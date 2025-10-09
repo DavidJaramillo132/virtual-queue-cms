@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm";
-import { Estacion } from "./IEstacion";
-import { Usuario } from "./IUsuario";
+import { Estacion } from "./Estacion";
+import { Usuario } from "./Usuario";
 
 @Entity({ name: "negocios" })
 export class Negocio {
@@ -10,10 +10,10 @@ export class Negocio {
   @Column("uuid", { nullable: true })
   admin_negocio_id?: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   nombre!: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   categoria!: string;
 
   @Column({ type: "text", nullable: true })

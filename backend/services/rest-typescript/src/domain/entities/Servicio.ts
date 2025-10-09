@@ -1,13 +1,13 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from "typeorm";
-import { Cita } from "./ICita";
+import { Cita } from "./Cita";
 
 @Entity({ name: "servicios" })
 export class Servicio {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
-  nombre!: string;
+  @Column({ type: 'varchar', nullable: false, default: '' })
+  nombre?: string;
 
   @Column({ nullable: true })
   codigo?: string;

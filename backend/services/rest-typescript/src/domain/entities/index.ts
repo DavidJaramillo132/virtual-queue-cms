@@ -1,9 +1,9 @@
-export { Usuario } from './IUsuario';
-export { Negocio } from './INegocio';
-export { Estacion } from './IEstacion';
-export { HorarioAtencion } from './IHorarioAtencion';
-export { Servicio } from './IServicio';
-export { Cita } from './ICita';
-export { Fila } from './IFila';
-export { AdminSistema } from './IAdminSistema';
+export { Usuario } from './Usuario';
+export { Negocio } from './Negocio';
+export { Estacion } from './Estacion';
+export { HorarioAtencion } from './HorarioAtencion';
+export { Servicio } from './Servicio';
+export { Cita } from './Cita';
+export { Fila } from './Fila';
+export { AdminSistema } from './AdminSistema';
 

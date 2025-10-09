@@ -1,23 +1,23 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from "typeorm";
-import { Cita } from "./ICita";
-import { AdminSistema } from "./IAdminSistema";
-import { Negocio } from "./INegocio";
+import { Cita } from "./Cita";
+import { AdminSistema } from "./AdminSistema";
+import { Negocio } from "./Negocio";
 
 @Entity({ name: "usuarios" })
 export class Usuario {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   nombre!: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   apellido!: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'varchar', nullable: false, default: '' })
   email!: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   password!: string;
 
   @Column({ 

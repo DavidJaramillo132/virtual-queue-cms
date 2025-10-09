@@ -8,7 +8,7 @@ export class Estacion {
   @Column("uuid", { nullable: true })
   negocio_id?: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   nombre!: string;
 
   @Column({ 

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
-import { Usuario } from "./IUsuario";
+import { Usuario } from "./Usuario";
 
 @Entity({ name: "admin_sistema" })
 export class AdminSistema {
@@ -9,13 +9,13 @@ export class AdminSistema {
   @Column("uuid", { nullable: true })
   usuario_id?: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   nombre!: string;
 
-  @Column()
+  @Column({ type: 'varchar', nullable: false, default: '' })
   apellidos!: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'varchar', nullable: false, default: '' })
   email!: string;
 
   @Column({ nullable: true })

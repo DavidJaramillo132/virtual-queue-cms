@@ -1,16 +1,19 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, JoinColumn } from "typeorm";
-import { Estacion } from "./IEstacion";
+import { Estacion } from "./Estacion";
 
-@Entity({ name: "fila" })
-export class Fila {
+@Entity({ name: "horarios_atencion" })
+export class HorarioAtencion {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Column("uuid", { nullable: true })
   estacion_id?: string;
 
-  @Column({ type: "date" })
-  fecha!: Date;
+  @Column({ 
+    type: "int",
+    nullable: true
+  })
+  dia_semana?: number; // 0 (Domingo) a 6 (Sábado)
 
   @Column({ type: "time" })
   hora_inicio!: string;
@@ -18,20 +21,13 @@ export class Fila {
   @Column({ type: "time" })
   hora_fin!: string;
 
-  @Column({ 
-    type: "simple-enum", 
-    enum: ["abierta", "cerrada"], 
-    default: "abierta" 
-  })
-  estado!: "abierta" | "cerrada";
-
   @CreateDateColumn({ name: "creado_en" })
   creadoEn!: Date;
 
   // Relaciones
-  @ManyToOne(() => Estacion, (estacion) => estacion.filas, {
+  @ManyToOne(() => Estacion, (estacion) => estacion.horarios, {
     nullable: true,
-    onDelete: "SET NULL"
+    onDelete: "CASCADE",
   })
   @JoinColumn({ name: "estacion_id" })
   estacion?: Estacion;

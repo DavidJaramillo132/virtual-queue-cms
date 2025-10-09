@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, JoinColumn } from "typeorm";
-import { Usuario } from "./IUsuario";
-import { Servicio } from "./IServicio";
+import { Usuario } from "./Usuario";
+import { Servicio } from "./Servicio";
 
 @Entity({ name: "citas" })
 export class Cita {
