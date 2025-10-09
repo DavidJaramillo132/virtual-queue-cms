@@ -1,0 +1,58 @@
+version: '3.9'
+services:
+  # Servicio REST (TypeScript)
+  rest-typescript:
+    build: ./backend/rest-typescript
+    container_name: rest-typescript
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/rest-typescript/.env
+    depends_on:
+      - db
+    networks:
+      - app-net
+
+  # Servicio GraphQL (Python)
+  graphql-python:
+    build: ./backend/graphql-python
+    container_name: graphql-python
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/graphql-python/.env
+    depends_on:
+      - db
+    networks:
+      - app-net
+
+  # Servicio WebSocket (Go)
+  websocket-go:
+    build: ./backend/websocket-go
+    container_name: websocket-go
+    restart: always
+    ports:
+      - "4000:4000"
+    networks:
+      - app-net
+
+
+  # Frontend (Angular)
+  frontend:
+    build: ./frontend/angular-app
+    container_name: angular-frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - api-rest
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  db_data:
