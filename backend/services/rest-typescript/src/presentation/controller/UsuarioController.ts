@@ -57,6 +57,8 @@ export class UsuarioController {
         }
     }
 
+    
+
     async deleteUsuario(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
         try {
