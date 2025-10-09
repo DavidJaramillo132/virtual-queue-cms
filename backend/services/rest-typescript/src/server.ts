@@ -40,7 +40,7 @@ AppDataSource.initialize()
       console.log(`Servidor REST corriendo en puerto ${port}`)
 
     );
-
+    // prueba de token y usuario
     // llamar usuario por id y generar token
     const userId = 'dd5a7684-5d96-4f7e-87ad-a9e74fb0f341'; // reemplaza con el ID real
 
@@ -59,42 +59,3 @@ AppDataSource.initialize()
 
   })
   .catch((error) => console.error('Error al conectar con la base de datos:', error));
-
-/*
-Ejemplos de uso: Crear y eliminar un usuario
-
-1) Crear usuario (registro) - endpoint público:
-
-curl:
-curl -X POST -H "Content-Type: application/json" \
-  -d '{"nombre":"Juan","apellido":"Pérez","email":"juan@example.com","password":"secreto"}' \
-  http://localhost:3000/api/usuarios
-
-PowerShell (Invoke-RestMethod):
-Invoke-RestMethod -Uri "http://localhost:3000/api/usuarios" -Method Post -ContentType 'application/json' -Body (@{ nombre='Juan'; apellido='Pérez'; email='juan@example.com'; password='secreto' } | ConvertTo-Json)
-
-Node (fetch):
-await fetch('http://localhost:3000/api/usuarios', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ nombre: 'Juan', apellido: 'Pérez', email: 'juan@example.com', password: 'secreto' })
-});
-
-
-2) Eliminar usuario - requiere token JWT en Authorization header:
-
-curl:
-curl -X DELETE -H "Authorization: Bearer <TU_TOKEN_JWT>" http://localhost:3000/api/usuarios/<ID_DEL_USUARIO>
-
-PowerShell:
->$headers = @{ Authorization = "Bearer <TU_TOKEN_JWT>" }
-Invoke-RestMethod -Uri "http://localhost:3000/api/usuarios/<ID_DEL_USUARIO>" -Method Delete -Headers $headers
-
-Node (fetch):
-await fetch(`http://localhost:3000/api/usuarios/${userId}`, {
-  method: 'DELETE',
-  headers: { 'Authorization': `Bearer ${token}` }
-});
-
-Reemplaza `<TU_TOKEN_JWT>` y `<ID_DEL_USUARIO>` por los valores reales. El middleware de autenticación espera el header en formato: "Authorization: Bearer <token>".
-*/
