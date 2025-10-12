@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { createClient } from '@supabase/supabase-js';
 import { environment } from '../../environment/environment';
 import { CommonModule } from '@angular/common';
@@ -9,7 +10,7 @@ const supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
 @Component({
   selector: 'app-register',
   standalone: true, 
-  imports: [CommonModule, ReactiveFormsModule], 
+  imports: [CommonModule, ReactiveFormsModule, RouterLink], 
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
