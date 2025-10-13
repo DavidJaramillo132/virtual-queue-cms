@@ -1,0 +1,35 @@
+<!-- Cliente view converted to TailwindCSS + Angular router links -->
+<header class="bg-gradient-to-r from-[#1B3C53] to-[#26576F] text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+                <a routerLink="/" class="flex items-center space-x-3">
+                    <div class="h-8 w-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+                        <!-- simple clock icon -->
+                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-lg">FilaVirtual</span>
+                </a>
+                <nav class="hidden md:flex space-x-6 ml-8">
+                    <a routerLink="/" class="hover:underline">Inicio</a>
+                    <a routerLink="/negocios" class="hover:underline">Negocios</a>
+                    <a routerLink="/como-funciona" class="hover:underline">¿Cómo funciona?</a>
+                    <a routerLink="/contacto" class="hover:underline">Contacto</a>
+                </nav>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <a routerLink="/login" class="px-4 py-2 border border-white/40 rounded-md hover:bg-white/10">Iniciar
+                    Sesión</a>
+                <a routerLink="/register"
+                    class="px-4 py-2 bg-[#4F6F85] rounded-md shadow hover:bg-[#3e5a6b]">Registrarse</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+

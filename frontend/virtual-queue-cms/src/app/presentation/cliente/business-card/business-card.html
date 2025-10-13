@@ -1,0 +1,25 @@
+<article class="bg-white rounded-lg shadow-md overflow-hidden">
+  <div class="h-40 bg-gradient-to-r from-[#1B3C53] to-[#26576F] flex items-center justify-center text-white">
+    <div class="text-3xl">{{ negocio.icon || '🏷️' }}</div>
+  </div>
+
+  <div class="p-4">
+    <h3 class="text-lg font-semibold">{{ negocio.nombre }}</h3>
+    <p class="text-sm text-slate-600 mt-1">{{ negocio.direccion }}</p>
+
+    <div class="mt-3 flex items-center gap-3">
+      <div class="bg-slate-100 rounded px-3 py-2 text-sm">
+        <div class="text-xs text-slate-500">Tiempo de espera</div>
+        <div class="font-semibold">{{ negocio.tiempoEspera }}</div>
+      </div>
+      <div class="bg-slate-100 rounded px-3 py-2 text-sm">
+        <div class="text-xs text-slate-500">En fila</div>
+        <div class="font-semibold">{{ negocio.enFila }}</div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <button class="w-full bg-[#4F6F85] hover:bg-[#3e5a6b] text-white py-2 rounded">{{ negocio.accion || 'Ver Servicios' }}</button>
+    </div>
+  </div>
+</article>

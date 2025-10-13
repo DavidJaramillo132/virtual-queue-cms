@@ -3,15 +3,19 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { LoginService } from '../../services/loginservice';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
 
 @Component({
   selector: 'app-login',
   standalone: true, 
-  imports: [CommonModule, ReactiveFormsModule, RouterLink], 
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule], 
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
 export class Login implements OnInit {
+  public faGoogle = faGoogle;
+  public faGithub = faGithub;
   loginForm!: FormGroup;
   loading = false;
   errorMsg = '';

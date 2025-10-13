@@ -1,0 +1,49 @@
+
+
+<main class="min-h-screen bg-gray-50">
+
+    <!-- Hero / header area -->
+    <section class="bg-gradient-to-r from-[#1B3C53] to-[#26576F] text-white py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-3xl font-extrabold">¡Hola, Ana!</h2>
+                    <p class="mt-1 text-slate-100">Encuentra y reserva en tus negocios favoritos</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <a routerLink="/perfil" class="px-4 py-2 border border-white/30 rounded text-white">Mi Perfil</a>
+                    <a routerLink="/" class="px-4 py-2 bg-white/20 rounded text-white">Inicio</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- search -->
+            <div class="flex items-center gap-4">
+                <input type="text" placeholder="Buscar negocios, servicios, ubicación..." class="flex-1 rounded-full border px-4 py-3 shadow-sm" />
+                <button class="px-4 py-3 bg-[#4F6F85] text-white rounded">Buscar</button>
+                <button class="px-4 py-3 bg-slate-200 rounded">Filtros</button>
+            </div>
+
+            <!-- category chips -->
+            <div class="mt-6 flex gap-3 flex-wrap">
+                <button class="px-4 py-2 bg-[#4F6F85] text-white rounded-full">Todos</button>
+                <button class="px-4 py-2 border rounded-full">Restaurantes</button>
+                <button class="px-4 py-2 border rounded-full">Hospitales</button>
+                <button class="px-4 py-2 border rounded-full">Veterinarias</button>
+                <button class="px-4 py-2 border rounded-full">Salones</button>
+                <button class="px-4 py-2 border rounded-full">Bancos</button>
+            </div>
+
+            <!-- cards grid -->
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <app-business-card *ngFor="let n of negocios" [negocio]="n"></app-business-card>
+            </div>
+        </div>
+    </section>
+
+</main>
+

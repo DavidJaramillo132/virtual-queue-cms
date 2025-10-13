@@ -1,0 +1,2 @@
+/* Minimal styles — project uses Tailwind, so most styling is via classes */
+:host { display: block; }
