@@ -5,48 +5,47 @@ import { RouterLink } from '@angular/router';
 import { LoginService } from '../../services/loginservice';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
+import { Navbar } from '../navbar/navbar';
+import { environment } from '../../environment/environment';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
 
 @Component({
   selector: 'app-login',
-  standalone: true, 
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule], 
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule, Navbar],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class Login implements OnInit {
+export class Login {
   public faGoogle = faGoogle;
   public faGithub = faGithub;
-  loginForm!: FormGroup;
+  loginForm: FormGroup;
+  errorMessage: string = '';
+  successMessage: string = '';
   loading = false;
-  errorMsg = '';
 
-  constructor(private fb: FormBuilder, private loginService: LoginService) {}
-
-  ngOnInit() {
+  constructor(private fb: FormBuilder) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   async onSubmit() {
     if (this.loginForm.invalid) {
-      this.errorMsg = 'Por favor, completa todos los campos correctamente';
+      if (this.loginForm.errors && this.loginForm.errors['passwordMismatch']) {
+        this.errorMessage = 'Las contraseñas no coinciden.';
+      }
       return;
     }
 
+    this.errorMessage = '';
+    this.successMessage = '';
     this.loading = true;
+
     const { email, password } = this.loginForm.value;
 
-    try {
-      const { user, error } = await this.loginService.signIn(email!, password!);
-      if (error) throw error;
-      console.log('✅ Usuario logueado:', user);
-      this.errorMsg = '';
-    } catch (err: any) {
-      this.errorMsg = err.message || 'Error al iniciar sesión';
-    } finally {
-      this.loading = false;
-    }
-  }
-}
+
+}}
