@@ -26,6 +26,11 @@ export const routes: Routes = [
     redirectTo: '/home',
     pathMatch: 'full'
   },
+  {
+    path: 'admin-local',
+    loadComponent: () =>
+      import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal)
+  },
   { 
     path: '', 
     redirectTo: '/login', 
