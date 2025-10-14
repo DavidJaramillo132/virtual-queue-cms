@@ -1,0 +1,24 @@
+
+<main class="container mx-auto px-4 py-8">
+
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-2 text-primary">Encuentra tu Negocio</h1>
+        <p class="text-lg text-gray-500">Agenda citas y únete a la fila virtual de tus negocios favoritos</p>
+    </div>
+
+    <!-- Placeholder for filters component (implement inputs/outputs in the Angular component as needed) -->
+    <!--<app-business-filters class="mb-6"></app-business-filters>-->
+
+    <!-- Empty state / Grid -->
+    <div *ngIf="!negocios || negocios.length === 0; else list" class="text-center py-12">
+        <p class="text-lg text-gray-500">No se encontraron negocios</p>
+    </div>
+
+    <ng-template #list>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <app-business-card *ngFor="let n of negocios" [negocio]="n"></app-business-card>
+        </div>
+    </ng-template>
+
+</main>
+

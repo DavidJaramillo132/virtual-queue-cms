@@ -2,19 +2,17 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { createClient } from '@supabase/supabase-js';
-import { environment } from '../../environment/environment';
+import { environment } from '../../../environment/environment';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { Navbar } from '../navbar/navbar';
 const supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
 
 @Component({
   selector: 'app-register',
   standalone: true, 
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule, Navbar], 
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule], 
   templateUrl: './register.html',
-  styleUrls: ['./register.css']
 })
 export class Register {
   public faGoogle = faGoogle;

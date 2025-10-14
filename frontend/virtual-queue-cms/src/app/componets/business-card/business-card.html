@@ -19,7 +19,11 @@
     </div>
 
     <div class="mt-4">
-      <button class="w-full bg-[#4F6F85] hover:bg-[#3e5a6b] text-white py-2 rounded">{{ negocio.accion || 'Ver Servicios' }}</button>
+      <button 
+        (click)="goToBusiness()" 
+        class="w-full bg-[#171717] hover:bg-[#2b2b2b] text-white py-2 rounded">
+        {{ negocio.accion || 'Ver Servicios' }}
+      </button>
     </div>
   </div>
 </article>

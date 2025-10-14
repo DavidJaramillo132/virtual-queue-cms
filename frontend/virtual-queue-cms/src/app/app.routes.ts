@@ -4,17 +4,35 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./presentation/login/login').then(m => m.Login)
+      import('./presentation/auth-user/login/login').then(m => m.Login)
   },
   {
     path: 'register',
     loadComponent: () =>
-      import('./presentation/register/register').then(m => m.Register)
+      import('./presentation/auth-user/register/register').then(m => m.Register)
   },
   {
-    path: 'cliente',
+    path: 'home',
     loadComponent: () =>
-      import('./presentation/cliente/cliente').then(m => m.Cliente)
+      import('./presentation/home/home').then(m => m.Home)
   },
-  { path: '', redirectTo: '/login', pathMatch: 'full' } // ruta por defect
+  {
+    path: 'business/:id',
+    loadComponent: () =>
+      import('./presentation/business/business').then(m => m.Business)
+  },
+  {
+    path: 'business',
+    redirectTo: '/home',
+    pathMatch: 'full'
+  },
+  { 
+    path: '', 
+    redirectTo: '/login', 
+    pathMatch: 'full' 
+  },
+  {
+    path: '**',
+    redirectTo: '/login'
+  }
 ];
