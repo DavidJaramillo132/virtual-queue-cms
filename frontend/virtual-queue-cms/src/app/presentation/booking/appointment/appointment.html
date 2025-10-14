@@ -1,0 +1,25 @@
+<div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+    <h2 class="text-xl font-bold mb-4">Agendar Cita</h2>
+
+    <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+      <label class="block mb-2 text-sm font-medium">Modificar esto a futuro</label>
+      <label class="block mb-2 text-sm font-medium">Fecha</label>
+      <input type="date" formControlName="fecha" class="w-full border p-2 rounded mb-4" />
+
+      <label class="block mb-2 text-sm font-medium">Hora</label>
+      <input type="time" formControlName="hora" class="w-full border p-2 rounded mb-4" />
+
+      <label class="block mb-2 text-sm font-medium">Nombre</label>
+      <input type="text" formControlName="nombre" class="w-full border p-2 rounded mb-4" />
+
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+        Confirmar Cita
+      </button>
+    </form>
+
+    <button (click)="close()" class="mt-4 text-sm text-gray-500 hover:underline w-full">
+      Cancelar
+    </button>
+  </div>
+</div>

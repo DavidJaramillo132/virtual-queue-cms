@@ -5,10 +5,10 @@ import { INegocio } from '../../domain/entities/INegocio';
 import { IServicio } from '../../domain/entities/IServicio';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowLeft, faClock, faMapPin, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-
+import { Appointment } from '../booking/appointment/appointment';
 @Component({
   selector: 'app-business',
-  imports: [CommonModule, FontAwesomeModule],
+  imports: [CommonModule, FontAwesomeModule, Appointment],
   templateUrl: './business.html',
 })
 export class Business implements OnInit {
@@ -26,7 +26,16 @@ export class Business implements OnInit {
   constructor(
     private location: Location,
     private route: ActivatedRoute
-  ) {}
+  ) { }
+
+  mostrarModal: boolean = false;
+  abrirModal() {
+    this.mostrarModal = true;
+  }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+  }
 
   ngOnInit(): void {
     // TODO: Obtener el ID del negocio de la ruta y cargar los datos
@@ -50,7 +59,7 @@ export class Business implements OnInit {
         ubicacion: 'Dirección de ejemplo',
         telefono: '+1234567890',
         correo: 'ejemplo@negocio.com',
-            imagen_url: '/assets/fila.jpg',
+        imagen_url: '/assets/fila.jpg',
         estado: true,
         horaDeAtencion: [],
         estacion: []
