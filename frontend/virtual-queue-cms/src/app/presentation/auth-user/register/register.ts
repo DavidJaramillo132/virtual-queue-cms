@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { createClient } from '@supabase/supabase-js';
-import { environment } from '../../../environment/environment';
+import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
-const supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
+import { userService } from '../../../services/userServices';
 
 @Component({
   selector: 'app-register',
@@ -22,13 +20,13 @@ export class Register {
   successMessage: string = '';
   loading = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private userService: userService, private router: Router) {
     this.registerForm = this.fb.group({
+      nombreCompleto: ['', [Validators.required]],
+      telefono: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
-      nombre: ['', [Validators.required]],
-      telefono: ['', [Validators.required]],
       rol: ['cliente', [Validators.required]], // cliente o adminLocal
       terms: [false, [Validators.requiredTrue]]
     }, { validators: this.passwordsMatch });
@@ -36,10 +34,19 @@ export class Register {
 
   async onSubmit() {
     if (this.registerForm.invalid) {
-      if (this.registerForm.errors && this.registerForm.errors['passwordMismatch']) {
-        this.errorMessage = 'Las contraseñas no coinciden.';
-      }
-      return;
+      await this.userService.registerUsuario(this.registerForm.value).subscribe({
+        next: (res: any) => {
+          if (res.successful) {
+            this.registerForm.reset();
+            this.router.navigate(['/home']);
+          }else {
+            this.errorMessage = res.message || 'Error en el registro. Inténtalo de nuevo.';
+          }
+        },
+        error: (err: any) => {
+          this.errorMessage = err.message;
+        }
+      });
     }
 
     this.errorMessage = '';
@@ -48,24 +55,7 @@ export class Register {
 
     const { email, password, nombre, rol, telefono } = this.registerForm.value;
 
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { nombre, rol, telefono } 
-        }
-      });
 
-      if (error) throw error;
-
-      this.successMessage = 'Registro exitoso. Revisa tu correo para confirmar la cuenta.';
-      this.registerForm.reset();
-    } catch (err: any) {
-      this.errorMessage = err.message;
-    } finally {
-      this.loading = false;
-    }
   }
 
   // Validator para comprobar que password y confirmPassword coincidan

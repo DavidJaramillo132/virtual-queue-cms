@@ -32,7 +32,7 @@ export const routes: Routes = [
       import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal)
   },
   {
-    path: 'admin-general',
+    path: '   ',
     loadComponent: () =>
       import('./presentation/adminGeneral/admin-general').then(m => m.AdminGeneral)
   },

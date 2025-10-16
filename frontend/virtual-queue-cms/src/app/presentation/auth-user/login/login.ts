@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { LoginService } from '../../../services/loginservice';
+import { RouterLink, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { environment } from '../../../environment/environment';
 import { createClient } from '@supabase/supabase-js';
+import { userService } from '../../../services/userServices';
 
 const supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
 
@@ -24,7 +24,7 @@ export class Login {
   successMessage: string = '';
   loading = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private userService: userService, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -33,10 +33,23 @@ export class Login {
 
   async onSubmit() {
     if (this.loginForm.invalid) {
-      if (this.loginForm.errors && this.loginForm.errors['passwordMismatch']) {
-        this.errorMessage = 'Las contraseñas no coinciden.';
-      }
-      return;
+      
+      await this.userService.loginUsuario(this.loginForm.value).subscribe({
+        next: (res: any) => {
+          if (res.successful) {
+            console.log(this.loginForm.value);
+            this.loginForm.reset();
+            this.successMessage = 'Inicio de sesión exitoso. Redirigiendo...';
+            this.router.navigate(['/home']);
+            // Aquí puedes redirigir al usuario a otra página si es necesario
+          }
+        },
+        error: (res: any) => {
+          console.log(res);
+          this.errorMessage = 'Error en el inicio de sesión.';
+          this.loading = false;
+        }
+      });
     }
 
     this.errorMessage = '';
