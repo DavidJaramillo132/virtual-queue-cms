@@ -31,25 +31,11 @@ export class Login {
     });
   }
 
-  async onSubmit() {
+
+  onSubmit() {
     if (this.loginForm.invalid) {
-      
-      await this.userService.loginUsuario(this.loginForm.value).subscribe({
-        next: (res: any) => {
-          if (res.successful) {
-            console.log(this.loginForm.value);
-            this.loginForm.reset();
-            this.successMessage = 'Inicio de sesión exitoso. Redirigiendo...';
-            this.router.navigate(['/home']);
-            // Aquí puedes redirigir al usuario a otra página si es necesario
-          }
-        },
-        error: (res: any) => {
-          console.log(res);
-          this.errorMessage = 'Error en el inicio de sesión.';
-          this.loading = false;
-        }
-      });
+      this.errorMessage = 'Por favor, completa todos los campos correctamente.';
+      return;
     }
 
     this.errorMessage = '';
@@ -57,6 +43,41 @@ export class Login {
     this.loading = true;
 
     const { email, password } = this.loginForm.value;
+    const userData = { email, password };
+
+    this.userService.loginUsuario(userData).subscribe({
+      next: (res: any) => {
+        console.log('Respuesta del servidor:', res);
+        if (res.successful) {
+          console.log('Inicio de sesión exitoso:', res);
+          this.successMessage = 'Inicio de sesión exitoso. Redirigiendo...';
+          
+          // Guardar el token primero
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('rol', res.user.rol);
+          console.log('Token guardado:', localStorage.getItem('token'));
+          
+          this.loginForm.reset();
+          this.loading = false;
+          
+          // Redirigir después de un breve delay
+          setTimeout(() => {
+            this.router.navigate(['/home']);
+          }, 1000);
+        } else {
+          this.errorMessage = res.message || 'Error en el inicio de sesión.';
+          this.loading = false;
+        }
+      },
+      error: (error: any) => {
+        console.error('Error en el inicio de sesión:', error);
+        this.errorMessage = error.error?.message || 'Error en el inicio de sesión. Por favor, intenta de nuevo.';
+        this.loading = false;
+      }
+    });
+  }
 
 
-}}
+
+
+}

@@ -14,7 +14,6 @@ import { Footer } from './presentation/footer/footer';
     Footer
   ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('virtual-queue-cms');

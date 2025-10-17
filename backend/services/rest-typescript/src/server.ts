@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import jwt from 'jsonwebtoken';
 import { AppDataSource } from './database/database';
 import { config } from 'dotenv';
 config();
@@ -44,19 +43,5 @@ AppDataSource.initialize()
     // 4️⃣ Inicia el servidor
     const port = process.env.PORT ? Number(process.env.PORT) : 3000;
     app.listen(port, () => console.log(`Servidor REST corriendo en puerto ${port}`));
-
-    // 5️⃣ Prueba de token JWT
-    const userId = 'dd5a7684-5d96-4f7e-87ad-a9e74fb0f341'; // reemplaza con el ID real
-    jwt.sign(
-      { userId },
-      process.env.JWT_SECRET!,
-      (err: Error | null, token?: string) => {
-        if (err) {
-          console.error('Error al generar el token JWT:', err);
-          return;
-        }
-        console.log('Token JWT generado:', token);
-      }
-    );
   })
   .catch((error) => console.error('Error al conectar con la base de datos:', error));

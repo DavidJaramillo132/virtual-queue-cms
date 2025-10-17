@@ -8,8 +8,8 @@ import { userService } from '../../../services/userServices';
 
 @Component({
   selector: 'app-register',
-  standalone: true, 
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule], 
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, FontAwesomeModule],
   templateUrl: './register.html',
 })
 export class Register {
@@ -33,29 +33,38 @@ export class Register {
   }
 
   async onSubmit() {
+    // Validar que el formulario sea válido
     if (this.registerForm.invalid) {
-      await this.userService.registerUsuario(this.registerForm.value).subscribe({
-        next: (res: any) => {
-          if (res.successful) {
-            this.registerForm.reset();
-            this.router.navigate(['/home']);
-          }else {
-            this.errorMessage = res.message || 'Error en el registro. Inténtalo de nuevo.';
-          }
-        },
-        error: (err: any) => {
-          this.errorMessage = err.message;
-        }
-      });
+      this.errorMessage = 'Por favor, completa todos los campos correctamente.';
+      return;
     }
 
     this.errorMessage = '';
     this.successMessage = '';
     this.loading = true;
 
-    const { email, password, nombre, rol, telefono } = this.registerForm.value;
+    // Preparar datos para enviar (sin confirmPassword y terms)
+    const { nombreCompleto, email, password, rol, telefono } = this.registerForm.value;
+    const userData = { nombreCompleto, email, password, rol, telefono };
 
+    this.userService.registerUsuario(userData).subscribe({
+      next: (res: any) => {
+        this.loading = false;
+        console.log('Usuario registrado exitosamente:', res);
+        this.successMessage = 'Registro exitoso. Redirigiendo...';
+        this.registerForm.reset();
 
+        // Redirigir después de un breve delay
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 1000);
+      },
+      error: (err: any) => {
+        this.loading = false;
+        console.error('Error en el registro:', err);
+        this.errorMessage = err.error?.message || 'Error en el registro. Inténtalo de nuevo.';
+      }
+    });
   }
 
   // Validator para comprobar que password y confirmPassword coincidan

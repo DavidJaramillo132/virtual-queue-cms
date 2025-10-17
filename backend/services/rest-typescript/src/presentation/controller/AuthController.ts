@@ -8,9 +8,18 @@ const usuarioRepo = new UsuarioRepo();
 export class AuthController {
     async login(req: Request, res: Response){
         try{
+            console.log('Request body recibido en login:', req.body);
+            // Solo necesitamos email y password para login
+            const { email, password } = req.body;
+            
+            // Validación de campos requeridos
+            if (!email || !password) {
+                res.status(400).json({ message: 'Email y contraseña son requeridos' });
+                return;
+            }
 
-            const { email, password, rol, telefono, creado_en} = req.body;
             const usuario = await usuarioRepo.getByEmail(email);
+            console.log('Usuario encontrado:', usuario);
             if(!usuario){
                 res.status(404).json({ message: 'Usuario no encontrado' });
                 return;
@@ -22,19 +31,28 @@ export class AuthController {
                 return;
             }
 
+            // Token con expiración de 24 horas
             const token = jwt.sign(
-                { id: usuario.id, email: usuario.email, rol: usuario.rol },
+                { id: usuario.id, email: usuario.email },
                 process.env.JWT_SECRET!,
-                //{ expiresIn: '1h' }
+                { expiresIn: '24h' }, 
             );
 
             res.json({
+                successful: true,
                 message: 'Login exitoso',
                 token,
-                user: { id: usuario.id, email: usuario.email, rol: usuario.rol }
+                user: { 
+                    id: usuario.id, 
+                    email: usuario.email, 
+                    rol: usuario.rol,
+                    nombreCompleto: usuario.nombreCompleto,
+                    telefono: usuario.telefono
+                }
             });
 
         } catch (error) {
+            console.error('Error en login:', error);
             res.status(500).json({ message: 'Error en el servidor' });
         }
     }
