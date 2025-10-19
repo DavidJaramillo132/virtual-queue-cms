@@ -4,23 +4,50 @@
             <div class="flex items-center space-x-4">
                 <a routerLink="/home" class="flex items-center space-x-3">
                     <div class="h-8 w-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                    <fa-icon [icon]="faUser"></fa-icon>
+                        <fa-icon [icon]="faUser"></fa-icon>
                     </div>
                     <span class="font-bold text-lg">FilaVirtual</span>
                 </a>
                 <nav class="hidden md:flex space-x-6 ml-8">
                     <!-- Navigation Links -->
                 </nav>
+
+            </div>
+            
+            <!-- Siempre visible -->
+            <div class="flex items-center space-x-3" *ngIf="!usuario">
+                <a routerLink="/login" class="px-4 py-2 rounded-md text-black bg-white">
+                    Iniciar Sesión
+                </a>
+                <a routerLink="/register"
+                    class="px-4 py-2 rounded-md shadow text-white bg-[#171717] hover:bg-[#2b2b2b]">
+                    Registrarse
+                </a>
             </div>
 
-            <div class="flex items-center space-x-3">
-                <a routerLink="/login" class="px-4 py-2  rounded-md text-black bg-white ">Iniciar
-                    Sesión</a>
-                <a routerLink="/register"
-                    class="px-4 py-2 rounded-md shadow text-white bg-[#171717] hover:bg-[#2b2b2b]">Registrarse</a>
+            <!-- Solo para clientes -->
+            <div class="flex items-center space-x-3" *ngIf="usuario?.rol === 'cliente'">
+                <a routerLink="/perfil" class="px-4 py-2 rounded-md bg-white text-black hover:bg-gray-200">
+                    Mi Perfil
+                </a>
+                <a routerLink="/citas" class="px-4 py-2 rounded-md bg-[#171717] text-white hover:bg-[#2b2b2b]">
+                    Mis Citas
+                </a>
+                <a (click)="logout()" class="px-4 py-2 rounded-md bg-[#171717] text-white hover:bg-[#2b2b2b]">
+                    Cerrar Sesión
+                </a>
             </div>
+
+            <!-- Solo para negocios -->
+            <div class="flex items-center space-x-3" *ngIf="usuario?.rol === 'Negocio'">
+                <a routerLink="/dashboard" class="px-4 py-2 rounded-md bg-[#171717] text-white hover:bg-[#2b2b2b]">
+                    Panel
+                </a>
+                <a routerLink="/servicios" class="px-4 py-2 rounded-md bg-white text-black hover:bg-gray-200">
+                    Servicios
+                </a>
+            </div>
+
         </div>
     </div>
 </header>
-
-

@@ -32,17 +32,22 @@ export const routes: Routes = [
       import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal)
   },
   {
-    path: '   ',
+    path: 'admin-general',
     loadComponent: () =>
       import('./presentation/adminGeneral/admin-general').then(m => m.AdminGeneral)
   },
+  {
+    path: 'perfil',
+    loadComponent: () =>
+      import('./presentation/perfil/perfil').then(m => m.PerfilComponent)
+  },
   { 
     path: '', 
-    redirectTo: '/login', 
+    redirectTo: '/home', 
     pathMatch: 'full' 
   },
   {
     path: '**',
-    redirectTo: '/login'
+    redirectTo: '/home'
   }
 ];

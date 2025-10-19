@@ -4,7 +4,8 @@ import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { userService } from '../../../services/userServices';
+import { UserService } from '../../../services/userServices';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -20,7 +21,7 @@ export class Register {
   successMessage: string = '';
   loading = false;
 
-  constructor(private fb: FormBuilder, private userService: userService, private router: Router) {
+  constructor(private fb: FormBuilder, private userService: UserService, private router: Router) {
     this.registerForm = this.fb.group({
       nombreCompleto: ['', [Validators.required]],
       telefono: ['', [Validators.required]],
@@ -46,8 +47,13 @@ export class Register {
     // Preparar datos para enviar (sin confirmPassword y terms)
     const { nombreCompleto, email, password, rol, telefono } = this.registerForm.value;
     const userData = { nombreCompleto, email, password, rol, telefono };
+    const userLoginData = { email, password };
 
-    this.userService.registerUsuario(userData).subscribe({
+    this.userService.registerUsuario(userData).pipe(
+      switchMap(() =>
+        this.userService.loginUsuario(userLoginData)
+      )
+    ).subscribe({
       next: (res: any) => {
         this.loading = false;
         console.log('Usuario registrado exitosamente:', res);
@@ -65,6 +71,17 @@ export class Register {
         this.errorMessage = err.error?.message || 'Error en el registro. Inténtalo de nuevo.';
       }
     });
+
+    this.userService.loginUsuario(userLoginData).subscribe({
+      next: (res: any) => {
+        console.log('Login exitoso:', res);
+        this.router.navigate(['/home']);
+      },
+      error: (err: any) => {
+        console.error('Error en el login:', err);
+      }
+    });
+
   }
 
   // Validator para comprobar que password y confirmPassword coincidan

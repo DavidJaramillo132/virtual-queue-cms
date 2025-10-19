@@ -1,0 +1,47 @@
+/* Estilos adicionales si son necesarios */
+
+/* Animación para el modo de edición */
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Transiciones suaves */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover effects */
+button:hover {
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .grid {
+    gap: 1rem;
+  }
+}
+
+/* Custom scrollbar para textarea */
+textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+textarea::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

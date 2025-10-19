@@ -4,11 +4,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { RouterLink, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { environment } from '../../../environment/environment';
-import { createClient } from '@supabase/supabase-js';
-import { userService } from '../../../services/userServices';
+import { UserService } from '../../../services/userServices';
 
-const supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
 
 @Component({
   selector: 'app-login',
@@ -24,7 +21,7 @@ export class Login {
   successMessage: string = '';
   loading = false;
 
-  constructor(private fb: FormBuilder, private userService: userService, private router: Router) {
+  constructor(private fb: FormBuilder, private userService: UserService, private router: Router) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -52,11 +49,6 @@ export class Login {
           console.log('Inicio de sesión exitoso:', res);
           this.successMessage = 'Inicio de sesión exitoso. Redirigiendo...';
           
-          // Guardar el token primero
-          localStorage.setItem('token', res.token);
-          localStorage.setItem('rol', res.user.rol);
-          console.log('Token guardado:', localStorage.getItem('token'));
-          
           this.loginForm.reset();
           this.loading = false;
           
@@ -76,7 +68,6 @@ export class Login {
       }
     });
   }
-
 
 
 

@@ -5,23 +5,37 @@ import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
-export class userService {
+export class UserService {
   private apiUrl = 'http://localhost:3000/api';
   private userActualBehavior: BehaviorSubject<any> = new BehaviorSubject<any>(
     this.getUserFromStorage()
   );
-  public userActual$: Observable<any> = this.userActualBehavior.asObservable();
+  public userActual: Observable<any> = this.userActualBehavior.asObservable();
 
   constructor(
     private http: HttpClient,
     private router: Router
-  ) {}
+  ) { }
 
   // Obtener usuario del localStorage al iniciar
   private getUserFromStorage(): any {
     const user = localStorage.getItem('currentUser');
-    return user ? JSON.parse(user) : null;
+
+    // Previene errores si el valor es null o el texto "undefined"
+    if (!user || user === 'undefined') {
+      return null;
+    }
+
+    try {
+      return JSON.parse(user);
+    } catch (error) {
+      console.error('Error al parsear currentUser:', error);
+      // Limpia el valor inválido del localStorage
+      localStorage.removeItem('currentUser');
+      return null;
+    }
   }
+
 
   // Getter para obtener el valor actual del usuario
   get currentUserValue(): any {
@@ -43,12 +57,11 @@ export class userService {
     console.log('Enviando credenciales al backend:', credentials);
     return this.http.post(`${this.apiUrl}/usuarios/login`, credentials).pipe(
       tap((response: any) => {
-        // Guardar usuario en localStorage y actualizar BehaviorSubject
-        if (response && response.usuario) {
-          localStorage.setItem('currentUser', JSON.stringify(response.usuario));
-          this.userActualBehavior.next(response.usuario);
-          
-          // Opcional: guardar token si lo usas
+        // Guardar usuario en localStorage y actualizar BehaviorSubjects
+        console.log('Respuesta recibida del backend:', response);
+        if (response.successful) {
+          localStorage.setItem('currentUser', JSON.stringify(response.user));
+          this.userActualBehavior.next(response.user);
           if (response.token) {
             localStorage.setItem('token', response.token);
           }
@@ -59,6 +72,8 @@ export class userService {
 
   // Register
   registerUsuario(usuario: any): Observable<any> {
+    console.log('Registrando usuario con datos:', usuario);
+    this.loginUsuario(usuario)
     return this.http.post(`${this.apiUrl}/usuarios`, usuario);
   }
 
