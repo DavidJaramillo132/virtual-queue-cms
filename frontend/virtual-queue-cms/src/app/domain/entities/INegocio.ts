@@ -7,7 +7,6 @@ export interface INegocio {
   nombre: string;
   categoria: string;
   descripcion: string;
-  ubicacion: string; // google map api
   telefono: string;
   correo?: string; 
   imagen_url: string;
@@ -15,3 +14,6 @@ export interface INegocio {
   horaDeAtencion: IHorarioAtencion[];
   estacion: IEstacion[];
 }
+
+
+

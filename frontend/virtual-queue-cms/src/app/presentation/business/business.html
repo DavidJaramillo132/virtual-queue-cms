@@ -1,20 +1,34 @@
-<main class="container mx-auto px-4 py-8" *ngIf="business">
+<main class="container mx-auto px-4 py-8">
     <button (click)="goBack()"
         class="flex items-center gap-2 mb-6 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors">
         <fa-icon [icon]="faArrowLeft" class="h-4 w-4"></fa-icon>
         Volver
     </button>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Main Content -->
+    <!-- Cargando estado -->
+    <div *ngIf="isLoading" class="text-center py-12">
+        <p class="text-lg text-gray-500">Cargando información del negocio...</p>
+    </div>
+
+    <!-- Estado de error -->
+    <div *ngIf="error && !isLoading" class="text-center py-12">
+        <p class="text-lg text-red-500">{{ error }}</p>
+        <button (click)="goBack()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Volver al inicio
+        </button>
+    </div>
+
+    <!-- Contenido del negocio -->
+    <div *ngIf="!isLoading && !error && business" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Contenido principal -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Business Image -->
+            <!-- Imagen del negocio -->
             <div class="relative h-64 lg:h-96 w-full rounded-lg overflow-hidden">
                 <img [src]="business.imagen_url || '/assets/fila.jpg'" [alt]="business.nombre"
                     class="w-full h-full object-cover" />
             </div>
 
-            <!-- Business Info -->
+            <!-- Información del negocio -->
             <div>
                 <div class="flex items-start justify-between mb-4">
                     <div>
@@ -27,7 +41,7 @@
                 <p class="text-gray-600 text-lg">{{ business.descripcion }}</p>
             </div>
 
-            <!-- Services Card -->
+            <!-- Servicios Card -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="p-6 border-b">
                     <h2 class="text-2xl font-bold mb-2">Servicios Disponibles</h2>
@@ -73,14 +87,6 @@
                     <h2 class="text-xl font-bold">Información de Contacto</h2>
                 </div>
                 <div class="p-6 space-y-4">
-                    <!-- Address -->
-                    <div *ngIf="business.ubicacion" class="flex items-start gap-3">
-                        <fa-icon [icon]="faMapPin" class="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0"></fa-icon>
-                        <div>
-                            <p class="font-medium">Dirección</p>
-                            <p class="text-sm text-gray-600">{{ business.ubicacion }}</p>
-                        </div>
-                    </div>
 
                     <!-- Phone -->
                     <div *ngIf="business.telefono" class="flex items-start gap-3">

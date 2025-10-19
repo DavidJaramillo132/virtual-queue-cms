@@ -6,6 +6,8 @@ import { IServicio } from '../../domain/entities/IServicio';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowLeft, faClock, faMapPin, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { Appointment } from '../booking/appointment/appointment';
+import { NegocioServices } from '../../services/negocio-services';
+
 @Component({
   selector: 'app-business',
   imports: [CommonModule, FontAwesomeModule, Appointment],
@@ -22,10 +24,13 @@ export class Business implements OnInit {
   // Component data
   business: INegocio | null = null;
   services: IServicio[] = [];
+  isLoading: boolean = false;
+  error: string = '';
 
   constructor(
     private location: Location,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private negocioServices: NegocioServices
   ) { }
 
   mostrarModal: boolean = false;
@@ -38,44 +43,49 @@ export class Business implements OnInit {
   }
 
   ngOnInit(): void {
-    // TODO: Obtener el ID del negocio de la ruta y cargar los datos
     const businessId = this.route.snapshot.paramMap.get('id');
-    this.loadBusinessData(businessId);
+    if (businessId) {
+      this.loadBusinessData(businessId);
+    }
   }
 
   goBack(): void {
     this.location.back();
   }
 
-  loadBusinessData(businessId: string | null): void {
-    // TODO: Implementar llamada al servicio para obtener datos del negocio
-    // Por ahora, datos de ejemplo
-    if (businessId) {
-      this.business = {
-        id: businessId,
-        nombre: 'Negocio de Ejemplo',
-        categoria: 'Salud',
-        descripcion: 'Descripción del negocio de ejemplo',
-        ubicacion: 'Dirección de ejemplo',
-        telefono: '+1234567890',
-        correo: 'ejemplo@negocio.com',
-        imagen_url: '/assets/fila.jpg',
-        estado: true,
-        horaDeAtencion: [],
-        estacion: []
-      };
+  loadBusinessData(businessId: string): void {
+    this.isLoading = true;
+    this.error = '';
 
-      this.services = [
-        {
-          id: '1',
-          negocio_id: businessId,
-          nombre: 'Servicio 1',
-          descripcion: 'Descripción del servicio 1',
-          duracion_minutos: 30,
-          visible: true
-        }
-      ];
-    }
+    this.negocioServices.getNegocioById(businessId).subscribe({
+      next: (data) => {
+        this.business = data;
+        this.isLoading = false;
+        console.log('Negocio cargado:', this.business);
+        
+        // Cargar servicios del negocio
+        this.loadServices(businessId);
+      },
+      error: (err) => {
+        console.error('Error al cargar negocio:', err);
+        this.error = 'No se pudo cargar la información del negocio.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadServices(businessId: string): void {
+    this.negocioServices.getServiciosByNegocio(businessId).subscribe({
+      next: (data) => {
+        this.services = data;
+        console.log('Servicios cargados:', this.services);
+      },
+      error: (err) => {
+        console.error('Error al cargar servicios:', err);
+        // No mostramos error general, solo dejamos la lista vacía
+        this.services = [];
+      }
+    });
   }
 
   handleBookService(serviceId: string): void {
