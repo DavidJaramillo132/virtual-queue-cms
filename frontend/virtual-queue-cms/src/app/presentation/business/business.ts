@@ -26,6 +26,7 @@ export class Business implements OnInit {
   services: IServicio[] = [];
   isLoading: boolean = false;
   error: string = '';
+  servicioModalAbierto: string | null = null;
 
   constructor(
     private location: Location,
@@ -33,13 +34,16 @@ export class Business implements OnInit {
     private negocioServices: NegocioServices
   ) { }
 
-  mostrarModal: boolean = false;
-  abrirModal() {
-    this.mostrarModal = true;
+  abrirModal(servicioId: string) {
+    this.servicioModalAbierto = servicioId;
   }
 
   cerrarModal() {
-    this.mostrarModal = false;
+    this.servicioModalAbierto = null;
+  }
+
+  isModalAbierto(servicioId: string): boolean {
+    return this.servicioModalAbierto === servicioId;
   }
 
   ngOnInit(): void {
@@ -50,6 +54,7 @@ export class Business implements OnInit {
   }
 
   goBack(): void {
+    localStorage.removeItem('businessId');
     this.location.back();
   }
 

@@ -1,25 +1,78 @@
-<div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-  <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-    <h2 class="text-xl font-bold mb-4">Agendar Cita</h2>
+<div class="p-4 max-w-3xl mx-auto">
+  <h2 class="text-2xl font-bold mb-4">Cola de citas de hoy</h2>
 
-    <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
-      <label class="block mb-2 text-sm font-medium">Modificar esto a futuro</label>
-      <label class="block mb-2 text-sm font-medium">Fecha</label>
-      <input type="date" formControlName="fecha" class="w-full border p-2 rounded mb-4" />
-
-      <label class="block mb-2 text-sm font-medium">Hora</label>
-      <input type="time" formControlName="hora" class="w-full border p-2 rounded mb-4" />
-
-      <label class="block mb-2 text-sm font-medium">Nombre</label>
-      <input type="text" formControlName="nombre" class="w-full border p-2 rounded mb-4" />
-
-      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-        Confirmar Cita
-      </button>
-    </form>
-
-    <button (click)="close()" class="mt-4 text-sm text-gray-500 hover:underline w-full">
-      Cancelar
-    </button>
+  <div class="border rounded-lg overflow-hidden mb-6 shadow">
+    <table class="w-full text-left border-collapse">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="border p-2">#</th>
+          <th class="border p-2">Hora Inicio</th>
+          <th class="border p-2">Hora Fin</th>
+          <th class="border p-2">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cita of citas; let i = index">
+          <td class="border p-2">{{ i + 1 }}</td>
+          <td class="border p-2">{{ cita.hora_inicio }}</td>
+          <td class="border p-2">{{ cita.hora_fin }}</td>
+          <td class="border p-2">{{ cita.estado }}</td>
+        </tr>
+        <tr *ngIf="citas.length === 0">
+          <td colspan="4" class="border p-2 text-center text-gray-500">No hay citas hoy</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+ 
+  <div class="mb-4">
+    <label for="servicio" class="block mb-2">
+      <p class="font-semibold">Servicio:</p>
+      <div *ngIf="servicioPreseleccionado" class="border p-3 rounded w-full bg-gray-50">
+        <p class="font-medium">{{ servicioPreseleccionado.nombre }}</p>
+        <p class="text-sm text-gray-600">Duración: {{ servicioPreseleccionado.duracion_minutos }} minutos</p>
+        <p *ngIf="servicioPreseleccionado.descripcion" class="text-sm text-gray-500 mt-1">{{ servicioPreseleccionado.descripcion }}</p>
+      </div>
+      <select 
+        *ngIf="!servicioPreseleccionado"
+        id="servicio" 
+        [(ngModel)]="servicio_seleccionado"
+        (change)="onServicioSeleccionado($event)"
+        class="border p-2 rounded w-full"
+      >
+        <option value="">-- Seleccione un servicio --</option>
+        <option *ngFor="let servicio of servicios" [value]="servicio.id">
+          {{ servicio.nombre }} ({{ servicio.duracion_minutos }} min)
+        </option>
+      </select>
+    </label>
+  </div>
+
+  <label for="hora_inicio">
+    <p>Hora de inicio:</p>
+    <input 
+      type="time" 
+      id="hora_inicio" 
+      [(ngModel)]="hora_inicio"
+      (ngModelChange)="onHoraInicioChange()"
+      class="border p-2 rounded mr-4" 
+    />
+  </label>
+  <label for="Tiempo_servicio">
+    <p>Tiempo de servicio:</p>
+    <input
+      type="time"
+      id="hora_fin"
+      [(ngModel)]="hora_fin"
+      readonly
+      class="border p-2 rounded mr-4 bg-gray-100"
+    />
+  </label>
+  
+  <button
+    (click)="agregarCita()"
+    class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+  >
+    Agregar al final de la cola
+  </button>
 </div>

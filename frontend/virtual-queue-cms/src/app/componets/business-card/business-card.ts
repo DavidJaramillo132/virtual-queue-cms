@@ -16,6 +16,7 @@ export class BusinessCard {
 
   goToBusiness(): void {
     if (this.negocio && this.negocio.id) {
+      localStorage.setItem('businessId', this.negocio.id);
       this.router.navigate(['/business', this.negocio.id]);
     }
   }

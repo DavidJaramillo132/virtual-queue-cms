@@ -68,11 +68,11 @@
                             </div>
                         </div>
                         <div class="p-4">
-                            <button (click)="abrirModal()"
+                            <button (click)="abrirModal(service.id)"
                                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
                                 Agendar Cita
                             </button>
-                            <app-appointment *ngIf="mostrarModal" (closeModal)="cerrarModal()"></app-appointment>
+                            <app-appointment *ngIf="isModalAbierto(service.id)" [servicios]="[service]" [servicioPreseleccionadoId]="service.id"></app-appointment>
 
                         </div>
                     </div>
