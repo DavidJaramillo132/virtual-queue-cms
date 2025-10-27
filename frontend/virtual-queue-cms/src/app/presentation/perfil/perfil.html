@@ -35,6 +35,7 @@
           <input
             *ngIf="isEditMode"
             type="text"
+            [(ngModel)]="editedProfile.nombreCompleto"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             placeholder="Tu nombre"
           />
@@ -83,6 +84,41 @@
           </div>
         </div>
 
+        <div>
+          <!-- Botones de Editar/Guardar -->
+          <div class="flex items-center space-x-4 mt-4 md:mt-0">
+            <button
+              *ngIf="!isEditMode"
+              (click)="habilitarModoEdicion()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Editar Perfil
+            </button>
+            <div *ngIf="isEditMode" class="space-x-4">
+              <button
+                (click)="guardarCambios()"
+                [disabled]="isSaving"
+                class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+              </button>
+              <button
+                (click)="cancelarModoEdicion()"
+                [disabled]="isSaving"
+                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors disabled:cursor-not-allowed"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+          
+          <!-- Mensaje de guardado -->
+          <div *ngIf="saveMessage" class="mt-4">
+            <p [class]="saveMessage.includes('éxito') ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'">
+              {{ saveMessage }}
+            </p>
+          </div>
+        </div>
     </div>
 
     <!-- Card Secundaria - Información de la Cuenta -->

@@ -22,11 +22,6 @@ export const routes: Routes = [
       import('./presentation/business/business').then(m => m.Business)
   },
   {
-    path: 'business',
-    redirectTo: '/home',
-    pathMatch: 'full'
-  },
-  {
     path: 'admin-local',
     loadComponent: () =>
       import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal)
@@ -41,13 +36,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./presentation/perfil/perfil').then(m => m.PerfilComponent)
   },
+  {
+    path: 'welcome',
+    loadComponent: () => 
+      import('./presentation/welcome-page/welcome-page').then(m => m.WelcomePage)
+  },
   { 
     path: '', 
-    redirectTo: '/home', 
+    redirectTo: '/welcome', 
     pathMatch: 'full' 
   },
   {
     path: '**',
-    redirectTo: '/home'
+    redirectTo: '/welcome'
   }
 ];

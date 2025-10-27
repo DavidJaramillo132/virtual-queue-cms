@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { IUsuario } from '../domain/entities';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -101,4 +102,21 @@ export class UserService {
     const userRole = this.getUserRole();
     return userRole ? roles.includes(userRole) : false;
   }
+
+  // Actualizar usuario
+  actualizarUsuario(updatedUser: IUsuario): Observable<IUsuario> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    return this.http.put<IUsuario>(`${this.apiUrl}/usuarios/${updatedUser.id}`, updatedUser, { headers }).pipe(
+      tap((user: IUsuario) => {
+        // Actualizar el usuario en localStorage y BehaviorSubject si es el usuario actual
+        if (user.id === this.currentUserValue?.id) {
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          this.userActualBehavior.next(user);
+        }
+      })
+    );  
+} 
 }

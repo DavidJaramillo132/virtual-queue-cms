@@ -62,6 +62,12 @@
         </div>
       </div>
 
+      <!-- Formulario de Negocio (se muestra solo si el rol es "Negocio") -->
+      <app-business 
+        *ngIf="showBusinessForm" 
+        [parentForm]="registerForm"
+      ></app-business>
+
       <button type="submit"
         class="w-full bg-[#171717] text-white py-3 rounded-lg hover:bg-[#2b2b2b] transition disabled:opacity-60"
         [disabled]="loading">Crear Cuenta</button>

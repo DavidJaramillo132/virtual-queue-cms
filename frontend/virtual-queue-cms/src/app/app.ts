@@ -2,8 +2,8 @@ import { Component, Provider, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { Navbar } from './presentation/navbar/navbar';
-import { Footer } from './presentation/footer/footer';
+import { Navbar } from './componets/navbar/navbar';
+import { Footer } from './componets/footer/footer';
 @Component({
   selector: 'app-root',
   imports: [

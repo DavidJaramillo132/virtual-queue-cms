@@ -40,12 +40,63 @@ export class PerfilComponent implements OnInit {
     }
 
   }
-
   goBack(): void {
     this.router.navigate(['/home']);
   }
-
+  
   getUser(): IUsuario | null {
     return this.userService.currentUserValue;
+  }
+  // Modificar el perfil
+  habilitarModoEdicion(): void {
+    this.isEditMode = true;
+    const currentUser = this.getUser();
+    if (currentUser) {
+      this.editedProfile = { ...currentUser };
+    }
+  }
+
+  cancelarModoEdicion(): void {
+    this.isEditMode = false;
+    this.editedProfile = {};
+    this.saveMessage = '';
+  }
+
+  guardarCambios(): void {
+    const currentUser = this.getUser();
+    
+    if (!currentUser || !currentUser.id) {
+      this.saveMessage = 'Error: No se pudo identificar el usuario.';
+      return;
+    }
+
+    // Crear el objeto completo con el id del usuario actual
+    const usuarioActualizado: any = {
+      ...currentUser,
+      ...this.editedProfile,
+      id: currentUser.id
+    };
+
+    this.isSaving = true;
+    this.saveMessage = '';
+
+    this.userService.actualizarUsuario(usuarioActualizado).subscribe({
+      next: (updatedUser: IUsuario) => {
+        this.IUsuario = updatedUser;
+        this.isEditMode = false;
+        this.isSaving = false;
+        this.saveMessage = 'Perfil actualizado con éxito.';
+        
+        // Limpiar mensaje después de 3 segundos
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 3000);
+      },
+      error: (err) => {
+        console.error('Error al actualizar el perfil:', err);
+        this.isSaving = false;
+        this.saveMessage = 'Error al actualizar el perfil. Por favor, inténtalo de nuevo.';
+      }
+    });
   }
 }
