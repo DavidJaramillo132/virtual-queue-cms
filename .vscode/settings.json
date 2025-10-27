@@ -1,0 +1,6 @@
+{
+  // Use the service-specific venv by default in this workspace
+  "python.defaultInterpreterPath": "c:\\Users\\Usuario\\Documents\\GitHub\\virtual-queue-cms\\backend\\services\\GraphQL_Service\\venv\\Scripts\\python.exe",
+  // Ensure the Python extension activates the selected environment in the terminal
+  "python.terminal.activateEnvironment": true
+}

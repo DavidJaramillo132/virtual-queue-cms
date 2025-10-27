@@ -3,11 +3,11 @@ from typing import List, Optional
 from app.queries.negocio_queries import get_negocios, get_negocio_by_id
 from app.queries.fila_queries import get_filas_activas, get_estadisticas_fila
 from app.queries.cita_queries import get_citas_por_cliente, get_citas_por_negocio
-from app.queries.reportes_queries import get_reporte_general, get_reporte_por_negocio
+# from app.queries.reportes_queries import get_reporte_general, get_reporte_por_negocio
 from app.types.negocio_type import Negocio
 from app.types.fila_type import Fila, EstadisticasFila
 from app.types.cita_type import Cita
-from app.types.reportes_type import ReporteGeneral, ReporteNegocio
+# from app.types.reportes_type import ReporteGeneral, ReporteNegocio
 
 @strawberry.type
 class Query:
