@@ -1,7 +1,7 @@
 import strawberry
 from typing import Optional
 from datetime import datetime
-from types.enums import Estado
+from gql_types.enums import Estado
 
 @strawberry.type
 class MetricasTemporales:

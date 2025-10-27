@@ -6,7 +6,7 @@ from datetime import time
 class HorarioAtencion:
     id: str
     negocio_id: str
-    dia_semana: str
-    hora_inicio: str
-    hora_fin: str
+    dia_semana: int
+    inicio: time
+    fin: time
     activo: bool

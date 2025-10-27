@@ -1,6 +1,6 @@
 from typing import List
 from services.http_client import http_client
-from types.horario_atencion_types import HorarioAtencion
+from gql_types.horario_atencion_types import HorarioAtencion
 
 class HorariosAtencionResolver:
     @staticmethod

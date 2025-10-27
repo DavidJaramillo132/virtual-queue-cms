@@ -2,22 +2,21 @@ import strawberry
 from typing import List
 from resolvers.usuarios_resolver import UsuariosResolver
 from resolvers.citas_resolver import CitasResolver
-from resolvers.servicios_resolver import ServiciosResolver
-from resolvers.negocios_resolver import NegociosResolver
+from resolvers.servicios_resolver import NegociosResolver
 from resolvers.estaciones_resolver import EstacionesResolver
 from resolvers.fila_resolver import FilaResolver
 from resolvers.horarios_atencion_resolver import HorariosAtencionResolver
 from resolvers.admin_sistema_resolver import AdminSistemaResolver
 
-# Import all types
-from types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario
-from types.cita_types import Cita, MetricasTemporales
-from types.servicio_types import Servicio, RankingServicios
-from types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
-from types.estacion_types import Estacion, EstacionDTO
-from types.fila_types import Fila
-from types.horario_atencion_types import HorarioAtencion
-from types.admin_sistema_types import AdminSistema
+# Import all types (use gql_types to avoid naming conflict with Python stdlib 'types')
+from gql_types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario
+from gql_types.cita_types import Cita, MetricasTemporales
+from gql_types.servicio_types import Servicio, RankingServicios
+from gql_types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
+from gql_types.estacion_types import Estacion, EstacionDTO
+from gql_types.fila_types import Fila
+from gql_types.horario_atencion_types import HorarioAtencion
+from gql_types.admin_sistema_types import AdminSistema
 
 @strawberry.type
 class Query:
@@ -58,15 +57,15 @@ class Query:
     # Servicios queries
     @strawberry.field(description="Obtener todos los servicios")
     async def servicios(self) -> List[Servicio]:
-        return await ServiciosResolver.find_all()
+        return await NegociosResolver.find_all()
     
     @strawberry.field(description="Obtener un servicio por ID")
     async def servicio(self, id: str) -> Servicio:
-        return await ServiciosResolver.find_one(id)
+        return await NegociosResolver.find_one(id)
     
     @strawberry.field(description="Ranking de servicios más solicitados")
     async def ranking_servicios(self) -> List[RankingServicios]:
-        return await ServiciosResolver.ranking_servicios()
+        return await NegociosResolver.ranking_servicios()
     
     # Negocios queries
     @strawberry.field(description="Obtener todos los negocios")

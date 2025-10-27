@@ -1,6 +1,6 @@
 from typing import List
 from services.http_client import http_client
-from types.admin_sistema_types import AdminSistema
+from gql_types.admin_sistema_types import AdminSistema
 
 class AdminSistemaResolver:
     @staticmethod

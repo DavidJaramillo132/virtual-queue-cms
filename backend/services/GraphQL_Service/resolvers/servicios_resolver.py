@@ -1,43 +1,62 @@
 from typing import List
 from services.http_client import http_client
-from types.servicio_types import Servicio, RankingServicios
+from gql_types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
+from gql_types.enums import Estado
 
-class ServiciosResolver:
+class NegociosResolver:
     @staticmethod
-    async def find_all() -> List[Servicio]:
-        """Get all services from REST API"""
-        data = await http_client.get("/api/servicios/")
-        return [Servicio(**servicio) for servicio in data]
+    async def find_all() -> List[Negocio]:
+        """Get all businesses from REST API"""
+        data = await http_client.get("/api/negocios/")
+        return [Negocio(**negocio) for negocio in data]
     
     @staticmethod
-    async def find_one(id: str) -> Servicio:
-        """Get a single service by ID"""
-        data = await http_client.get(f"/api/servicios/{id}")
-        return Servicio(**data)
+    async def find_one(id: str) -> Negocio:
+        """Get a single business by ID"""
+        data = await http_client.get(f"/api/negocios/{id}")
+        return Negocio(**data)
     
     @staticmethod
-    async def ranking_servicios() -> List[RankingServicios]:
-        """Get ranking of most requested services"""
+    async def dashboard_negocio(negocio_id: str) -> DashboardNegocio:
+        """Get business dashboard with metrics"""
+        from resolvers.servicios_resolver import ServiciosResolver
         from resolvers.citas_resolver import CitasResolver
         
+        negocio = await NegociosResolver.find_one(negocio_id)
         servicios = await ServiciosResolver.find_all()
         citas = await CitasResolver.find_all()
         
-        # Count appointments per service
-        servicio_counts = {}
-        for cita in citas:
-            servicio_counts[cita.servicio_id] = servicio_counts.get(cita.servicio_id, 0) + 1
+        servicios_negocio = [s for s in servicios if s.negocio_id == negocio_id]
+        citas_negocio = [c for c in citas if c.negocio_id == negocio_id]
         
-        # Create ranking
-        ranking = []
-        for servicio in servicios:
-            count = servicio_counts.get(servicio.id, 0)
-            ranking.append(RankingServicios(
-                servicio=servicio.nombre,
-                total_citas=count
-            ))
+        citas_pendientes = len([c for c in citas_negocio if c.estado == Estado.PENDIENTE])
+        citas_atendidas = len([c for c in citas_negocio if c.estado == Estado.ATENDIDA])
         
-        # Sort by total_citas descending
-        ranking.sort(key=lambda x: x.total_citas, reverse=True)
+        return DashboardNegocio(
+            nombre_negocio=negocio.nombre,
+            total_servicios=len(servicios_negocio),
+            total_citas=len(citas_negocio),
+            citas_pendientes=citas_pendientes,
+            citas_atendidas=citas_atendidas
+        )
+    
+    @staticmethod
+    async def resumen_negocio(negocio_id: str) -> ResumenNegocio:
+        """Get business summary"""
+        from resolvers.servicios_resolver import ServiciosResolver
+        from resolvers.citas_resolver import CitasResolver
         
-        return ranking
+        negocio = await NegociosResolver.find_one(negocio_id)
+        servicios = await ServiciosResolver.find_all()
+        citas = await CitasResolver.find_all()
+        
+        servicios_negocio = [s for s in servicios if s.negocio_id == negocio_id]
+        citas_negocio = [c for c in citas if c.negocio_id == negocio_id]
+        
+        return ResumenNegocio(
+            id=negocio.id,
+            nombre=negocio.nombre,
+            direccion=negocio.direccion,
+            total_servicios=len(servicios_negocio),
+            total_citas=len(citas_negocio)
+        )

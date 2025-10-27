@@ -1,6 +1,6 @@
 from typing import List
 from services.http_client import http_client
-from types.cita_types import Cita, MetricasTemporales
+from gql_types.cita_types import Cita, MetricasTemporales
 from datetime import datetime, timedelta
 
 class CitasResolver:

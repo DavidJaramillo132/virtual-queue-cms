@@ -1,6 +1,6 @@
 from typing import List
 from services.http_client import http_client
-from types.estacion_types import Estacion
+from gql_types.estacion_types import Estacion
 
 class EstacionesResolver:
     @staticmethod

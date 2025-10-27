@@ -1,7 +1,7 @@
 import strawberry
 from typing import List, Optional
 from datetime import datetime
-from types.enums import Rol
+from gql_types.enums import Rol
 
 @strawberry.type
 class CitaInfo:

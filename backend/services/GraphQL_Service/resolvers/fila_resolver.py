@@ -1,6 +1,6 @@
 from typing import List
 from services.http_client import http_client
-from types.fila_types import Fila
+from gql_types.fila_types import Fila
 
 class FilaResolver:
     @staticmethod

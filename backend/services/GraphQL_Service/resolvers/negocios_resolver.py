@@ -1,7 +1,7 @@
 from typing import List
 from services.http_client import http_client
-from types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
-from types.enums import Estado
+from gql_types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
+from gql_types.enums import Estado
 
 class NegociosResolver:
     @staticmethod

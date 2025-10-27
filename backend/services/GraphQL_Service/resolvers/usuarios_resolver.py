@@ -1,7 +1,7 @@
 from typing import List
 from services.http_client import http_client
-from types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario, CitaInfo
-from types.enums import Estado
+from gql_types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario, CitaInfo
+from gql_types.enums import Estado
 from datetime import datetime
 
 class UsuariosResolver:
@@ -21,11 +21,11 @@ class UsuariosResolver:
     async def usuarios_con_citas_pendientes() -> List[UsuarioCitasDTO]:
         """Get users with pending appointments"""
         from resolvers.citas_resolver import CitasResolver
-        from resolvers.servicios_resolver import ServiciosResolver
+        from resolvers.servicios_resolver import NegociosResolver
         
         usuarios = await UsuariosResolver.find_all()
         citas = await CitasResolver.find_all()
-        servicios = await ServiciosResolver.find_all()
+        servicios = await NegociosResolver.find_all()
         
         pendientes = [c for c in citas if c.estado == Estado.PENDIENTE]
         
@@ -51,11 +51,11 @@ class UsuariosResolver:
     async def usuarios_con_citas_atendidas() -> List[UsuarioCitasDTO]:
         """Get users with completed appointments"""
         from resolvers.citas_resolver import CitasResolver
-        from resolvers.servicios_resolver import ServiciosResolver
+        from resolvers.servicios_resolver import NegociosResolver
         
         usuarios = await UsuariosResolver.find_all()
         citas = await CitasResolver.find_all()
-        servicios = await ServiciosResolver.find_all()
+        servicios = await NegociosResolver.find_all()
         
         atendidas = [c for c in citas if c.estado == Estado.ATENDIDA]
         

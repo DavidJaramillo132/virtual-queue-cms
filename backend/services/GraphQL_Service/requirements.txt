@@ -1,5 +1,5 @@
-fastapi==0.115.6
-uvicorn[standard]==0.34.0
-strawberry-graphql[fastapi]==0.252.3
-httpx==0.28.1
-python-dotenv==1.0.1
+﻿fastapi>=0.115.6
+uvicorn[standard]>=0.34.0
+strawberry-graphql[fastapi]>=0.284.0
+httpx>=0.28.1
+python-dotenv>=1.0.1
