@@ -1,0 +1,109 @@
+<div *ngIf="businessForm" [formGroup]="businessForm" class="space-y-4 mt-6 p-6 bg-gray-50 rounded-lg border-2 border-primary">
+  <h3 class="text-lg font-semibold text-primary mb-4">Información del Negocio</h3>
+  
+  <!-- Nombre del Negocio -->
+  <div>
+    <label class="block text-sm font-medium text-gray-600 mb-1">Nombre del Negocio *</label>
+    <input 
+      type="text" 
+      formControlName="nombre" 
+      placeholder="Ej: Restaurante El Buen Sabor"
+      class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300" 
+    />
+    <small 
+      *ngIf="businessForm.get('nombre')?.invalid && businessForm.get('nombre')?.touched"
+      class="text-red-500"
+    >
+      El nombre debe tener al menos 3 caracteres
+    </small>
+  </div>
+
+  <!-- Categoría -->
+  <div>
+    <label class="block text-sm font-medium text-gray-600 mb-1">Categoría *</label>
+    <select 
+      formControlName="categoria"
+      class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300"
+    >
+      <option value="">Selecciona una categoría</option>
+      <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+    </select>
+    <small 
+      *ngIf="businessForm.get('categoria')?.invalid && businessForm.get('categoria')?.touched"
+      class="text-red-500"
+    >
+      Selecciona una categoría
+    </small>
+  </div>
+
+  <!-- Descripción -->
+  <div>
+    <label class="block text-sm font-medium text-gray-600 mb-1">Descripción del Negocio *</label>
+    <textarea 
+      formControlName="descripcion" 
+      placeholder="Describe tu negocio, servicios que ofreces, etc."
+      rows="4"
+      class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none"
+    ></textarea>
+    <small 
+      *ngIf="businessForm.get('descripcion')?.invalid && businessForm.get('descripcion')?.touched"
+      class="text-red-500"
+    >
+      La descripción debe tener al menos 10 caracteres
+    </small>
+  </div>
+
+  <!-- Teléfono del Negocio y Correo -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-600 mb-1">Teléfono del Negocio *</label>
+      <input 
+        type="tel" 
+        formControlName="telefono_negocio" 
+        placeholder="+593 999 999 999"
+        class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300" 
+      />
+      <small 
+        *ngIf="businessForm.get('telefono_negocio')?.invalid && businessForm.get('telefono_negocio')?.touched"
+        class="text-red-500"
+      >
+        Teléfono inválido (10-15 dígitos)
+      </small>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-600 mb-1">Correo del Negocio *</label>
+      <input 
+        type="email" 
+        formControlName="correo" 
+        placeholder="negocio@email.com"
+        class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300" 
+      />
+      <small 
+        *ngIf="businessForm.get('correo')?.invalid && businessForm.get('correo')?.touched"
+        class="text-red-500"
+      >
+        Correo inválido
+      </small>
+    </div>
+  </div>
+
+  <!-- URL de la Imagen (opcional) -->
+  <div>
+    <label class="block text-sm font-medium text-gray-600 mb-1">URL de Imagen (opcional)</label>
+    <input 
+      type="url" 
+      formControlName="imagen_url" 
+      placeholder="https://ejemplo.com/imagen.jpg"
+      class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300" 
+    />
+    <small class="text-gray-400 text-xs">Puedes agregar una imagen de tu negocio más tarde</small>
+  </div>
+
+  <div class="bg-blue-50 border-l-4 border-primary p-3 rounded">
+    <p class="text-xs text-gray-600">
+      <strong>Nota:</strong> Esta información se utilizará para crear el perfil de tu negocio. 
+      Podrás modificarla más tarde desde tu panel de administración.
+    </p>
+  </div>
+</div>

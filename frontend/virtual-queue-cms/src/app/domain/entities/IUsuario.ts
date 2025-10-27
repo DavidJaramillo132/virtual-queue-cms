@@ -1,9 +1,9 @@
 export interface IUsuario {
   id: string;
-  name: string;
-  apellido: string;
+  nombreCompleto: string;
   email: string;
   password: string;
-  rol: 'cliente' | 'adminNegocio';
+  rol: 'cliente' | 'Negocio' | 'admin';
   telefono: string;
+  creado_en: Date;
 }

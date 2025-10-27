@@ -9,10 +9,7 @@ export class Usuario {
   id!: string;
 
   @Column({ type: 'varchar', nullable: false, default: '' })
-  nombre!: string;
-
-  @Column({ type: 'varchar', nullable: false, default: '' })
-  apellido!: string;
+  nombreCompleto!: string;
 
   @Column({ unique: true, type: 'varchar', nullable: false, default: '' })
   email!: string;
@@ -22,10 +19,10 @@ export class Usuario {
 
   @Column({ 
     type: "simple-enum", 
-    enum: ["cliente", "adminNegocio"],
+    enum: ["cliente", "Negocio"],
     name: "rol"
   })
-  rol!: "cliente" | "adminNegocio";
+  rol!: "cliente" | "Negocio";
 
   @Column({ nullable: true })
   telefono?: string;

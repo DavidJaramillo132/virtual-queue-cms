@@ -1,0 +1,104 @@
+<div class="space-y-6">
+  <!-- Header con búsqueda -->
+  <div class="flex items-center justify-between flex-wrap gap-4">
+    <div>
+      <h2 class="text-xl font-bold text-gray-900">Gestión de Negocios</h2>
+      <p class="text-sm text-gray-600 mt-1">Administra todos los negocios de la plataforma</p>
+    </div>
+
+    <!-- Buscador -->
+    <div class="relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <fa-icon [icon]="faSearch" class="text-gray-400"></fa-icon>
+      </div>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        placeholder="Buscar negocios..."
+        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent w-64"
+      />
+    </div>
+  </div>
+
+  <!-- Lista de negocios -->
+  <div class="space-y-4">
+    @if (negociosFiltrados().length === 0) {
+      <div class="bg-white rounded-lg shadow-md p-8 border border-gray-200 text-center">
+        <p class="text-gray-500">No se encontraron negocios</p>
+      </div>
+    }
+
+    @for (negocio of negociosFiltrados(); track negocio.id) {
+      <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+        <div class="flex items-start justify-between">
+          <!-- Información del negocio -->
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-lg font-bold text-gray-900">{{ negocio.nombre }}</h3>
+              <span class="px-3 py-1 bg-black text-white text-xs font-medium rounded-full">
+                {{ negocio.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+              <span class="px-3 py-1 bg-gray-200 text-gray-700 text-xs font-medium rounded-full">
+                {{ negocio.categoria }}
+              </span>
+            </div>
+
+            <p class="text-sm text-gray-600 mb-3">{{ negocio.descripcion }}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+              <div>
+                <span class="text-gray-500">Dirección:</span>
+                <p class="text-gray-900">{{ negocio.direccion }}</p>
+              </div>
+              <div>
+                <span class="text-gray-500">Teléfono:</span>
+                <p class="text-gray-900">{{ negocio.telefono }}</p>
+              </div>
+              <div>
+                <span class="text-gray-500">Email:</span>
+                <p class="text-gray-900">{{ negocio.email }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de acción -->
+          <div class="flex gap-2 ml-6">
+            <button 
+              (click)="verDetalles(negocio)"
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+              title="Ver Detalles"
+            >
+              <fa-icon [icon]="faEye"></fa-icon>
+              Ver Detalles
+            </button>
+
+            @if (!negocio.tieneAdvertencia) {
+              <button 
+                (click)="emitirAdvertencia(negocio)"
+                class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-colors flex items-center gap-2"
+                title="Advertir"
+              >
+                <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+                Advertir
+              </button>
+            } @else {
+              <span class="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                <fa-icon [icon]="faExclamationTriangle"></fa-icon>
+                Advertido
+              </span>
+            }
+
+            <button 
+              (click)="eliminarNegocio(negocio)"
+              class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-2"
+              title="Eliminar"
+            >
+              <fa-icon [icon]="faTrash"></fa-icon>
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

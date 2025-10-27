@@ -1,0 +1,137 @@
+<div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+  <div class="mb-6">
+    <h2 class="text-xl font-bold text-gray-900">Información del Negocio</h2>
+    <p class="text-sm text-gray-600 mt-1">Actualiza la información de tu negocio</p>
+  </div>
+
+  <div class="space-y-6">
+    <!-- Nombre del Negocio -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Nombre del Negocio
+      </label>
+      @if (isEditing()) {
+        <input 
+          type="text" 
+          [(ngModel)]="negocioTemp.nombre"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+        />
+      } @else {
+        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().nombre }}</p>
+      }
+    </div>
+
+    <!-- Categoría -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Categoría
+      </label>
+      @if (isEditing()) {
+        <select 
+          [(ngModel)]="negocioTemp.categoria"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+        >
+          <option value="Restaurante">Restaurante</option>
+          <option value="Consultorio Médico">Consultorio Médico</option>
+          <option value="Peluquería">Peluquería</option>
+          <option value="Veterinaria">Veterinaria</option>
+          <option value="Otro">Otro</option>
+        </select>
+      } @else {
+        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().categoria }}</p>
+      }
+    </div>
+
+    <!-- Descripción -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Descripción
+      </label>
+      @if (isEditing()) {
+        <textarea 
+          [(ngModel)]="negocioTemp.descripcion"
+          rows="4"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+        ></textarea>
+      } @else {
+        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().descripcion }}</p>
+      }
+    </div>
+
+    <!-- Dirección -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Dirección
+      </label>
+      @if (isEditing()) {
+        <input 
+          type="text" 
+          [(ngModel)]="negocioTemp.direccion"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+        />
+      } @else {
+        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().direccion }}</p>
+      }
+    </div>
+
+    <!-- Teléfono y Email en dos columnas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Teléfono -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Teléfono
+        </label>
+        @if (isEditing()) {
+          <input 
+            type="tel" 
+            [(ngModel)]="negocioTemp.telefono"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+          />
+        } @else {
+          <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().telefono }}</p>
+        }
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Email
+        </label>
+        @if (isEditing()) {
+          <input 
+            type="email" 
+            [(ngModel)]="negocioTemp.email"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+          />
+        } @else {
+          <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().email }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex gap-3 pt-4">
+      @if (isEditing()) {
+        <button 
+          (click)="guardarCambios()"
+          class="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+        >
+          Guardar Cambios
+        </button>
+        <button 
+          (click)="toggleEdit()"
+          class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+        >
+          Cancelar
+        </button>
+      } @else {
+        <button 
+          (click)="toggleEdit()"
+          class="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+        >
+          Editar Información
+        </button>
+      }
+    </div>
+  </div>
+</div>

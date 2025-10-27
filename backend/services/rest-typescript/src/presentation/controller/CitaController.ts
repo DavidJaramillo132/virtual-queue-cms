@@ -8,6 +8,41 @@ export class CitaController {
   async create(req: Request, res: Response): Promise<void> {
     try {
       const data: Partial<Cita> = req.body;
+      
+      // Obtener usuario_id del token (req.user viene del middleware de autenticación)
+      if (req.user && req.user.id) {
+        data.usuario_id = req.user.id;
+      }
+      
+      // Log para debug
+      console.log('Datos recibidos para crear cita:', JSON.stringify(data, null, 2));
+      
+      // Validar campos requeridos
+      if (!data.fecha) {
+        res.status(400).json({ error: 'El campo "fecha" es requerido' });
+        return;
+      }
+      
+      if (!data.hora_inicio) {
+        res.status(400).json({ error: 'El campo "hora_inicio" es requerido' });
+        return;
+      }
+      
+      if (!data.hora_fin) {
+        res.status(400).json({ error: 'El campo "hora_fin" es requerido' });
+        return;
+      }
+      
+      if (!data.usuario_id) {
+        res.status(400).json({ error: 'El campo "usuario_id" es requerido' });
+        return;
+      }
+      
+      if (!data.servicio_id) {
+        res.status(400).json({ error: 'El campo "servicio_id" es requerido' });
+        return;
+      }
+      
       const created = await citaRepo.create(data);
       res.status(201).json(created);
     } catch (error) {
