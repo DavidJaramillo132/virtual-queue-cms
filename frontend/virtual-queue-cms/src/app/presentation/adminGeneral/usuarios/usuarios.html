@@ -1,0 +1,81 @@
+<div class="space-y-6">
+  <!-- Header con filtros -->
+  <div class="flex items-center justify-between flex-wrap gap-4">
+    <div>
+      <h2 class="text-xl font-bold text-gray-900">Gestión de Usuarios</h2>
+      <p class="text-sm text-gray-600 mt-1">Administra todos los usuarios de la plataforma</p>
+    </div>
+
+    <div class="flex gap-3">
+      <!-- Filtro por rol -->
+      <select 
+        [(ngModel)]="filtroRol"
+        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+      >
+        <option value="todos">Todos los roles</option>
+        <option value="Cliente">Cliente</option>
+        <option value="Admin Local">Admin Local</option>
+        <option value="Admin Sistema">Admin Sistema</option>
+      </select>
+
+      <!-- Buscador -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <fa-icon [icon]="faSearch" class="text-gray-400"></fa-icon>
+        </div>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery"
+          placeholder="Buscar usuarios..."
+          class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent w-64"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de usuarios -->
+  <div class="space-y-4">
+    @if (usuariosFiltrados().length === 0) {
+      <div class="bg-white rounded-lg shadow-md p-8 border border-gray-200 text-center">
+        <p class="text-gray-500">No se encontraron usuarios</p>
+      </div>
+    }
+
+    @for (usuario of usuariosFiltrados(); track usuario.id) {
+      <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+        <div class="flex items-center justify-between">
+          <!-- Información del usuario -->
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-3">
+              <h3 class="text-lg font-bold text-gray-900">{{ usuario.nombre }}</h3>
+              <span [class]="getRolBadgeClass(usuario.rol)">
+                {{ usuario.rol }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
+              <fa-icon [icon]="faEnvelope" class="text-gray-400"></fa-icon>
+              <span>{{ usuario.email }}</span>
+            </div>
+
+            <p class="text-sm text-gray-500">
+              Registrado: {{ formatearFecha(usuario.fechaRegistro) }}
+            </p>
+          </div>
+
+          <!-- Botón de eliminar -->
+          <div class="ml-6">
+            <button 
+              (click)="eliminarUsuario(usuario)"
+              class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-2"
+              title="Eliminar"
+            >
+              <fa-icon [icon]="faTrash"></fa-icon>
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

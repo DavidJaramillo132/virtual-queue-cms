@@ -1,0 +1,77 @@
+<div class="space-y-6">
+  <!-- Cards de métricas principales -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Total de Citas -->
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-gray-600 text-sm font-medium">Total de Citas</h3>
+        <fa-icon [icon]="faCalendar" class="text-gray-400 text-xl"></fa-icon>
+      </div>
+      <div class="space-y-1">
+        <p class="text-3xl font-bold text-gray-900">{{ estadisticas().totalCitas }}</p>
+        <p class="text-sm text-gray-500">Este mes</p>
+      </div>
+    </div>
+
+    <!-- Citas Hoy -->
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-gray-600 text-sm font-medium">Citas Hoy</h3>
+        <fa-icon [icon]="faUsers" class="text-gray-400 text-xl"></fa-icon>
+      </div>
+      <div class="space-y-1">
+        <p class="text-3xl font-bold text-gray-900">{{ estadisticas().citasHoy }}</p>
+        <p class="text-sm text-gray-500">En progreso y pendientes</p>
+      </div>
+    </div>
+
+    <!-- Tiempo de Espera -->
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-gray-600 text-sm font-medium">Tiempo de Espera</h3>
+        <fa-icon [icon]="faClock" class="text-gray-400 text-xl"></fa-icon>
+      </div>
+      <div class="space-y-1">
+        <p class="text-3xl font-bold text-gray-900">{{ estadisticas().tiempoEspera }} min</p>
+        <p class="text-sm text-gray-500">Promedio</p>
+      </div>
+    </div>
+
+    <!-- Satisfacción -->
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-gray-600 text-sm font-medium">Satisfacción</h3>
+        <fa-icon [icon]="faChartLine" class="text-gray-400 text-xl"></fa-icon>
+      </div>
+      <div class="space-y-1">
+        <p class="text-3xl font-bold text-gray-900">{{ estadisticas().satisfaccion }}/5</p>
+        <p class="text-sm text-gray-500">Calificación promedio</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen de Actividad -->
+  <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+    <div class="mb-6">
+      <h2 class="text-xl font-bold text-gray-900">Resumen de Actividad</h2>
+      <p class="text-sm text-gray-600 mt-1">Vista general del rendimiento de tu negocio</p>
+    </div>
+
+    <div class="space-y-4">
+      <div class="flex items-center justify-between py-3 border-b border-gray-100">
+        <span class="text-gray-700 font-medium">Citas completadas</span>
+        <span class="text-2xl font-bold text-gray-900">{{ estadisticas().citasCompletadas }}</span>
+      </div>
+
+      <div class="flex items-center justify-between py-3 border-b border-gray-100">
+        <span class="text-gray-700 font-medium">Citas canceladas</span>
+        <span class="text-2xl font-bold text-gray-900">{{ estadisticas().citasCanceladas }}</span>
+      </div>
+
+      <div class="flex items-center justify-between py-3">
+        <span class="text-gray-700 font-medium">Nuevos clientes</span>
+        <span class="text-2xl font-bold text-gray-900">{{ estadisticas().nuevosClientes }}</span>
+      </div>
+    </div>
+  </div>
+</div>

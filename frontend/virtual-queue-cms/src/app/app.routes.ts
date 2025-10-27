@@ -4,12 +4,50 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./presentation/login/login').then(m => m.Login)
+      import('./presentation/auth-user/login/login').then(m => m.Login)
   },
   {
     path: 'register',
     loadComponent: () =>
-      import('./presentation/register/register').then(m => m.Register)
+      import('./presentation/auth-user/register/register').then(m => m.Register)
   },
-  { path: '', redirectTo: '/login', pathMatch: 'full' } // ruta por defect
+  {
+    path: 'home',
+    loadComponent: () =>
+      import('./presentation/home/home').then(m => m.Home)
+  },
+  {
+    path: 'business/:id',
+    loadComponent: () =>
+      import('./presentation/business/business').then(m => m.Business)
+  },
+  {
+    path: 'admin-local',
+    loadComponent: () =>
+      import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal)
+  },
+  {
+    path: 'admin-general',
+    loadComponent: () =>
+      import('./presentation/adminGeneral/admin-general').then(m => m.AdminGeneral)
+  },
+  {
+    path: 'perfil',
+    loadComponent: () =>
+      import('./presentation/perfil/perfil').then(m => m.PerfilComponent)
+  },
+  {
+    path: 'welcome',
+    loadComponent: () => 
+      import('./presentation/welcome-page/welcome-page').then(m => m.WelcomePage)
+  },
+  { 
+    path: '', 
+    redirectTo: '/welcome', 
+    pathMatch: 'full' 
+  },
+  {
+    path: '**',
+    redirectTo: '/welcome'
+  }
 ];

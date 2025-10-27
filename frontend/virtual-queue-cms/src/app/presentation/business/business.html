@@ -1,0 +1,112 @@
+<main class="container mx-auto px-4 py-8">
+    <button (click)="goBack()"
+        class="flex items-center gap-2 mb-6 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors">
+        <fa-icon [icon]="faArrowLeft" class="h-4 w-4"></fa-icon>
+        Volver
+    </button>
+
+    <!-- Cargando estado -->
+    <div *ngIf="isLoading" class="text-center py-12">
+        <p class="text-lg text-gray-500">Cargando información del negocio...</p>
+    </div>
+
+    <!-- Estado de error -->
+    <div *ngIf="error && !isLoading" class="text-center py-12">
+        <p class="text-lg text-red-500">{{ error }}</p>
+        <button (click)="goBack()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+            Volver al inicio
+        </button>
+    </div>
+
+    <!-- Contenido del negocio -->
+    <div *ngIf="!isLoading && !error && business" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Contenido principal -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Imagen del negocio -->
+            <div class="relative h-64 lg:h-96 w-full rounded-lg overflow-hidden">
+                <img [src]="business.imagen_url || '/assets/fila.jpg'" [alt]="business.nombre"
+                    class="w-full h-full object-cover" />
+            </div>
+
+            <!-- Información del negocio -->
+            <div>
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2">{{ business.nombre }}</h1>
+                        <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {{ business.categoria }}
+                        </span>
+                    </div>
+                </div>
+                <p class="text-gray-600 text-lg">{{ business.descripcion }}</p>
+            </div>
+
+            <!-- Servicios Card -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-6 border-b">
+                    <h2 class="text-2xl font-bold mb-2">Servicios Disponibles</h2>
+                    <p class="text-gray-600">Selecciona un servicio para agendar tu cita</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <p *ngIf="services.length === 0" class="text-gray-600">
+                        No hay servicios disponibles
+                    </p>
+
+                    <div *ngFor="let service of services" class="bg-white border rounded-lg shadow-sm overflow-hidden">
+                        <div class="p-4 border-b">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h3 class="text-lg font-bold">{{ service.nombre }}</h3>
+                                    <p class="text-gray-600 text-sm">{{ service.descripcion }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 border-b">
+                            <div class="flex items-center gap-2 text-sm text-gray-600">
+                                <fa-icon [icon]="faClock" class="h-4 w-4"></fa-icon>
+                                <span>{{ service.duracion_minutos }} minutos</span>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <button (click)="abrirModal(service.id)"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                                Agendar Cita
+                            </button>
+                            <app-appointment *ngIf="isModalAbierto(service.id)" [servicios]="[service]" [servicioPreseleccionadoId]="service.id"></app-appointment>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-6 border-b">
+                    <h2 class="text-xl font-bold">Información de Contacto</h2>
+                </div>
+                <div class="p-6 space-y-4">
+
+                    <!-- Phone -->
+                    <div *ngIf="business.telefono" class="flex items-start gap-3">
+                        <fa-icon [icon]="faPhone" class="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0"></fa-icon>
+                        <div>
+                            <p class="font-medium">Teléfono</p>
+                            <p class="text-sm text-gray-600">{{ business.telefono }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div *ngIf="business.correo" class="flex items-start gap-3">
+                        <fa-icon [icon]="faEnvelope" class="h-5 w-5 text-gray-500 mt-0.5 flex-shrink-0"></fa-icon>
+                        <div>
+                            <p class="font-medium">Email</p>
+                            <p class="text-sm text-gray-600">{{ business.correo }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

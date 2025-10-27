@@ -1,0 +1,67 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Panel de Administración</h1>
+      <p class="text-gray-600 mt-2">Gestiona tu negocio y servicios</p>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex gap-4 mb-8 overflow-x-auto">
+      <button 
+        (click)="setActiveTab('estadisticas')"
+        [class]="activeTab() === 'estadisticas' 
+          ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
+          : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
+        Estadísticas
+      </button>
+      <button 
+        (click)="setActiveTab('negocio')"
+        [class]="activeTab() === 'negocio' 
+          ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
+          : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
+        Negocio
+      </button>
+      <button 
+        (click)="setActiveTab('servicios')"
+        [class]="activeTab() === 'servicios' 
+          ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
+          : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
+        Servicios
+      </button>
+      <button 
+        (click)="setActiveTab('horarios')"
+        [class]="activeTab() === 'horarios' 
+          ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
+          : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
+        Horarios
+      </button>
+      <button 
+        (click)="setActiveTab('citas')"
+        [class]="activeTab() === 'citas' 
+          ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
+          : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
+        Citas
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="transition-all duration-300">
+      @if (activeTab() === 'estadisticas') {
+        <app-estadisticas />
+      }
+      @if (activeTab() === 'negocio') {
+        <app-negocio-info />
+      }
+      @if (activeTab() === 'servicios') {
+        <app-servicios />
+      }
+      @if (activeTab() === 'horarios') {
+        <app-horarios />
+      }
+      @if (activeTab() === 'citas') {
+        <app-citas />
+      }
+    </div>
+  </div>
+</div>

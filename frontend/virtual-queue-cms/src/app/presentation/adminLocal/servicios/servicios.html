@@ -1,0 +1,157 @@
+<div class="space-y-6">
+  <!-- Header con botón de agregar -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-xl font-bold text-gray-900">Servicios</h2>
+      <p class="text-sm text-gray-600 mt-1">Gestiona los servicios que ofreces</p>
+    </div>
+    <button 
+      (click)="abrirModalNuevo()"
+      class="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2"
+    >
+      <fa-icon [icon]="faPlus"></fa-icon>
+      Agregar Servicio
+    </button>
+  </div>
+
+  <!-- Lista de servicios -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    @for (servicio of servicios(); track servicio.id) {
+      <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+        <!-- Header del servicio -->
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex-1">
+            <h3 class="text-lg font-bold text-gray-900">{{ servicio.nombre }}</h3>
+            <p class="text-sm text-gray-600 mt-1">{{ servicio.descripcion }}</p>
+          </div>
+          <span 
+            [class]="servicio.activo 
+              ? 'px-3 py-1 bg-black text-white text-xs font-medium rounded-full' 
+              : 'px-3 py-1 bg-gray-300 text-gray-700 text-xs font-medium rounded-full'"
+          >
+            {{ servicio.activo ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+
+        <!-- Detalles del servicio -->
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">Duración:</span>
+            <span class="text-sm font-medium text-gray-900">{{ servicio.duracion }} min</span>
+          </div>
+          @if (servicio.precio !== undefined && servicio.precio > 0) {
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">Precio:</span>
+              <span class="text-sm font-medium text-gray-900">${{ servicio.precio }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex items-center gap-2 pt-4 border-t border-gray-100">
+          <button 
+            (click)="abrirModalEditar(servicio)"
+            class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+          >
+            <fa-icon [icon]="faPencil" class="text-sm"></fa-icon>
+            Editar
+          </button>
+          <button 
+            (click)="eliminarServicio(servicio.id)"
+            class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-red-50 hover:text-red-600 transition-colors flex items-center justify-center gap-2"
+          >
+            <fa-icon [icon]="faTrash" class="text-sm"></fa-icon>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal para agregar/editar servicio -->
+@if (showModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-6">
+        {{ isEditing() ? 'Editar Servicio' : 'Nuevo Servicio' }}
+      </h3>
+
+      <div class="space-y-4">
+        <!-- Nombre -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Servicio</label>
+          <input 
+            type="text" 
+            [(ngModel)]="servicioActual.nombre"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            placeholder="Ej: Consulta General"
+          />
+        </div>
+
+        <!-- Descripción -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+          <textarea 
+            [(ngModel)]="servicioActual.descripcion"
+            rows="3"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            placeholder="Describe el servicio"
+          ></textarea>
+        </div>
+
+        <!-- Duración -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Duración (minutos)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="servicioActual.duracion"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            min="5"
+            step="5"
+          />
+        </div>
+
+        <!-- Precio (opcional) -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Precio (opcional)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="servicioActual.precio"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+          />
+        </div>
+
+        <!-- Estado activo -->
+        <div class="flex items-center gap-3">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="servicioActual.activo"
+            id="activo"
+            class="w-5 h-5 text-gray-900 border-gray-300 rounded focus:ring-gray-500"
+          />
+          <label for="activo" class="text-sm font-medium text-gray-700">Servicio activo</label>
+        </div>
+      </div>
+
+      <!-- Botones del modal -->
+      <div class="flex gap-3 mt-6">
+        <button 
+          (click)="guardarServicio()"
+          class="flex-1 px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+        >
+          {{ isEditing() ? 'Guardar Cambios' : 'Crear Servicio' }}
+        </button>
+        <button 
+          (click)="cerrarModal()"
+          class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+}

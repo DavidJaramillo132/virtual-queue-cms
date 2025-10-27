@@ -31,7 +31,7 @@ export class UsuarioRepo {
         return this.repo.find();
     }
 
-    async getById(id: string): Promise<Usuario | null> {
-        return this.repo.findOneBy({ id });
+    async getByEmail(email: string): Promise<Usuario | null> {
+        return this.repo.findOneBy({ email });
     }
 }

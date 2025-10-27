@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import { Usuario } from "../../entities/Usuario";
 import { UsuarioRepo } from "../../repository/UsuarioRepo";
 
@@ -7,12 +8,47 @@ const usuarioRepo = new UsuarioRepo();
 export class UsuarioController {
     async createUsuario(req: Request, res: Response): Promise<void>{
         try {
-            const usuarioData: Partial<Usuario> = req.body;
+            const { nombreCompleto, email, password, rol, telefono } = req.body;
+
+            // Validación de campos requeridos
+            if (!nombreCompleto || !email || !password || !rol) {
+                res.status(400).json({ 
+                    message: 'Todos los campos son requeridos: nombreCompleto, email, password, rol' 
+                });
+                return;
+            }
+
+            // Verificar si el email ya existe
+            const existingUsuario = await usuarioRepo.getByEmail(email);
+            if (existingUsuario) {
+                res.status(409).json({ message: 'El email ya está registrado' });
+                return;
+            }
+
+            // Encriptar contraseña
+            const hashedPassword = await bcrypt.hash(password, 10);
+            console.log("Hashed password:", hashedPassword);
+            // Crear usuario con contraseña encriptada
+            const usuarioData: Partial<Usuario> = {
+                nombreCompleto,
+                email,
+                password: hashedPassword,
+                rol,
+                telefono
+            };
+
             const newUsuario = await usuarioRepo.create(usuarioData);
-            res.status(201).json(newUsuario);
+            
+            // No devolver la contraseña en la respuesta
+            const { password: _, ...usuarioSinPassword } = newUsuario;
+            
+            res.status(201).json({
+                message: 'Usuario registrado exitosamente',
+                user: usuarioSinPassword
+            });
         } catch (error) {
             console.error("Error creating usuario:", error);
-            res.status(500).json({ error: "Internal server error" });
+            res.status(500).json({ message: "Error interno del servidor" });
         }
     }
 
@@ -26,17 +62,18 @@ export class UsuarioController {
         }
     }
 
-    async getUsuarioById(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;
+    async getUsuarioByEmail(req: Request, res: Response): Promise<void> {
+        const { email } = req.params;
         try {
-            const usuario = await usuarioRepo.getById(id);
+            console.log("DSADASASASADADDASD");
+            const usuario = await usuarioRepo.getByEmail(email);
             if (!usuario) {
                 res.status(404).json({ error: "Usuario not found" });
                 return;
             }
             res.json(usuario);
         } catch (error) {
-            console.error(`Error fetching usuario ${id}:`, error);
+            console.error(`Error fetching usuario ${email}:`, error);
             res.status(500).json({ error: "Internal server error" });
         }
     }

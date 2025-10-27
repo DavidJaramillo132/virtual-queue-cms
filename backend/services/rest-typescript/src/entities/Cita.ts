@@ -30,7 +30,7 @@ export class Cita {
   estado!: "pendiente" | "atendida" | "cancelada";
 
   @CreateDateColumn({ name: "creado_en" })
-  creadoEn!: Date;
+  creado_en!: Date;
 
   // Relaciones
   @ManyToOne(() => Usuario, (usuario) => usuario.citas, {
