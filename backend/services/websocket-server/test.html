@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Test WebSocket Fila Virtual</title>
+</head>
+<body>
+  <h2>Fila Virtual - Test WebSocket</h2>
+  <p>Abre dos pestañas: una como Usuario y otra como Admin.</p>
+
+  <button id="pedirCita">Pedir cita</button>
+  <div id="log"></div>
+
+  <script>
+    let jwt = "<JWT_CORTO_DEL_USUARIO>";
+    const refreshToken = "<REFRESH_TOKEN_DEL_USUARIO>";
+
+    // Conexión WS
+    let socket;
+    function conectarWS(token) {
+      socket = new WebSocket(`ws://localhost:8080/ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjE1MDkxOTksInJvbCI6ImNsaWVudGUiLCJ1c2VyX2lkIjoiY2xpZW50ZTIifQ.x5iWyMsr45bd6xbSzgb6not7pl1ypk7LGsVsaO21xoo`);
+
+      socket.onopen = () => {
+        log("✅ Conectado al WS");
+      };
+
+      socket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        log(`📩 Evento: ${msg.type}, Datos: ${JSON.stringify(msg.data)}`);
+      };
+
+      socket.onclose = async (event) => {
+        log("❌ WS cerrado, intentando renovar JWT...");
+        try {
+          const res = await fetch("/refresh", {
+            method: "GET",
+            headers: { "Authorization": refreshToken }
+          });
+          const data = await res.json();
+          jwt = data.token;
+          log("🔄 Nuevo JWT recibido, reconectando...");
+          conectarWS(jwt);
+        } catch (e) {
+          log("❌ No se pudo renovar el JWT:", e);
+        }
+      };
+
+      socket.onerror = (err) => {
+        log("⚠️ Error WS:", err);
+      };
+    }
+
+    function log(msg) {
+      const div = document.getElementById("log");
+      div.innerHTML += `<p>${msg}</p>`;
+      console.log(msg);
+    }
+
+    // Conectar al cargar la página
+    conectarWS(jwt);
+
+    // Simula usuario pidiendo cita
+    document.getElementById("pedirCita").addEventListener("click", () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        const message = {
+          type: "nueva_cita",
+          data: {
+            usuario_id: "cliente1",
+            servicio_id: "servicio1",
+            hora_solicitada: new Date().toISOString()
+          }
+        };
+        socket.send(JSON.stringify(message));
+        log("➡️ Pedido de cita enviado al WS");
+      } else {
+        log("⚠️ WS no está conectado");
+      }
+    });
+  </script>
+</body>
+</html>
