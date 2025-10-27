@@ -7,19 +7,19 @@ from datetime import datetime
 class UsuariosResolver:
     @staticmethod
     async def find_all() -> List[Usuario]:
-        """Get all users from REST API"""
-        data = await http_client.get("/api/users/")
+        """Get all usuarios from REST API"""
+        data = await http_client.get("/api/usuarios/")
         return [Usuario(**user) for user in data]
     
     @staticmethod
     async def find_one(id: str) -> Usuario:
         """Get a single user by ID"""
-        data = await http_client.get(f"/api/users/{id}")
+        data = await http_client.get(f"/api/usuarios/{id}")
         return Usuario(**data)
     
     @staticmethod
     async def usuarios_con_citas_pendientes() -> List[UsuarioCitasDTO]:
-        """Get users with pending appointments"""
+        """Get usuarios with pending appointments"""
         from resolvers.citas_resolver import CitasResolver
         from resolvers.servicios_resolver import NegociosResolver
         
@@ -49,7 +49,7 @@ class UsuariosResolver:
     
     @staticmethod
     async def usuarios_con_citas_atendidas() -> List[UsuarioCitasDTO]:
-        """Get users with completed appointments"""
+        """Get usuarios with completed appointments"""
         from resolvers.citas_resolver import CitasResolver
         from resolvers.servicios_resolver import NegociosResolver
         

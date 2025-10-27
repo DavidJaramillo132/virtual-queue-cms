@@ -6,5 +6,5 @@ class AdminSistemaResolver:
     @staticmethod
     async def find_all() -> List[AdminSistema]:
         """Get all system admins from REST API"""
-        data = await http_client.get("/api/admin-sistema/")
+        data = await http_client.get("/api/admins/")
         return [AdminSistema(**admin) for admin in data]
