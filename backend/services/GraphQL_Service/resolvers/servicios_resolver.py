@@ -7,13 +7,13 @@ class NegociosResolver:
     @staticmethod
     async def find_all() -> List[Negocio]:
         """Get all businesses from REST API"""
-        data = await http_client.get("/api/negocios/")
+        data = await http_client.get("/api/servicios/")
         return [Negocio(**negocio) for negocio in data]
     
     @staticmethod
     async def find_one(id: str) -> Negocio:
         """Get a single business by ID"""
-        data = await http_client.get(f"/api/negocios/{id}")
+        data = await http_client.get(f"/api/servicios/{id}")
         return Negocio(**data)
     
     @staticmethod
