@@ -8,7 +8,7 @@ const controller = new NegocioController();
 // Todas las rutas de negocios requieren autenticación
 // La ruta es la siguiente: /api/negocios
 
-router.post('/', authMiddleware, (req, res) => controller.create(req, res));
+router.post('/', (req, res) => controller.create(req, res));
 // GET /api/negocios publico
 router.get('/', (req, res) => controller.getAll(req, res));
 // GET /api/negocios/:id publico

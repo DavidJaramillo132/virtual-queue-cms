@@ -117,16 +117,16 @@ curl -s -X POST http://localhost:3001/graphql \
 
 Ejemplo:
 
-query {
-  perfil_completo_usuario(usuario_id: "USER_ID") {
+{
+  perfilCompletoUsuario(usuarioId: "djdavidjaramillo@gmail.com") {
     id
-    nombre
+    nombreCompleto
     email
     telefono
-    total_citas
-    citas_completadas
-    citas_pendientes
-    citas_canceladas
+    totalCitas
+    citasCompletadas
+    citasPendientes
+    citasCanceladas
   }
 }
 

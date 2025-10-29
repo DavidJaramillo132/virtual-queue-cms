@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Cita } from "./Cita";
+import { Negocio } from "./Negocio";
 
 @Entity({ name: "servicios" })
 export class Servicio {
@@ -36,4 +37,11 @@ export class Servicio {
   // Relaciones
   @OneToMany(() => Cita, (cita) => cita.servicio)
   citas!: Cita[];
+
+  @ManyToOne(() => Negocio, (negocio) => negocio.servicios, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'negocioId' })
+  negocio!: Negocio;
+  @Column()
+  negocio_id!: string;
+
 }

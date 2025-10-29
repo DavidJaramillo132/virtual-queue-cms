@@ -20,6 +20,7 @@ class NegociosResolver:
         """Get a single business by ID. Forward token if provided."""
         headers = _headers_from_token(token)
         data = await http_client.get(f"/api/negocios/{id}", headers=headers)
+        print(data)
         return Negocio(**data)
     
     @staticmethod
@@ -62,7 +63,6 @@ class NegociosResolver:
         return ResumenNegocio(
             id=negocio.id,
             nombre=negocio.nombre,
-            direccion=negocio.direccion,
-            total_servicios=len(servicios_negocio),
-            total_citas=len(citas_negocio)
+            totalServicios=len(servicios_negocio),
+            totalCitas=len(citas_negocio)
         )

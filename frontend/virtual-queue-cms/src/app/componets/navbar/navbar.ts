@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { UserService } from '../../services/userServices'; // 👈 importa tu servicio
+import { UserService } from '../../services/userServices'; 
 import { IUsuario } from '../../domain/entities';
 
 @Component({
@@ -18,7 +18,7 @@ export class Navbar implements OnInit {
 
   constructor(
     private router: Router,
-    private userService: UserService // 👈 inyecta el servicio
+    private userService: UserService
   ) {}
 
   ngOnInit() {
@@ -29,6 +29,6 @@ export class Navbar implements OnInit {
   }
 
   logout() {
-    this.userService.logout(); // 👈 usa el método del servicio
+    this.userService.logout(); 
   }
 }

@@ -69,7 +69,15 @@ export class Register {
         switchMap((userResponse: any) => {
           console.log('Usuario registrado:', userResponse);
           // Crear el negocio asociado al usuario
-          const userId = userResponse.id || userResponse.data?.id || userResponse.usuario?.id;
+          // Extraer id del usuario creado. Puede venir en distintos formatos según el backend
+          const userId = userResponse.id || userResponse.data?.id || userResponse.usuario?.id || userResponse.user?.id || userResponse.data?.user?.id;
+          console.log('userId extraído del registro:', userId);
+
+          if (!userId) {
+            // Evitar crear un negocio huérfano si no se encuentra el id del usuario
+            throw new Error('No se pudo obtener el id del usuario tras el registro');
+          }
+
           const negocioData = {
             nombre: negocio.nombre,
             categoria: negocio.categoria,
@@ -77,6 +85,7 @@ export class Register {
             telefono: negocio.telefono_negocio,
             correo: negocio.correo,
             imagen_url: negocio.imagen_url || '',
+            // Usar el userId extraído del response (puede venir anidado)
             admin_negocio_id: userId,
             estado: true,
           };
