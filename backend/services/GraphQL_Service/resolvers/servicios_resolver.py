@@ -12,7 +12,7 @@ class ServiciosResolver:
     async def find_all(token: Optional[str] = None) -> List[Servicio]:
         """Get all services from REST API. Forward token if provided."""
         headers = _headers_from_token(token)
-        data = await http_client.get("/api/servicios/", headers=headers)
+        data = await http_client.get("/api/servicios", headers=headers)
         return [Servicio(**servicio) for servicio in data]
 
     @staticmethod

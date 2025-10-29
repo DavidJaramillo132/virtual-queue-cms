@@ -10,9 +10,12 @@ class RankingServicios:
 @strawberry.type
 class Servicio:
     id: str
-    nombre: str
-    descripcion: Optional[str] = None
-    duracion: int
-    precio: float
-    negocio_id: str
-    creado_en: datetime
+    nombre: str | None = ""
+    codigo: str | None = None
+    descripcion: str | None = None
+    duracion_minutos: int
+    capacidad: int = 1
+    requiere_cita: bool = True
+    precio_centavos: int = 0
+    visible: bool = True
+    creadoEn: datetime | None = None

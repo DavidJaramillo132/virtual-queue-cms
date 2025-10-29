@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, CreateDateColumn } from "typeorm";
 import { Estacion } from "./Estacion";
 import { Usuario } from "./Usuario";
+import { Servicio } from "./Servicio";
 
 @Entity({ name: "negocios" })
 export class Negocio {
@@ -49,4 +50,9 @@ export class Negocio {
     cascade: true,
   })
   estaciones!: Estacion[];
+
+  @OneToMany(() => Servicio, (servicio) => servicio.negocio, {
+    cascade: true,
+  })
+  servicios!: Servicio[];
 }

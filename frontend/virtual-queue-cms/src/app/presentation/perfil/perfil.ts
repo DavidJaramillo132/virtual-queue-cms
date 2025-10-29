@@ -20,6 +20,11 @@ export class PerfilComponent implements OnInit {
   profileCompleteness: number = 0;
   isSaving: boolean = false;
   saveMessage: string = '';
+  stats = [
+    { totalCitas: 5, citasCompletadas: 5, citasPendientes: 0, citasCanceladas: 0 },
+    { totalCitas: 20, citasCompletadas: 15, citasPendientes: 5, citasCanceladas: 0 },
+    { totalCitas: 1500, citasCompletadas: 1000, citasPendientes: 500, citasCanceladas: 0 }
+  ];
 
   constructor(
     private userService: UserService,
