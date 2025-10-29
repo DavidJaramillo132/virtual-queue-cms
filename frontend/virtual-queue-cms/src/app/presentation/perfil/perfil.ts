@@ -6,6 +6,8 @@ import { UserService } from '../../services/Rest/userServices';
 //import { PerfilService } from '../../services/perfilService';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { IUsuario } from '../../domain/entities';
+
+import { UserGraphQl } from '../../services/GraphQL/user-graph-ql'
 @Component({
   selector: 'app-perfil',
   standalone: true,
@@ -25,15 +27,29 @@ export class PerfilComponent implements OnInit {
     { totalCitas: 20, citasCompletadas: 15, citasPendientes: 5, citasCanceladas: 0 },
     { totalCitas: 1500, citasCompletadas: 1000, citasPendientes: 500, citasCanceladas: 0 }
   ];
+  perfilGraphQL: [] = [];
 
   constructor(
     private userService: UserService,
     //private perfilService: PerfilService,
-    private router: Router
+    private router: Router,
+    private userGraphQl: UserGraphQl
   ) { }
 
   ngOnInit(): void {
     this.loadUserProfile();
+    this.loadUserProfileGraphQL();
+
+  }
+
+  loadUserProfileGraphQL(){
+    const userStr = localStorage.getItem('currentUser');
+    const user = userStr ? JSON.parse(userStr) : null;
+    this.userGraphQl.perfil_completo_usuario(user?.email)
+    .subscribe(({ data }) =>  {
+      this.perfilGraphQL = data.perfil_completo_usuario;
+    })
+
   }
 
   loadUserProfile(): void {

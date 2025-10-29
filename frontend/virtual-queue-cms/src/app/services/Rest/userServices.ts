@@ -117,6 +117,9 @@ export class UserService {
           this.userActualBehavior.next(user);
         }
       })
-    );  
-} 
+    );
+  }
+
+  // GraphQL
+  
 }

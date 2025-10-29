@@ -131,25 +131,25 @@
         <!-- Total Citas -->
         <div class="p-4 bg-gray-50 rounded-lg flex flex-col items-start">
           <p class="text-sm text-gray-600">Total de Citas</p>
-          <p class="text-2xl font-semibold text-gray-900">{{ stats?.totalCitas || 0 }}</p>
+          <p class="text-2xl font-semibold text-gray-900">{{ stats[0].totalCitas || 0 }}</p>
         </div>
 
         <!-- Citas Completadas -->
         <div class="p-4 bg-gray-50 rounded-lg flex flex-col items-start">
           <p class="text-sm text-gray-600">Completadas</p>
-          <p class="text-2xl font-semibold text-green-600">{{ stats?.citasCompletadas || 0 }}</p>
+          <p class="text-2xl font-semibold text-green-600">{{ stats[1].citasCompletadas || 0 }}</p>
         </div>
 
         <!-- Citas Pendientes -->
         <div class="p-4 bg-gray-50 rounded-lg flex flex-col items-start">
           <p class="text-sm text-gray-600">Pendientes</p>
-          <p class="text-2xl font-semibold text-yellow-600">{{ stats?.citasPendientes || 0 }}</p>
+          <p class="text-2xl font-semibold text-yellow-600">{{ stats[2].citasPendientes || 0 }}</p>
         </div>
 
         <!-- Citas Canceladas -->
         <div class="p-4 bg-gray-50 rounded-lg flex flex-col items-start">
           <p class="text-sm text-gray-600">Canceladas</p>
-          <p class="text-2xl font-semibold text-red-600">{{ stats?.citasCanceladas || 0 }}</p>
+          <p class="text-2xl font-semibold text-red-600">{{ stats[3].citasCanceladas || 0 }}</p>
         </div>
       </div>
     </div>
