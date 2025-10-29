@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { RouterLink, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { UserService } from '../../../services/userServices';
+import { UserService } from '../../../services/Rest/userServices';
 
 
 @Component({

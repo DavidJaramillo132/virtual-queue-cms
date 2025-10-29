@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { IUsuario } from '../domain/entities';
+import { IUsuario } from '../../domain/entities';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -117,6 +117,9 @@ export class UserService {
           this.userActualBehavior.next(user);
         }
       })
-    );  
-} 
+    );
+  }
+
+  // GraphQL
+  
 }

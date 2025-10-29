@@ -1,2 +1,29 @@
-node_modules
+# Node
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Angular cache
+.angular/
+
+# Environments
+src/environments/environment*.ts
 .env
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# IDEs
+.vscode/
+.idea/
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ICita } from '../domain/entities';
+import { ICita } from '../../domain/entities';
 
 @Injectable({ providedIn: 'root' })
 export class FilasService {
