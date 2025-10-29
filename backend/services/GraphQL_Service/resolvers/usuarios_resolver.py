@@ -1,4 +1,6 @@
 from typing import List, Optional, Dict
+
+from numpy import convolve
 from services.http_client import http_client
 from gql_types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario, CitaInfo
 from gql_types.enums import Estado
@@ -23,6 +25,14 @@ class UsuariosResolver:
         """Get a single user by ID, sending Authorization header if token provided"""
         headers = _headers_from_token(token)
         data = await http_client.get(f"/api/usuarios/{id}", headers=headers)
+        print(data)
+        return Usuario(**data)
+    @staticmethod
+    async def find_one_by_email(email: str, token: Optional[str] = None) -> Usuario:
+        """Get a single user by email, sending Authorization header if token provided"""
+        headers = _headers_from_token(token)
+        data = await http_client.get(f"/api/usuarios/{email}", headers=headers)
+        print(data)
         return Usuario(**data)
 
     @staticmethod
@@ -96,11 +106,11 @@ class UsuariosResolver:
             raise Exception("Token no proporcionado en la cabecera Authorization")
 
         # 2️⃣ Llamar a los resolvers que hacen peticiones HTTP, reenviando el token
-        usuario = await UsuariosResolver.find_one(usuario_id, token)
+        usuario = await UsuariosResolver.find_one_by_email(usuario_id, token)
         todas_citas = await CitasResolver.find_all(token)
 
         # 3️⃣ Filtrar citas del usuario
-        citas_usuario = [c for c in todas_citas if c.usuario_id == usuario_id]
+        citas_usuario = [c for c in todas_citas if c.usuario_id == usuario.id]
 
         # 4️⃣ Calcular estadísticas
         total_citas = len(citas_usuario)
@@ -111,11 +121,11 @@ class UsuariosResolver:
         # 5️⃣ Retornar el perfil completo
         return PerfilCompletoUsuario(
             id=usuario.id,
-            nombre=usuario.nombre_completo,
+            nombreCompleto=usuario.nombreCompleto,
             email=usuario.email,
             telefono=usuario.telefono or "",
-            total_citas=total_citas,
-            citas_completadas=citas_completadas,
-            citas_pendientes=citas_pendientes,
-            citas_canceladas=citas_canceladas
+            totalCitas=total_citas,
+            citasCompletadas=citas_completadas,
+            citasPendientes=citas_pendientes,
+            citasCanceladas=citas_canceladas
         )

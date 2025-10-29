@@ -16,13 +16,13 @@ class UsuarioCitasDTO:
 @strawberry.type
 class PerfilCompletoUsuario:
     id: str
-    nombre: str
+    nombreCompleto: str
     email: str
     telefono: str
-    total_citas: int
-    citas_completadas: int
-    citas_pendientes: int
-    citas_canceladas: int
+    totalCitas: int
+    citasCompletadas: int
+    citasPendientes: int
+    citasCanceladas: int
 
 @strawberry.type
 class Usuario:
@@ -31,5 +31,5 @@ class Usuario:
     password: str
     rol: Rol
     telefono: Optional[str] = None
-    creado_en: datetime
-    nombre_completo: str
+    creadoEn: datetime
+    nombreCompleto: str
