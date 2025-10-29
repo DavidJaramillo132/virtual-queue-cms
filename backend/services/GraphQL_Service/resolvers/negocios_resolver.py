@@ -1,30 +1,36 @@
-from typing import List
+from typing import List, Optional, Dict
 from services.http_client import http_client
 from gql_types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
 from gql_types.enums import Estado
 
+
+def _headers_from_token(token: Optional[str]) -> Optional[Dict[str, str]]:
+    return {"Authorization": token} if token else None
+
 class NegociosResolver:
     @staticmethod
-    async def find_all() -> List[Negocio]:
-        """Get all businesses from REST API"""
-        data = await http_client.get("/api/negocios/")
+    async def find_all(token: Optional[str] = None) -> List[Negocio]:
+        """Get all businesses from REST API. Forward token if provided."""
+        headers = _headers_from_token(token)
+        data = await http_client.get("/api/negocios/", headers=headers)
         return [Negocio(**negocio) for negocio in data]
     
     @staticmethod
-    async def find_one(id: str) -> Negocio:
-        """Get a single business by ID"""
-        data = await http_client.get(f"/api/negocios/{id}")
+    async def find_one(id: str, token: Optional[str] = None) -> Negocio:
+        """Get a single business by ID. Forward token if provided."""
+        headers = _headers_from_token(token)
+        data = await http_client.get(f"/api/negocios/{id}", headers=headers)
         return Negocio(**data)
     
     @staticmethod
-    async def dashboard_negocio(negocio_id: str) -> DashboardNegocio:
+    async def dashboard_negocio(negocio_id: str, token: Optional[str] = None) -> DashboardNegocio:
         """Get business dashboard with metrics"""
         from resolvers.servicios_resolver import ServiciosResolver
         from resolvers.citas_resolver import CitasResolver
-        
-        negocio = await NegociosResolver.find_one(negocio_id)
-        servicios = await ServiciosResolver.find_all()
-        citas = await CitasResolver.find_all()
+
+        negocio = await NegociosResolver.find_one(negocio_id, token)
+        servicios = await ServiciosResolver.find_all(token)
+        citas = await CitasResolver.find_all(token)
         
         servicios_negocio = [s for s in servicios if s.negocio_id == negocio_id]
         citas_negocio = [c for c in citas if c.negocio_id == negocio_id]
@@ -41,14 +47,14 @@ class NegociosResolver:
         )
     
     @staticmethod
-    async def resumen_negocio(negocio_id: str) -> ResumenNegocio:
+    async def resumen_negocio(negocio_id: str, token: Optional[str] = None) -> ResumenNegocio:
         """Get business summary"""
         from resolvers.servicios_resolver import ServiciosResolver
         from resolvers.citas_resolver import CitasResolver
-        
-        negocio = await NegociosResolver.find_one(negocio_id)
-        servicios = await ServiciosResolver.find_all()
-        citas = await CitasResolver.find_all()
+
+        negocio = await NegociosResolver.find_one(negocio_id, token)
+        servicios = await ServiciosResolver.find_all(token)
+        citas = await CitasResolver.find_all(token)
         
         servicios_negocio = [s for s in servicios if s.negocio_id == negocio_id]
         citas_negocio = [c for c in citas if c.negocio_id == negocio_id]
