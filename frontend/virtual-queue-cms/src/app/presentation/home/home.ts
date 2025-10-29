@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { BusinessCard } from '../../componets/business-card/business-card';
-import { NegocioServices } from '../../services/negocio-services';
+import { NegocioServices } from '../../services/Rest/negocio-services';
 import { INegocio } from '../../domain/entities';
 
 @Component({

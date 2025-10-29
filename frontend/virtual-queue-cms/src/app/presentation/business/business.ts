@@ -6,7 +6,7 @@ import { IServicio } from '../../domain/entities/IServicio';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faArrowLeft, faClock, faMapPin, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { Appointment } from '../booking/appointment/appointment';
-import { NegocioServices } from '../../services/negocio-services';
+import { NegocioServices } from '../../services/Rest/negocio-services';
 
 @Component({
   selector: 'app-business',

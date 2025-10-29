@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserService } from '../../services/userServices';
+import { UserService } from '../../services/Rest/userServices';
 //import { PerfilService } from '../../services/perfilService';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { IUsuario } from '../../domain/entities';

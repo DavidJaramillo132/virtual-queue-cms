@@ -4,8 +4,8 @@ import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
-import { UserService } from '../../../services/userServices';
-import { NegocioServices } from '../../../services/negocio-services';
+import { UserService } from '../../../services/Rest/userServices';
+import { NegocioServices } from '../../../services/Rest/negocio-services';
 import { switchMap } from 'rxjs';
 import { Business } from './business/business';
 

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { UserService } from '../../services/userServices'; 
+import { UserService } from '../../services/Rest/userServices'; 
 import { IUsuario } from '../../domain/entities';
 
 @Component({

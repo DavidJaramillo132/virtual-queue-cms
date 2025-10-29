@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FilasService } from '../../../services/fila-services';
+import { FilasService } from '../../../services/Rest/fila-services';
 import { CommonModule } from '@angular/common';
 import { ICita } from '../../../domain/entities';
 import { IServicio } from '../../../domain/entities/IServicio';

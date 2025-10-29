@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { INegocio, IServicio } from '../domain/entities';
+import { INegocio, IServicio } from '../../domain/entities';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/internal/Observable';
