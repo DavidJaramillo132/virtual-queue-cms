@@ -1,16 +1,15 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpHeaders, provideHttpClient } from '@angular/common/http';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
-import { InMemoryCache } from '@apollo/client';
-import { graphqlProvider } from './graphql';
+import { ApolloLink, InMemoryCache } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    graphqlProvider,
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(), provideHttpClient(), provideApollo(() => {
@@ -20,6 +19,26 @@ export const appConfig: ApplicationConfig = {
         link: httpLink.create({
           uri: '<%= endpoint %>',
         }),
+        cache: new InMemoryCache(),
+      };
+    }),
+    provideHttpClient(),
+        provideApollo(() => {
+      const httpLink = inject(HttpLink);
+
+      const authLink = setContext(() => {
+        const token = localStorage.getItem('token') ?? '';
+
+        return {
+          headers: new HttpHeaders().set('Authorization', `Bearer ${token}`)
+        };
+      });
+
+      return {
+        link: ApolloLink.from([
+          authLink,
+          httpLink.create({ uri: 'http://localhost:3001/graphql' })
+        ]),
         cache: new InMemoryCache(),
       };
     }),

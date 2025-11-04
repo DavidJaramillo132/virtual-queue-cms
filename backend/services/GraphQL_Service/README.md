@@ -13,6 +13,8 @@ API GraphQL construida con FastAPI y Strawberry GraphQL para gestionar citas, se
 
 \`\`\`bash
 pip install -r requirements.txt
+pip install PyJWT
+
 \`\`\`
 
 O un entorno virtual:

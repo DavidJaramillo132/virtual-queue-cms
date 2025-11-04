@@ -1,15 +1,13 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CitaService } from '../../../services/Rest/cita-services';
+import { ICita } from '../../../domain/entities';
 
-interface Cita {
-  id: number;
-  nombreCliente: string;
-  servicio: string;
-  fecha: string;
-  hora: string;
-  posicionFila: number;
-  estado: 'confirmada' | 'pendiente' | 'en_progreso' | 'completada' | 'cancelada';
+interface CitaExtendida extends ICita {
+  nombreCliente?: string;
+  nombreServicio?: string;
+  posicionFila?: number;
 }
 
 @Component({
@@ -20,60 +18,32 @@ interface Cita {
   styleUrls: ['./citas.css']
 })
 export class CitasComponent implements OnInit {
-  // Filtros
   filtroEstado = signal<string>('todas');
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  successMessage = signal<string>('');
+  citas = signal<CitaExtendida[]>([]);
 
-  // Data - Preparado para conexión a BD
-  citas = signal<Cita[]>([
-    {
-      id: 1,
-      nombreCliente: 'María García',
-      servicio: 'Consulta General',
-      fecha: '2024-01-15',
-      hora: '10:00',
-      posicionFila: 1,
-      estado: 'confirmada'
-    },
-    {
-      id: 2,
-      nombreCliente: 'Juan Pérez',
-      servicio: 'Vacunación',
-      fecha: '2024-01-15',
-      hora: '10:30',
-      posicionFila: 2,
-      estado: 'pendiente'
-    },
-    {
-      id: 3,
-      nombreCliente: 'Ana López',
-      servicio: 'Consulta General',
-      fecha: '2024-01-15',
-      hora: '11:00',
-      posicionFila: 3,
-      estado: 'en_progreso'
-    },
-    {
-      id: 4,
-      nombreCliente: 'Carlos Martínez',
-      servicio: 'Reserva de Mesa',
-      fecha: '2024-01-16',
-      hora: '14:00',
-      posicionFila: 1,
-      estado: 'confirmada'
-    }
-  ]);
+  constructor(private citaService: CitaService) {}
 
   ngOnInit() {
-    // TODO: Aquí se cargará la data desde el servicio
-    // this.cargarCitas();
+    this.cargarCitas();
   }
 
-  // Método preparado para conexión con BD
   cargarCitas() {
-    // TODO: Implementar llamada al servicio
-    // this.citasService.getCitas().subscribe(data => {
-    //   this.citas.set(data);
-    // });
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.citaService.getAllCitas().subscribe({
+      next: (data) => {
+        this.citas.set(data);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message || 'Error al cargar las citas');
+        this.isLoading.set(false);
+        console.error('Error al cargar citas:', error);
+      }
+    });
   }
 
   citasFiltradas() {
@@ -84,37 +54,71 @@ export class CitasComponent implements OnInit {
     return this.citas().filter(c => c.estado === filtro);
   }
 
-  cambiarEstado(cita: Cita, nuevoEstado: 'confirmada' | 'en_progreso' | 'completada' | 'cancelada') {
-    cita.estado = nuevoEstado;
-    // TODO: Actualizar en BD
-    // this.citasService.updateCita(cita).subscribe(...)
-    this.citas.set([...this.citas()]);
+  cambiarEstado(cita: CitaExtendida, nuevoEstado: 'pendiente' | 'atendida' | 'cancelada') {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.citaService.updateEstadoCita(cita.id, nuevoEstado).subscribe({
+      next: (citaActualizada) => {
+        const citasActualizadas = this.citas().map(c => 
+          c.id === cita.id ? { ...c, estado: citaActualizada.estado } : c
+        );
+        this.citas.set(citasActualizadas);
+        this.successMessage.set('Estado actualizado correctamente');
+        this.isLoading.set(false);
+        setTimeout(() => this.successMessage.set(''), 3000);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message || 'Error al actualizar el estado');
+        this.isLoading.set(false);
+        console.error('Error al actualizar estado:', error);
+      }
+    });
   }
 
-  iniciarCita(cita: Cita) {
-    this.cambiarEstado(cita, 'en_progreso');
+  iniciarCita(cita: CitaExtendida) {
+    this.cambiarEstado(cita, 'atendida');
   }
 
-  confirmarCita(cita: Cita) {
-    this.cambiarEstado(cita, 'confirmada');
+  confirmarCita(cita: CitaExtendida) {
+    this.cambiarEstado(cita, 'pendiente');
   }
 
-  completarCita(cita: Cita) {
-    this.cambiarEstado(cita, 'completada');
+  completarCita(cita: CitaExtendida) {
+    this.cambiarEstado(cita, 'atendida');
   }
 
-  cancelarCita(cita: Cita) {
-    if (confirm('¿Estás seguro de cancelar esta cita?')) {
+  cancelarCita(cita: CitaExtendida) {
+    if (confirm('Estás seguro de cancelar esta cita?')) {
       this.cambiarEstado(cita, 'cancelada');
+    }
+  }
+
+  eliminarCita(cita: CitaExtendida) {
+    if (confirm('Estás seguro de eliminar esta cita? Esta acción no se puede deshacer.')) {
+      this.isLoading.set(true);
+      this.errorMessage.set('');
+      this.citaService.deleteCita(cita.id).subscribe({
+        next: () => {
+          const citasActualizadas = this.citas().filter(c => c.id !== cita.id);
+          this.citas.set(citasActualizadas);
+          this.successMessage.set('Cita eliminada correctamente');
+          this.isLoading.set(false);
+          setTimeout(() => this.successMessage.set(''), 3000);
+        },
+        error: (error) => {
+          this.errorMessage.set(error.message || 'Error al eliminar la cita');
+          this.isLoading.set(false);
+          console.error('Error al eliminar cita:', error);
+        }
+      });
     }
   }
 
   getEstadoBadgeClass(estado: string): string {
     const classes: { [key: string]: string } = {
-      'confirmada': 'px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-full',
       'pendiente': 'px-3 py-1 bg-yellow-500 text-white text-xs font-medium rounded-full',
-      'en_progreso': 'px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full',
-      'completada': 'px-3 py-1 bg-gray-500 text-white text-xs font-medium rounded-full',
+      'atendida': 'px-3 py-1 bg-green-500 text-white text-xs font-medium rounded-full',
       'cancelada': 'px-3 py-1 bg-red-500 text-white text-xs font-medium rounded-full'
     };
     return classes[estado] || classes['pendiente'];
@@ -122,17 +126,15 @@ export class CitasComponent implements OnInit {
 
   getEstadoTexto(estado: string): string {
     const textos: { [key: string]: string } = {
-      'confirmada': 'Confirmada',
       'pendiente': 'Pendiente',
-      'en_progreso': 'En Progreso',
-      'completada': 'Completada',
+      'atendida': 'Atendida',
       'cancelada': 'Cancelada'
     };
     return textos[estado] || estado;
   }
 
-  formatearFecha(fecha: string): string {
-    const date = new Date(fecha + 'T00:00:00');
+  formatearFecha(fecha: Date | string): string {
+    const date = typeof fecha === 'string' ? new Date(fecha) : fecha;
     return date.toLocaleDateString('es-ES', { 
       year: 'numeric', 
       month: 'long', 
