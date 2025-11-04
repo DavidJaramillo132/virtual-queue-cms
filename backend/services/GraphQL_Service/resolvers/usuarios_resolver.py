@@ -1,6 +1,7 @@
 from typing import List, Optional, Dict
 
 from numpy import convolve
+from services.decode import decode_jwt
 from services.http_client import http_client
 from gql_types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario, CitaInfo
 from gql_types.enums import Estado
@@ -14,10 +15,9 @@ def _headers_from_token(token: Optional[str]) -> Optional[Dict[str, str]]:
 
 class UsuariosResolver:
     @staticmethod
-    async def find_all(token: Optional[str] = None) -> List[Usuario]:
-        """Get all usuarios from REST API, sending Authorization header if token provided"""
-        headers = _headers_from_token(token)
-        data = await http_client.get("/api/usuarios/", headers=headers)
+    async def find_all() -> List[Usuario]:
+        """Get all usuarios from REST API"""
+        data = await http_client.get("/api/usuarios/")
         return [Usuario(**user) for user in data]
 
     @staticmethod
@@ -26,7 +26,8 @@ class UsuariosResolver:
         headers = _headers_from_token(token)
         data = await http_client.get(f"/api/usuarios/{id}", headers=headers)
         print(data)
-        return Usuario(**data)
+        return Usuario(**data)      
+    
     @staticmethod
     async def find_one_by_email(email: str, token: Optional[str] = None) -> Usuario:
         """Get a single user by email, sending Authorization header if token provided"""
@@ -96,29 +97,35 @@ class UsuariosResolver:
         return result
 
     @staticmethod
-    async def perfil_completo_usuario(info: Info, usuario_id: str) -> PerfilCompletoUsuario:
+    async def perfil_completo_usuario(info: Info) -> PerfilCompletoUsuario:
         """Obtiene el perfil completo de un usuario con sus citas agregadas."""
         from resolvers.citas_resolver import CitasResolver
 
-        # 1️⃣ Obtener el token del header HTTP
+        #Obtener el token del header HTTP
         token = info.context["request"].headers.get("authorization")
         if not token:
             raise Exception("Token no proporcionado en la cabecera Authorization")
 
-        # 2️⃣ Llamar a los resolvers que hacen peticiones HTTP, reenviando el token
-        usuario = await UsuariosResolver.find_one_by_email(usuario_id, token)
+        data = decode_jwt(token)
+
+        # Usar el email del token en lugar del ID para buscar al usuario
+        # porque el REST API espera email como identificador
+        usuario_email = data.get("email") or data.get("sub") or data.get("id")
+        
+        # Llamar a los resolvers que hacen peticiones HTTP, reenviando el token
+        usuario = await UsuariosResolver.find_one_by_email(usuario_email, token)
         todas_citas = await CitasResolver.find_all(token)
 
-        # 3️⃣ Filtrar citas del usuario
+        # Filtrar citas del usuario
         citas_usuario = [c for c in todas_citas if c.usuario_id == usuario.id]
 
-        # 4️⃣ Calcular estadísticas
+        #  Calcular estadísticas
         total_citas = len(citas_usuario)
         citas_completadas = len([c for c in citas_usuario if c.estado == Estado.ATENDIDA])
         citas_pendientes = len([c for c in citas_usuario if c.estado == Estado.PENDIENTE])
         citas_canceladas = len([c for c in citas_usuario if c.estado == Estado.CANCELADA])
 
-        # 5️⃣ Retornar el perfil completo
+        # Retornar el perfil completo
         return PerfilCompletoUsuario(
             id=usuario.id,
             nombreCompleto=usuario.nombreCompleto,

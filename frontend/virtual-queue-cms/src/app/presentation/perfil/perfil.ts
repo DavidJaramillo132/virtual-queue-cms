@@ -22,12 +22,15 @@ export class PerfilComponent implements OnInit {
   profileCompleteness: number = 0;
   isSaving: boolean = false;
   saveMessage: string = '';
-  stats = [
-    { totalCitas: 5, citasCompletadas: 5, citasPendientes: 0, citasCanceladas: 0 },
-    { totalCitas: 20, citasCompletadas: 15, citasPendientes: 5, citasCanceladas: 0 },
-    { totalCitas: 1500, citasCompletadas: 1000, citasPendientes: 500, citasCanceladas: 0 }
-  ];
-  perfilGraphQL: [] = [];
+  perfilGraphQL: any[] = [];
+  
+  // Datos del resumen de citas desde GraphQL
+  resumenCitas = {
+    totalCitas: 0,
+    citasCompletadas: 0,
+    citasPendientes: 0,
+    citasCanceladas: 0
+  };
 
   constructor(
     private userService: UserService,
@@ -42,15 +45,31 @@ export class PerfilComponent implements OnInit {
 
   }
 
-  loadUserProfileGraphQL(){
-    const userStr = localStorage.getItem('currentUser');
-    const user = userStr ? JSON.parse(userStr) : null;
-    this.userGraphQl.perfil_completo_usuario(user?.email)
-    .subscribe(({ data }) =>  {
-      this.perfilGraphQL = data.perfil_completo_usuario;
-    })
-
+  loadUserProfileGraphQL() {
+    this.userGraphQl.perfil_completo_usuario()
+      .subscribe({
+        next: (res) => {
+          this.perfilGraphQL = res?.data?.perfilCompletoUsuario ? [res.data.perfilCompletoUsuario] : [];
+          
+          // Extraer los datos del resumen de citas
+          if (res?.data?.perfilCompletoUsuario) {
+            this.resumenCitas = {
+              totalCitas: res.data.perfilCompletoUsuario.totalCitas || 0,
+              citasCompletadas: res.data.perfilCompletoUsuario.citasCompletadas || 0,
+              citasPendientes: res.data.perfilCompletoUsuario.citasPendientes || 0,
+              citasCanceladas: res.data.perfilCompletoUsuario.citasCanceladas || 0
+            };
+          }
+        },
+        error: () => {
+          this.perfilGraphQL = [];
+          // Mantener valores en 0 en caso de error
+        }
+      });
+    
+    console.log("informacion del graphQL", this.perfilGraphQL);
   }
+
 
   loadUserProfile(): void {
     const currentUser = this.userService.currentUserValue;
@@ -64,7 +83,7 @@ export class PerfilComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/home']);
   }
-  
+
   getUser(): IUsuario | null {
     return this.userService.currentUserValue;
   }
@@ -85,7 +104,7 @@ export class PerfilComponent implements OnInit {
 
   guardarCambios(): void {
     const currentUser = this.getUser();
-    
+
     if (!currentUser || !currentUser.id) {
       this.saveMessage = 'Error: No se pudo identificar el usuario.';
       return;
@@ -107,7 +126,7 @@ export class PerfilComponent implements OnInit {
         this.isEditMode = false;
         this.isSaving = false;
         this.saveMessage = 'Perfil actualizado con éxito.';
-        
+
         // Limpiar mensaje después de 3 segundos
         setTimeout(() => {
           this.saveMessage = '';

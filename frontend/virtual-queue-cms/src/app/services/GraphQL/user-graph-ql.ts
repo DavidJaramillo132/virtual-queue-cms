@@ -3,6 +3,16 @@ import { Apollo, gql } from 'apollo-angular';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+interface PerfilCompletoResponse {
+  perfilCompletoUsuario: {
+    totalCitas: number;
+    citasCompletadas: number;
+    citasPendientes: number;
+    citasCanceladas: number;
+  };
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -13,23 +23,18 @@ export class UserGraphQl {
 
   constructor(private apollo: Apollo) { }
 
-  perfil_completo_usuario(correo: string): Observable<any> {
-    return this.apollo.watchQuery({
+  perfil_completo_usuario() {
+    return this.apollo.watchQuery<PerfilCompletoResponse>({
       query: gql`
-      query PerfilCompletoUsuario($correo: String!) {
-        perfilCompletoUsuario(usuarioId: $correo) {
+      query {
+        perfilCompletoUsuario {
           totalCitas
           citasCompletadas
           citasPendientes
           citasCanceladas
         }
       }
-    `,
-      variables: {
-        correo: correo
-      }
-    }).valueChanges; 
+    `
+    }).valueChanges;
   }
-
-
 }

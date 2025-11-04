@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCalendar, faUsers, faClock, faChartLine } from '@fortawesome/free-solid-svg-icons';
+import { faCalendar, faUsers, faClock, faChartLine, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 interface EstadisticasData {
   totalCitas: number;
@@ -26,6 +26,8 @@ export class EstadisticasComponent implements OnInit {
   faUsers = faUsers;
   faClock = faClock;
   faChartLine = faChartLine;
+  faCheck = faCheck;
+  faTimes = faTimes;
 
   // Data signals - Preparado para conexión a BD
   estadisticas = signal<EstadisticasData>({

@@ -40,7 +40,7 @@
               </span>
             </div>
 
-            <p class="text-sm text-gray-600 mb-3">{{ cita.servicio }}</p>
+            <p class="text-sm text-gray-600 mb-3">{{ cita.nombreServicio || 'Servicio no especificado' }}</p>
 
             <div class="grid grid-cols-3 gap-4 text-sm">
               <div>
@@ -49,7 +49,7 @@
               </div>
               <div>
                 <span class="text-gray-500">Hora:</span>
-                <p class="font-medium text-gray-900">{{ cita.hora }}</p>
+                <p class="font-medium text-gray-900">{{ cita.hora_inicio }}</p>
               </div>
               <div>
                 <span class="text-gray-500">Posición en fila:</span>
@@ -60,12 +60,12 @@
 
           <!-- Botones de acción según el estado -->
           <div class="flex gap-2 ml-6">
-            @if (cita.estado === 'confirmada') {
+            @if (cita.estado === 'pendiente') {
               <button 
                 (click)="iniciarCita(cita)"
                 class="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
               >
-                Iniciar
+                Iniciar Atención
               </button>
               <button 
                 (click)="cancelarCita(cita)"
@@ -75,39 +75,15 @@
               </button>
             }
 
-            @if (cita.estado === 'pendiente') {
-              <button 
-                (click)="confirmarCita(cita)"
-                class="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                Confirmar
-              </button>
-              <button 
-                (click)="cancelarCita(cita)"
-                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-red-50 hover:text-red-600 transition-colors"
-              >
-                Cancelar
-              </button>
+            @if (cita.estado === 'atendida') {
+              <div class="px-4 py-2 text-sm text-green-600 font-medium">
+                ✓ Atendida
+              </div>
             }
 
-            @if (cita.estado === 'en_progreso') {
-              <button 
-                (click)="completarCita(cita)"
-                class="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                Completar
-              </button>
-              <button 
-                (click)="cancelarCita(cita)"
-                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-red-50 hover:text-red-600 transition-colors"
-              >
-                Cancelar
-              </button>
-            }
-
-            @if (cita.estado === 'completada' || cita.estado === 'cancelada') {
-              <div class="px-4 py-2 text-sm text-gray-500 italic">
-                {{ cita.estado === 'completada' ? 'Finalizada' : 'Cancelada' }}
+            @if (cita.estado === 'cancelada') {
+              <div class="px-4 py-2 text-sm text-red-600 font-medium">
+                ✗ Cancelada
               </div>
             }
           </div>

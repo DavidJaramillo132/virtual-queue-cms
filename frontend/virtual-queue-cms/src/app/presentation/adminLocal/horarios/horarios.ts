@@ -1,12 +1,16 @@
-import { Component, OnInit, signal } from '@angular/core';
+﻿import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HorarioService } from '../../../services/Rest/horario-services';
+import { IHorarioAtencion } from '../../../domain/entities';
 
 interface DiaHorario {
   dia: string;
+  diaSemana: number;
   activo: boolean;
   horaInicio: string;
   horaFin: string;
+  id?: string;
 }
 
 @Component({
@@ -17,44 +21,125 @@ interface DiaHorario {
   styleUrls: ['./horarios.css']
 })
 export class HorariosComponent implements OnInit {
-  // Data - Preparado para conexión a BD
   horarios = signal<DiaHorario[]>([
-    { dia: 'Domingo', activo: false, horaInicio: '09:00', horaFin: '18:00' },
-    { dia: 'Lunes', activo: true, horaInicio: '09:00', horaFin: '18:00' },
-    { dia: 'Martes', activo: true, horaInicio: '09:00', horaFin: '18:00' },
-    { dia: 'Miércoles', activo: true, horaInicio: '09:00', horaFin: '18:00' },
-    { dia: 'Jueves', activo: true, horaInicio: '09:00', horaFin: '18:00' },
-    { dia: 'Viernes', activo: true, horaInicio: '09:00', horaFin: '18:00' },
-    { dia: 'Sábado', activo: false, horaInicio: '09:00', horaFin: '18:00' }
+    { dia: 'Domingo', diaSemana: 0, activo: false, horaInicio: '09:00', horaFin: '18:00' },
+    { dia: 'Lunes', diaSemana: 1, activo: true, horaInicio: '09:00', horaFin: '18:00' },
+    { dia: 'Martes', diaSemana: 2, activo: true, horaInicio: '09:00', horaFin: '18:00' },
+    { dia: 'Miércoles', diaSemana: 3, activo: true, horaInicio: '09:00', horaFin: '18:00' },
+    { dia: 'Jueves', diaSemana: 4, activo: true, horaInicio: '09:00', horaFin: '18:00' },
+    { dia: 'Viernes', diaSemana: 5, activo: true, horaInicio: '09:00', horaFin: '18:00' },
+    { dia: 'Sábado', diaSemana: 6, activo: false, horaInicio: '09:00', horaFin: '18:00' }
   ]);
 
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  successMessage = signal<string>('');
+  estacionId = signal<string>('');
+
+  constructor(private horarioService: HorarioService) {}
+
   ngOnInit() {
-    // TODO: Aquí se cargará la data desde el servicio
-    // this.cargarHorarios();
+    this.cargarHorarios();
   }
 
-  // Método preparado para conexión con BD
   cargarHorarios() {
-    // TODO: Implementar llamada al servicio
-    // this.horariosService.getHorarios().subscribe(data => {
-    //   this.horarios.set(data);
-    // });
+    const estacionIdValue = this.estacionId();
+    if (!estacionIdValue) {
+      console.warn('No hay ID de estación configurado');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.horarioService.getHorariosByEstacion(estacionIdValue).subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          const horariosMap = new Map<number, IHorarioAtencion>();
+          data.forEach(h => {
+            if (h.diaSemana !== undefined) {
+              horariosMap.set(parseInt(h.diaSemana), h);
+            }
+          });
+
+          const horariosActualizados = this.horarios().map(dia => {
+            const horarioBD = horariosMap.get(dia.diaSemana);
+            if (horarioBD) {
+              return {
+                ...dia,
+                id: horarioBD.id,
+                activo: true,
+                horaInicio: horarioBD.horaInicio,
+                horaFin: horarioBD.horaFin
+              };
+            }
+            return dia;
+          });
+          this.horarios.set(horariosActualizados);
+        }
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message || 'Error al cargar los horarios');
+        this.isLoading.set(false);
+        console.error('Error al cargar horarios:', error);
+      }
+    });
   }
 
   toggleDia(dia: DiaHorario) {
     dia.activo = !dia.activo;
-    // Actualizar señal para disparar la detección de cambios
     this.horarios.set([...this.horarios()]);
   }
 
   guardarHorarios() {
-    // TODO: Implementar llamada al servicio para guardar
-    // this.horariosService.updateHorarios(this.horarios()).subscribe(
-    //   () => {
-    //     alert('Horarios guardados correctamente');
-    //   }
-    // );
-    alert('Horarios guardados correctamente');
+    const estacionIdValue = this.estacionId();
+    if (!estacionIdValue) {
+      this.errorMessage.set('No se ha configurado el ID de la estación');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    const horariosParaGuardar: Partial<IHorarioAtencion>[] = this.horarios()
+      .filter(h => h.activo)
+      .map(h => ({
+        id: h.id,
+        idEstacion: estacionIdValue,
+        diaSemana: h.diaSemana.toString(),
+        horaInicio: h.horaInicio,
+        horaFin: h.horaFin
+      }));
+
+    this.horarioService.updateMultipleHorarios(horariosParaGuardar).subscribe({
+      next: (horariosActualizados) => {
+        const horariosMap = new Map<number, IHorarioAtencion>();
+        horariosActualizados.forEach(h => {
+          if (h.diaSemana) {
+            horariosMap.set(parseInt(h.diaSemana), h);
+          }
+        });
+
+        const horariosConIds = this.horarios().map(dia => {
+          const horarioBD = horariosMap.get(dia.diaSemana);
+          if (horarioBD) {
+            return { ...dia, id: horarioBD.id };
+          }
+          return dia;
+        });
+
+        this.horarios.set(horariosConIds);
+        this.successMessage.set('Horarios guardados correctamente');
+        this.isLoading.set(false);
+        setTimeout(() => this.successMessage.set(''), 3000);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message || 'Error al guardar los horarios');
+        this.isLoading.set(false);
+        console.error('Error al guardar horarios:', error);
+      }
+    });
   }
 
   convertTo12Hour(time24: string): string {

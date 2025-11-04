@@ -44,9 +44,9 @@ class Query:
         return await UsuariosResolver.usuarios_con_citas_atendidas(token)
     
     @strawberry.field(description="Perfil completo del usuario")
-    async def perfil_completo_usuario(self, info: Info, usuario_id: str) -> PerfilCompletoUsuario:
+    async def perfil_completo_usuario(self, info: Info) -> PerfilCompletoUsuario:
         # This resolver needs access to request headers, so forward the info
-        return await UsuariosResolver.perfil_completo_usuario(info, usuario_id)
+        return await UsuariosResolver.perfil_completo_usuario(info)
     
     # Citas queries
     @strawberry.field(description="Obtener todas las citas")
