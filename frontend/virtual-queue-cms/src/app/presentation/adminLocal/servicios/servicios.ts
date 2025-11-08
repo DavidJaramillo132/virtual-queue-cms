@@ -5,6 +5,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPencil, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { ServicioServicios } from '../../../services/Rest/servicio-servicios';
 import { IServicio } from '../../../domain/entities';
+import { UserService } from '../../../services/Rest/userServices';
 
 interface ServicioExtendido extends IServicio {
   activo?: boolean;
@@ -31,8 +32,19 @@ export class ServiciosComponent implements OnInit {
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
   servicioActual: Partial<ServicioExtendido> = this.getEmptyServicio();
+  
+  private negocioId: string = '';
 
-  constructor(private servicioService: ServicioServicios) {}
+  constructor(
+    private servicioService: ServicioServicios,
+    private userService: UserService
+  ) {
+    // Obtener el negocio_id del usuario autenticado
+    const currentUser = this.userService.currentUserValue;
+    if (currentUser && currentUser.negocio_id) {
+      this.negocioId = currentUser.negocio_id;
+    }
+  }
 
   ngOnInit() {
     this.cargarServicios();
@@ -41,7 +53,16 @@ export class ServiciosComponent implements OnInit {
   cargarServicios() {
     this.isLoading.set(true);
     this.errorMessage.set('');
-    this.servicioService.getAllServicios().subscribe({
+    
+    // Validar que tengamos negocio_id
+    if (!this.negocioId) {
+      this.errorMessage.set('Error: No se encontró el ID del negocio. Por favor, inicie sesión nuevamente.');
+      this.isLoading.set(false);
+      return;
+    }
+    
+    // Cargar solo los servicios de este negocio
+    this.servicioService.getServiciosByNegocio(this.negocioId).subscribe({
       next: (data) => {
         const serviciosExtendidos: ServicioExtendido[] = data.map(s => ({
           ...s,
@@ -69,7 +90,7 @@ export class ServiciosComponent implements OnInit {
       activo: true,
       precio: 0,
       precio_centavos: 0,
-      negocio_id: ''
+      negocio_id: this.negocioId
     };
   }
 
@@ -97,12 +118,19 @@ export class ServiciosComponent implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
+    // Validar que tengamos negocio_id
+    if (!this.negocioId) {
+      this.errorMessage.set('Error: No se encontró el ID del negocio. Por favor, inicie sesión nuevamente.');
+      this.isLoading.set(false);
+      return;
+    }
+
     const servicioParaGuardar: Partial<IServicio> = {
       nombre: this.servicioActual.nombre,
       descripcion: this.servicioActual.descripcion,
       duracion_minutos: this.servicioActual.duracion || 30,
       precio_centavos: (this.servicioActual.precio || 0) * 100, // Convertir a centavos
-      negocio_id: this.servicioActual.negocio_id || ''
+      negocio_id: this.negocioId
     };
 
     if (this.isEditing() && this.servicioActual.id) {

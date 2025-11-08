@@ -32,6 +32,9 @@ export class UsuarioRepo {
     }
 
     async getByEmail(email: string): Promise<Usuario | null> {
-        return this.repo.findOneBy({ email });
+        return this.repo.findOne({ 
+            where: { email },
+            relations: ['negociosAdministrados']
+        });
     }
 }

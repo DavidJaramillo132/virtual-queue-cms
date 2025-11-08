@@ -22,7 +22,7 @@ export class NegocioServices {
   }
 
   getServiciosByNegocio(negocioId: string): Observable<IServicio[]> {
-    return this.http.get(`http://localhost:3000/api/servicios?negocioId=${negocioId}`) as Observable<IServicio[]>;
+    return this.http.get(`http://localhost:3000/api/servicios?negocio_id=${negocioId}`) as Observable<IServicio[]>;
   }
 
   // Crear un nuevo negocio
