@@ -4,22 +4,42 @@
     <p class="text-sm text-gray-600 mt-1">Actualiza la información de tu negocio</p>
   </div>
 
-  <div class="space-y-6">
-    <!-- Nombre del Negocio -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Nombre del Negocio
-      </label>
-      @if (isEditing()) {
-        <input 
-          type="text" 
-          [(ngModel)]="negocioTemp.nombre"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-        />
-      } @else {
-        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().nombre }}</p>
-      }
+  <!-- Mensajes de estado -->
+  @if (isLoading()) {
+    <div class="mb-4 p-4 bg-blue-50 text-blue-700 rounded-lg">
+      Cargando información...
     </div>
+  }
+  
+  @if (errorMessage()) {
+    <div class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">
+      {{ errorMessage() }}
+    </div>
+  }
+  
+  @if (successMessage()) {
+    <div class="mb-4 p-4 bg-green-50 text-green-700 rounded-lg">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (negocio()) {
+    <div class="space-y-6">
+      <!-- Nombre del Negocio -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Nombre del Negocio
+        </label>
+        @if (isEditing()) {
+          <input 
+            type="text" 
+            [(ngModel)]="negocioTemp.nombre"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+          />
+        } @else {
+          <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio()?.nombre }}</p>
+        }
+      </div>
 
     <!-- Categoría -->
     <div>
@@ -38,7 +58,7 @@
           <option value="Otro">Otro</option>
         </select>
       } @else {
-        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().categoria }}</p>
+        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio()?.categoria }}</p>
       }
     </div>
 
@@ -54,7 +74,7 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
         ></textarea>
       } @else {
-        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().descripcion }}</p>
+        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio()?.descripcion }}</p>
       }
     </div>
 
@@ -70,11 +90,11 @@
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
         />
       } @else {
-        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().direccion }}</p>
+        <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio()?.direccion }}</p>
       }
     </div>
 
-    <!-- Teléfono y Email en dos columnas -->
+    <!-- Teléfono y Correo en dos columnas -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Teléfono -->
       <div>
@@ -88,23 +108,23 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
           />
         } @else {
-          <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().telefono }}</p>
+          <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio()?.telefono }}</p>
         }
       </div>
 
-      <!-- Email -->
+      <!-- Correo -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">
-          Email
+          Correo
         </label>
         @if (isEditing()) {
           <input 
             type="email" 
-            [(ngModel)]="negocioTemp.email"
+            [(ngModel)]="negocioTemp.correo"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
           />
         } @else {
-          <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio().email }}</p>
+          <p class="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{{ negocio()?.correo }}</p>
         }
       </div>
     </div>
@@ -115,12 +135,14 @@
         <button 
           (click)="guardarCambios()"
           class="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+          [disabled]="isLoading()"
         >
-          Guardar Cambios
+          {{ isLoading() ? 'Guardando...' : 'Guardar Cambios' }}
         </button>
         <button 
           (click)="toggleEdit()"
           class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+          [disabled]="isLoading()"
         >
           Cancelar
         </button>
@@ -128,10 +150,12 @@
         <button 
           (click)="toggleEdit()"
           class="px-6 py-3 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+          [disabled]="isLoading()"
         >
           Editar Información
         </button>
       }
     </div>
   </div>
+  }
 </div>
