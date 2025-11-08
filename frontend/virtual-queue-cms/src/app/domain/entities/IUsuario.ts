@@ -6,4 +6,5 @@ export interface IUsuario {
   telefono?: string;
   nombre_completo: string;
   creadoEn?: Date;
+  negocio_id?: string; // ID del negocio si el usuario es de tipo 'negocio'
 }

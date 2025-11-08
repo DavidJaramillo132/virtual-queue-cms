@@ -38,6 +38,12 @@ export class AuthController {
                 { expiresIn: '24h' }, 
             );
 
+            // Obtener negocio_id si el usuario es de tipo negocio
+            let negocio_id = null;
+            if (usuario.rol === 'negocio' && usuario.negociosAdministrados && usuario.negociosAdministrados.length > 0) {
+                negocio_id = usuario.negociosAdministrados[0].id;
+            }
+
             res.json({
                 successful: true,
                 message: 'Login exitoso',
@@ -46,8 +52,9 @@ export class AuthController {
                     id: usuario.id, 
                     email: usuario.email, 
                     rol: usuario.rol,
-                    nombre_completo: usuario.nombre_completo,
-                    telefono: usuario.telefono
+                    nombreCompleto: usuario.nombre_completo,
+                    telefono: usuario.telefono,
+                    negocio_id: negocio_id
                 }
             });
 

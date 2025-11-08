@@ -74,10 +74,10 @@ export class UserService {
   // Register
   registerUsuario(usuario: any): Observable<any> {
     console.log('Registrando usuario con datos:', usuario);
-    // Asegurar que el campo sea nombre_completo (no nombreCompleto)
-    if (usuario.nombreCompleto && !usuario.nombre_completo) {
-      usuario.nombre_completo = usuario.nombreCompleto;
-      delete usuario.nombreCompleto;
+    // Asegurar que el campo sea nombre_completo (no nombre_completo)
+    if (usuario.nombre_completo && !usuario.nombre_completo) {
+      usuario.nombre_completo = usuario.nombre_completo;
+      delete usuario.nombre_completo;
     }
     return this.http.post(`${this.apiUrl}/usuarios`, usuario);
   }
@@ -124,6 +124,6 @@ export class UserService {
     );
   }
 
-  // GraphQL
+
   
 }

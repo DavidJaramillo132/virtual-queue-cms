@@ -18,6 +18,16 @@ export class ServicioController {
 
   async getAll(req: Request, res: Response): Promise<void> {
     try {
+      const { negocio_id } = req.query;
+      
+      // Si se proporciona negocio_id, filtrar por ese negocio
+      if (negocio_id && typeof negocio_id === 'string') {
+        const items = await servicioRepo.getByNegocioId(negocio_id);
+        res.json(items);
+        return;
+      }
+      
+      // Si no, devolver todos
       const items = await servicioRepo.getAll();
       res.json(items);
     } catch (error) {

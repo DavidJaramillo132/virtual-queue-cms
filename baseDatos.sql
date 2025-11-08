@@ -127,3 +127,4 @@ ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_negocio" FOREIGN KEY ("negocio_id")
 ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_estacion" FOREIGN KEY ("estacion_id") REFERENCES "estaciones" ("id") ON DELETE SET NULL;
 
 ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_servicio" FOREIGN KEY ("servicio_id") REFERENCES "servicios" ("id") ON DELETE RESTRICT;
+
