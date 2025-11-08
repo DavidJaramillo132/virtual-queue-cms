@@ -1,6 +1,8 @@
 export interface IEstacion {
   id: string;
-  idNegocio: string;
+  negocio_id: string;
   nombre: string;
-  estado: 'activo' | 'inactivo';
+  tipo?: string;
+  estado: 'activa' | 'inactiva';
+  creadoEn?: Date;
 }

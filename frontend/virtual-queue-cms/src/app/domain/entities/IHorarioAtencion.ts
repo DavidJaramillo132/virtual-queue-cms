@@ -1,7 +1,8 @@
 export interface IHorarioAtencion {
   id: string;
-  idEstacion: string;
-  diaSemana: string;
-  horaInicio: string;
-  horaFin: string;
+  estacion_id: string;
+  dia_semana: number; // 0-6 (Domingo a Sábado)
+  hora_inicio: string;
+  hora_fin: string;
+  creadoEn?: Date;
 }

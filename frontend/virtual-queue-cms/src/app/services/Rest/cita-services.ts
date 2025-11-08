@@ -42,10 +42,19 @@ export class CitaService {
   }
 
   /**
-   * Obtiene citas por usuario_id
+   * Obtiene citas por cliente_id (usuario)
    */
-  getCitasByUsuario(usuarioId: string): Observable<ICita[]> {
-    return this.http.get<ICita[]>(`${this.apiUrl}?usuario_id=${usuarioId}`).pipe(
+  getCitasByCliente(clienteId: string): Observable<ICita[]> {
+    return this.http.get<ICita[]>(`${this.apiUrl}?cliente_id=${clienteId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene citas por negocio_id
+   */
+  getCitasByNegocio(negocioId: string): Observable<ICita[]> {
+    return this.http.get<ICita[]>(`${this.apiUrl}?negocio_id=${negocioId}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -55,6 +64,15 @@ export class CitaService {
    */
   getCitasByServicio(servicioId: string): Observable<ICita[]> {
     return this.http.get<ICita[]>(`${this.apiUrl}?servicio_id=${servicioId}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene citas por estacion_id
+   */
+  getCitasByEstacion(estacionId: string): Observable<ICita[]> {
+    return this.http.get<ICita[]>(`${this.apiUrl}?estacion_id=${estacionId}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -71,9 +89,16 @@ export class CitaService {
 
   /**
    * Crea una nueva cita
+   * Nota: cliente_id, negocio_id y servicio_id son obligatorios
    */
   createCita(cita: Partial<ICita>): Observable<ICita> {
     const headers = this.getAuthHeaders();
+    
+    // Validar campos obligatorios
+    if (!cita.cliente_id || !cita.negocio_id || !cita.servicio_id) {
+      return throwError(() => new Error('cliente_id, negocio_id y servicio_id son obligatorios'));
+    }
+    
     return this.http.post<ICita>(this.apiUrl, cita, { headers }).pipe(
       catchError(this.handleError)
     );

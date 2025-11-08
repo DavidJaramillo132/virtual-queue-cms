@@ -8,7 +8,7 @@ import { IHorarioAtencion } from '../../domain/entities';
   providedIn: 'root'
 })
 export class HorarioService {
-  private apiUrl = 'http://localhost:3000/api/horarios-atencion';
+  private apiUrl = 'http://localhost:3000/api/horarios';
 
   constructor(private http: HttpClient) {}
 
