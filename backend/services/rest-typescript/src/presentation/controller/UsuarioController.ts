@@ -8,12 +8,12 @@ const usuarioRepo = new UsuarioRepo();
 export class UsuarioController {
     async createUsuario(req: Request, res: Response): Promise<void>{
         try {
-            const { nombreCompleto, email, password, rol, telefono } = req.body;
+            const { nombre_completo, email, password, rol, telefono } = req.body;
 
             // Validación de campos requeridos
-            if (!nombreCompleto || !email || !password || !rol) {
+            if (!nombre_completo || !email || !password || !rol) {
                 res.status(400).json({ 
-                    message: 'Todos los campos son requeridos: nombreCompleto, email, password, rol' 
+                    message: 'Todos los campos son requeridos: nombre_completo, email, password, rol' 
                 });
                 return;
             }
@@ -30,7 +30,7 @@ export class UsuarioController {
             console.log("Hashed password:", hashedPassword);
             // Crear usuario con contraseña encriptada
             const usuarioData: Partial<Usuario> = {
-                nombreCompleto,
+                nombre_completo,
                 email,
                 password: hashedPassword,
                 rol,

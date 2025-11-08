@@ -9,9 +9,9 @@ export class CitaController {
     try {
       const data: Partial<Cita> = req.body;
       
-      // Obtener usuario_id del token (req.user viene del middleware de autenticación)
+      // Obtener cliente_id del token (req.user viene del middleware de autenticación)
       if (req.user && req.user.id) {
-        data.usuario_id = req.user.id;
+        data.cliente_id = req.user.id;
       }
       
       // Log para debug
@@ -33,8 +33,13 @@ export class CitaController {
         return;
       }
       
-      if (!data.usuario_id) {
-        res.status(400).json({ error: 'El campo "usuario_id" es requerido' });
+      if (!data.cliente_id) {
+        res.status(400).json({ error: 'El campo "cliente_id" es requerido' });
+        return;
+      }
+      
+      if (!data.negocio_id) {
+        res.status(400).json({ error: 'El campo "negocio_id" es requerido' });
         return;
       }
       

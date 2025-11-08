@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 
-import { Usuario, Negocio, Estacion, HorarioAtencion, Servicio, Cita, Fila, AdminSistema } from '../entities/index';
+import { Usuario, Negocio, Estacion, HorarioAtencion, Servicio, Cita, AdminSistema } from '../entities/index';
 
 
 
@@ -15,8 +15,8 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  synchronize: true, // Solo en desarrollo
+  synchronize: false, // ⚠️ IMPORTANTE: Cambiado a false para no sobrescribir tu base de datos
   ssl: { rejectUnauthorized: false }, // Requerido por Supabase
   logging: false,
-  entities: [Usuario, Negocio, Estacion, HorarioAtencion, Servicio, Cita, Fila, AdminSistema],
+  entities: [Usuario, Negocio, Estacion, HorarioAtencion, Servicio, Cita, AdminSistema],
 });

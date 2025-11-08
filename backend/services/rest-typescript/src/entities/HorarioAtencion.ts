@@ -6,19 +6,19 @@ export class HorarioAtencion {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column("uuid", { nullable: true })
-  estacion_id?: string;
+  @Column("uuid", { nullable: false })
+  estacion_id!: string;
 
   @Column({ 
-    type: "int",
-    nullable: true
+    type: "smallint",
+    nullable: false
   })
-  dia_semana?: number; // 0 (Domingo) a 6 (Sábado)
+  dia_semana!: number; // 0 (Domingo) a 6 (Sábado)
 
-  @Column({ type: "time" })
+  @Column({ type: "time", nullable: false })
   hora_inicio!: string;
 
-  @Column({ type: "time" })
+  @Column({ type: "time", nullable: false })
   hora_fin!: string;
 
   @CreateDateColumn({ name: "creado_en" })
@@ -26,9 +26,8 @@ export class HorarioAtencion {
 
   // Relaciones
   @ManyToOne(() => Estacion, (estacion) => estacion.horarios, {
-    nullable: true,
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "estacion_id" })
-  estacion?: Estacion;
+  estacion!: Estacion;
 }

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColum
 import { Estacion } from "./Estacion";
 import { Usuario } from "./Usuario";
 import { Servicio } from "./Servicio";
+import { Cita } from "./Cita";
 
 @Entity({ name: "negocios" })
 export class Negocio {
@@ -20,20 +21,23 @@ export class Negocio {
   @Column({ type: "text", nullable: true })
   descripcion?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   telefono?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   correo?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
+  direccion?: string;
+
+  @Column({ type: 'varchar', nullable: true })
   imagen_url?: string;
 
-  @Column({ default: true })
+  @Column({ type: 'boolean', nullable: false, default: true })
   estado!: boolean;
 
-  @Column({ nullable: true })
-  hora_atencion?: string;
+  @Column({ type: 'varchar', nullable: true })
+  horario_general?: string;
 
   @CreateDateColumn({ name: "creado_en" })
   creadoEn!: Date;
@@ -55,4 +59,7 @@ export class Negocio {
     cascade: true,
   })
   servicios!: Servicio[];
+
+  @OneToMany(() => Cita, (cita) => cita.negocio)
+  citas!: Cita[];
 }

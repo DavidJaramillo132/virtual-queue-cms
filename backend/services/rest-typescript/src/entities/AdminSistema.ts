@@ -6,8 +6,8 @@ export class AdminSistema {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column("uuid", { nullable: true })
-  usuario_id?: string;
+  @Column("uuid", { unique: true, nullable: false })
+  usuario_id!: string;
 
   @Column({ type: 'varchar', nullable: false, default: '' })
   nombre!: string;
@@ -15,17 +15,13 @@ export class AdminSistema {
   @Column({ type: 'varchar', nullable: false, default: '' })
   apellidos!: string;
 
-  @Column({ unique: true, type: 'varchar', nullable: false, default: '' })
-  email!: string;
-
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   telefono?: string;
 
   // Relación con Usuario
   @ManyToOne(() => Usuario, (usuario) => usuario.adminSistema, {
-    nullable: true,
-    onDelete: "SET NULL"
+    onDelete: "CASCADE"
   })
   @JoinColumn({ name: "usuario_id" })
-  usuario?: Usuario;
+  usuario!: Usuario;
 }
