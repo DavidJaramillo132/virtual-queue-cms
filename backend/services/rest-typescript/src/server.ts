@@ -10,7 +10,6 @@ import estacionRoutes from './presentation/routes/estacionRoutes';
 import horarioRoutes from './presentation/routes/horarioRoutes';
 import servicioRoutes from './presentation/routes/servicioRoutes';
 import citaRoutes from './presentation/routes/citaRoutes';
-import filaRoutes from './presentation/routes/filaRoutes';
 import adminSistemaRoutes from './presentation/routes/adminSistemaRoutes';
 
 const app = express();
@@ -37,7 +36,6 @@ AppDataSource.initialize()
     app.use('/api/horarios', horarioRoutes);
     app.use('/api/servicios', servicioRoutes);
     app.use('/api/citas', citaRoutes);
-    app.use('/api/filas', filaRoutes);
     app.use('/api/admins', adminSistemaRoutes);
 
     // 4️⃣ Inicia el servidor

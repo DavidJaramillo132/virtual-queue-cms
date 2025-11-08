@@ -8,24 +8,25 @@ export class Usuario {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column({ type: 'varchar', nullable: false, default: '' })
-  nombreCompleto!: string;
-
-  @Column({ unique: true, type: 'varchar', nullable: false, default: '' })
+  @Column({ unique: true, type: 'varchar', nullable: false })
   email!: string;
 
-  @Column({ type: 'varchar', nullable: false, default: '' })
+  @Column({ type: 'varchar', nullable: false })
   password!: string;
 
   @Column({ 
-    type: "simple-enum", 
-    enum: ["cliente", "Negocio"],
-    name: "rol"
+    type: "enum", 
+    enum: ["cliente", "negocio", "admin_sistema"],
+    enumName: "rol_usuario_enum",
+    default: "cliente"
   })
-  rol!: "cliente" | "Negocio";
+  rol!: "cliente" | "negocio" | "admin_sistema";
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   telefono?: string;
+
+  @Column({ type: 'varchar', nullable: false, default: '', name: "nombre_completo" })
+  nombre_completo!: string;
 
   @CreateDateColumn({ name: "creado_en" })
   creadoEn!: Date;

@@ -1,41 +1,54 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
+import { Negocio } from "./Negocio";
+import { HorarioAtencion } from "./HorarioAtencion";
+import { Cita } from "./Cita";
+import { Servicio } from "./Servicio";
 
 @Entity({ name: "estaciones" })
 export class Estacion {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column("uuid", { nullable: true })
-  negocio_id?: string;
+  @Column("uuid", { nullable: false })
+  negocio_id!: string;
 
   @Column({ type: 'varchar', nullable: false, default: '' })
   nombre!: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  tipo?: string;
+
   @Column({ 
-    type: "simple-enum", 
-    enum: ["activo", "inactivo"], 
-    default: "activo" 
+    type: "enum", 
+    enum: ["activa", "inactiva"],
+    enumName: "estaciones_estado_enum",
+    default: "activa" 
   })
-  estado!: "activo" | "inactivo";
+  estado!: "activa" | "inactiva";
 
   @CreateDateColumn({ name: "creado_en" })
   creadoEn!: Date;
 
   // Relaciones
-  @ManyToOne("Negocio", "estaciones", {
-    nullable: true,
-    onDelete: "SET NULL"
+  @ManyToOne(() => Negocio, (negocio) => negocio.estaciones, {
+    onDelete: "CASCADE"
   })
   @JoinColumn({ name: "negocio_id" })
-  negocio?: any;
+  negocio!: Negocio;
 
-  @OneToMany("Fila", "estacion", {
+  @OneToMany(() => HorarioAtencion, (horario) => horario.estacion, {
     cascade: true,
   })
-  filas!: any[];
+  horarios!: HorarioAtencion[];
 
-  @OneToMany("HorarioAtencion", "estacion", {
-    cascade: true,
+  @OneToMany(() => Cita, (cita) => cita.estacion)
+  citas!: Cita[];
+
+  @ManyToMany(() => Servicio, (servicio) => servicio.estaciones)
+  @JoinTable({
+    name: "estacion_servicios",
+    joinColumn: { name: "estacion_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "servicio_id", referencedColumnName: "id" }
   })
-  horarios!: any[];
+  servicios!: Servicio[];
 }
