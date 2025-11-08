@@ -45,9 +45,9 @@ export class ServiciosComponent implements OnInit {
       next: (data) => {
         const serviciosExtendidos: ServicioExtendido[] = data.map(s => ({
           ...s,
-          activo: s.visible,
+          activo: true, // IServicio ya no tiene 'visible'
           duracion: s.duracion_minutos,
-          precio: 0
+          precio: s.precio_centavos / 100 // Convertir centavos a unidad
         }));
         this.servicios.set(serviciosExtendidos);
         this.isLoading.set(false);
@@ -66,9 +66,9 @@ export class ServiciosComponent implements OnInit {
       descripcion: '',
       duracion: 30,
       duracion_minutos: 30,
-      visible: true,
       activo: true,
       precio: 0,
+      precio_centavos: 0,
       negocio_id: ''
     };
   }
@@ -98,9 +98,11 @@ export class ServiciosComponent implements OnInit {
     this.successMessage.set('');
 
     const servicioParaGuardar: Partial<IServicio> = {
-      ...this.servicioActual,
+      nombre: this.servicioActual.nombre,
+      descripcion: this.servicioActual.descripcion,
       duracion_minutos: this.servicioActual.duracion || 30,
-      visible: this.servicioActual.activo !== false
+      precio_centavos: (this.servicioActual.precio || 0) * 100, // Convertir a centavos
+      negocio_id: this.servicioActual.negocio_id || ''
     };
 
     if (this.isEditing() && this.servicioActual.id) {
@@ -109,9 +111,9 @@ export class ServiciosComponent implements OnInit {
           const serviciosActualizados = this.servicios().map(s => 
             s.id === servicioActualizado.id ? {
               ...servicioActualizado,
-              activo: servicioActualizado.visible,
+              activo: true,
               duracion: servicioActualizado.duracion_minutos,
-              precio: 0
+              precio: servicioActualizado.precio_centavos / 100
             } : s
           );
           this.servicios.set(serviciosActualizados);
@@ -129,9 +131,9 @@ export class ServiciosComponent implements OnInit {
         next: (nuevoServicio) => {
           const servicioExtendido: ServicioExtendido = {
             ...nuevoServicio,
-            activo: nuevoServicio.visible,
+            activo: true,
             duracion: nuevoServicio.duracion_minutos,
-            precio: 0
+            precio: nuevoServicio.precio_centavos / 100
           };
           this.servicios.set([...this.servicios(), servicioExtendido]);
           this.successMessage.set('Servicio creado correctamente');
@@ -166,25 +168,11 @@ export class ServiciosComponent implements OnInit {
   }
 
   toggleEstado(servicio: ServicioExtendido) {
-    const nuevoEstado = !servicio.visible;
-    this.servicioService.actualizarServicio(servicio.id, { visible: nuevoEstado }).subscribe({
-      next: (servicioActualizado) => {
-        const serviciosActualizados = this.servicios().map(s => 
-          s.id === servicioActualizado.id ? {
-            ...servicioActualizado,
-            activo: servicioActualizado.visible,
-            duracion: servicioActualizado.duracion_minutos,
-            precio: s.precio
-          } : s
-        );
-        this.servicios.set(serviciosActualizados);
-        this.successMessage.set(`Servicio ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
-        setTimeout(() => this.successMessage.set(''), 3000);
-      },
-      error: (error) => {
-        this.errorMessage.set(error.message || 'Error al cambiar el estado del servicio');
-        setTimeout(() => this.errorMessage.set(''), 3000);
-      }
-    });
+    const nuevoEstado = !servicio.activo;
+    // Como ya no existe el campo 'visible', actualizamos el estado local
+    servicio.activo = nuevoEstado;
+    this.servicios.set([...this.servicios()]);
+    this.successMessage.set(`Servicio ${nuevoEstado ? 'activado' : 'desactivado'} correctamente`);
+    setTimeout(() => this.successMessage.set(''), 3000);
   }
 }

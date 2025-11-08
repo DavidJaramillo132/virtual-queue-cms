@@ -74,7 +74,11 @@ export class UserService {
   // Register
   registerUsuario(usuario: any): Observable<any> {
     console.log('Registrando usuario con datos:', usuario);
-    this.loginUsuario(usuario)
+    // Asegurar que el campo sea nombre_completo (no nombreCompleto)
+    if (usuario.nombreCompleto && !usuario.nombre_completo) {
+      usuario.nombre_completo = usuario.nombreCompleto;
+      delete usuario.nombreCompleto;
+    }
     return this.http.post(`${this.apiUrl}/usuarios`, usuario);
   }
 

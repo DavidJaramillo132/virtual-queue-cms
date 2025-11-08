@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { FilasService } from '../../../services/Rest/fila-services';
+import { CitaService } from '../../../services/Rest/cita-services';
 import { CommonModule } from '@angular/common';
 import { ICita } from '../../../domain/entities';
 import { IServicio } from '../../../domain/entities/IServicio';
 
 @Component({
   selector: 'app-appointment',
+  standalone: true,
   imports: [ReactiveFormsModule, CommonModule, FormsModule],
   templateUrl: './appointment.html',
 })
@@ -23,7 +24,7 @@ export class Appointment implements OnInit {
   nuevaCitaForm: FormGroup;
   servicioPreseleccionado: IServicio | null = null;
 
-  constructor(private FilasService: FilasService, private fb: FormBuilder) {
+  constructor(private citaService: CitaService, private fb: FormBuilder) {
     this.nuevaCitaForm = this.fb.group({
       fecha: [new Date().toISOString().split('T')[0], Validators.required],
       hora_inicio: ['', Validators.required],
@@ -50,8 +51,8 @@ export class Appointment implements OnInit {
 
   cargarCitas() {
     this.loading = true;
-    this.FilasService.getCitas().subscribe({
-      next: (data) => {
+    this.citaService.getAllCitas().subscribe({
+      next: (data: ICita[]) => {
         this.citas = data;
         this.loading = false;
       },
@@ -60,11 +61,16 @@ export class Appointment implements OnInit {
   }
 
   agregarCita() {
+    // Validar que tenga los campos obligatorios
+    const citaData = this.nuevaCitaForm.value;
+    if (!citaData.cliente_id || !citaData.negocio_id || !citaData.servicio_id) {
+      console.error('Faltan campos obligatorios: cliente_id, negocio_id, servicio_id');
+      return;
+    }
 
-
-    this.FilasService.agregarCita(this.nuevaCitaForm.value).subscribe({
-      next: (cita) => this.citas.push(cita),
-      error: (err) => console.error('Error al agregar cita:', err, this.nuevaCitaForm.value),
+    this.citaService.createCita(citaData).subscribe({
+      next: (cita: ICita) => this.citas.push(cita),
+      error: (err: any) => console.error('Error al agregar cita:', err, this.nuevaCitaForm.value),
     });
   }
 

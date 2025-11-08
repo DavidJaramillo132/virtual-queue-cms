@@ -56,8 +56,8 @@ export class HorariosComponent implements OnInit {
         if (data && data.length > 0) {
           const horariosMap = new Map<number, IHorarioAtencion>();
           data.forEach(h => {
-            if (h.diaSemana !== undefined) {
-              horariosMap.set(parseInt(h.diaSemana), h);
+            if (h.dia_semana !== undefined) {
+              horariosMap.set(h.dia_semana, h);
             }
           });
 
@@ -68,8 +68,8 @@ export class HorariosComponent implements OnInit {
                 ...dia,
                 id: horarioBD.id,
                 activo: true,
-                horaInicio: horarioBD.horaInicio,
-                horaFin: horarioBD.horaFin
+                horaInicio: horarioBD.hora_inicio,
+                horaFin: horarioBD.hora_fin
               };
             }
             return dia;
@@ -106,18 +106,18 @@ export class HorariosComponent implements OnInit {
       .filter(h => h.activo)
       .map(h => ({
         id: h.id,
-        idEstacion: estacionIdValue,
-        diaSemana: h.diaSemana.toString(),
-        horaInicio: h.horaInicio,
-        horaFin: h.horaFin
+        estacion_id: estacionIdValue,
+        dia_semana: h.diaSemana,
+        hora_inicio: h.horaInicio,
+        hora_fin: h.horaFin
       }));
 
     this.horarioService.updateMultipleHorarios(horariosParaGuardar).subscribe({
       next: (horariosActualizados) => {
         const horariosMap = new Map<number, IHorarioAtencion>();
         horariosActualizados.forEach(h => {
-          if (h.diaSemana) {
-            horariosMap.set(parseInt(h.diaSemana), h);
+          if (h.dia_semana !== undefined) {
+            horariosMap.set(h.dia_semana, h);
           }
         });
 

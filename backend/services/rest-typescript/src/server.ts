@@ -29,7 +29,7 @@ AppDataSource.initialize()
   .then(() => {
     console.log('Conexión a Supabase (PostgreSQL) establecida');
 
-    // 3️⃣ Rutas
+    // Rutas
     app.use('/api/usuarios', usuarioRoutes);
     app.use('/api/negocios', negocioRoutes);
     app.use('/api/estaciones', estacionRoutes);
@@ -38,7 +38,7 @@ AppDataSource.initialize()
     app.use('/api/citas', citaRoutes);
     app.use('/api/admins', adminSistemaRoutes);
 
-    // 4️⃣ Inicia el servidor
+    // Inicia el servidor
     const port = process.env.PORT ? Number(process.env.PORT) : 3000;
     app.listen(port, () => console.log(`Servidor REST corriendo en puerto ${port}`));
   })

@@ -1,10 +1,12 @@
 export interface ICita {
   id: string;
-  usuario_id?: string;
-  servicio_id?: string;
-  fecha: Date;              // Fecha de la cita
-  hora_inicio: string;      // Ej: "09:30"
-  hora_fin: string;         // Ej: "10:00"
+  cliente_id: string;
+  negocio_id: string;
+  estacion_id?: string;
+  servicio_id: string;
+  fecha: Date;
+  hora_inicio: string;
+  hora_fin: string;
   estado: 'pendiente' | 'atendida' | 'cancelada';
-  creado_en: Date;
+  creadoEn?: Date;
 }

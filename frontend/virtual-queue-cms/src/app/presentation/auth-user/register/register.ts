@@ -31,18 +31,18 @@ export class Register {
     private router: Router
   ) {
     this.registerForm = this.fb.group({
-      nombreCompleto: ['', [Validators.required]],
+      nombre_completo: ['', [Validators.required]],
       telefono: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
-      rol: ['cliente', [Validators.required]], // cliente o Negocio
+      rol: ['cliente', [Validators.required]], // cliente, negocio o admin_sistema
       terms: [false, [Validators.requiredTrue]]
     }, { validators: this.passwordsMatch });
 
     // Escuchar cambios en el campo 'rol'
     this.registerForm.get('rol')?.valueChanges.subscribe((value) => {
-      this.showBusinessForm = value === 'Negocio';
+      this.showBusinessForm = value === 'negocio';
     });
   }
 
@@ -59,12 +59,12 @@ export class Register {
     this.loading = true;
 
     // Preparar datos para enviar (sin confirmPassword y terms)
-    const { nombreCompleto, email, password, rol, telefono, negocio } = this.registerForm.value;
-    const userData = { nombreCompleto, email, password, rol, telefono };
+    const { nombre_completo, email, password, rol, telefono, negocio } = this.registerForm.value;
+    const userData = { nombre_completo, email, password, rol, telefono };
     const userLoginData = { email, password };
 
-    // Si el rol es "Negocio", primero crear el usuario y luego el negocio
-    if (rol === 'Negocio' && negocio) {
+    // Si el rol es "negocio", primero crear el usuario y luego el negocio
+    if (rol === 'negocio' && negocio) {
       this.userService.registerUsuario(userData).pipe(
         switchMap((userResponse: any) => {
           console.log('Usuario registrado:', userResponse);
