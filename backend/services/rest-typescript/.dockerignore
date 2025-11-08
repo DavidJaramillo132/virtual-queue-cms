@@ -1,0 +1,14 @@
+# .dockerignore para el servicio REST TypeScript
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+*.md
+.vscode
+.DS_Store
+dist
+build
+coverage
+.nyc_output
+*.log

@@ -1,0 +1,18 @@
+# .dockerignore para el servicio GraphQL Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.git
+.gitignore
+*.md
+.vscode
+.DS_Store
+*.log
+.pytest_cache
+.coverage
+htmlcov/
