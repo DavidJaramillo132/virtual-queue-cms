@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/Rest/userServices';
-//import { PerfilService } from '../../services/perfilService';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { IUsuario } from '../../domain/entities';
 
@@ -42,7 +41,7 @@ export class PerfilComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserProfile();
     this.loadUserProfileGraphQL();
-
+  
   }
 
   loadUserProfileGraphQL() {
@@ -139,5 +138,9 @@ export class PerfilComponent implements OnInit {
         this.saveMessage = 'Error al actualizar el perfil. Por favor, inténtalo de nuevo.';
       }
     });
+  }
+
+  ResumenPDF(): void {
+    this.loadUserProfileGraphQL();
   }
 }

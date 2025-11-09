@@ -42,7 +42,7 @@ export class UserGraphQl {
           citasCanceladas
         }
       }
-    `
+    `, fetchPolicy: 'network-only'
     }).valueChanges;
   }
 }
