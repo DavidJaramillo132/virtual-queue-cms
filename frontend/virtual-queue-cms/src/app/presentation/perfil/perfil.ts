@@ -50,7 +50,7 @@ export class PerfilComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.perfilGraphQL = res?.data?.perfilCompletoUsuario ? [res.data.perfilCompletoUsuario] : [];
-          
+          console.log("respuesta del graphQL", res);
           // Extraer los datos del resumen de citas
           if (res?.data?.perfilCompletoUsuario) {
             this.resumenCitas = {
@@ -61,7 +61,8 @@ export class PerfilComponent implements OnInit {
             };
           }
         },
-        error: () => {
+        error: (err) => {
+          console.error("Error al cargar perfil desde GraphQL:", err);
           this.perfilGraphQL = [];
           // Mantener valores en 0 en caso de error
         }

@@ -39,5 +39,5 @@ export class Usuario {
   adminSistema!: AdminSistema[];
 
   @OneToMany(() => Negocio, (negocio) => negocio.adminNegocio)
-  negociosAdministrados!: Negocio[];
+  negocios!: Negocio[];
 }

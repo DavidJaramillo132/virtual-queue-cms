@@ -27,4 +27,4 @@ class Cita:
     hora_inicio: time
     hora_fin: time
     estado: EstadoCita
-    creado_en: datetime
+    creadoEn: datetime

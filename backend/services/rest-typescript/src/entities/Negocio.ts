@@ -43,7 +43,7 @@ export class Negocio {
   creadoEn!: Date;
 
   // Relaciones
-  @ManyToOne(() => Usuario, (usuario) => usuario.negociosAdministrados, {
+  @ManyToOne(() => Usuario, (usuario) => usuario.negocios, {
     nullable: true,
     onDelete: "SET NULL"
   })
