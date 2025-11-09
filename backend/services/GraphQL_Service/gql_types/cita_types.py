@@ -1,14 +1,13 @@
-from matplotlib.pylab import Enum
 import strawberry
 from typing import Optional
-from datetime import date, datetime
-from gql_types.enums import Estado
+from datetime import date, time, datetime
+from enum import Enum
 
+@strawberry.enum
 class EstadoCita(Enum):
     PENDIENTE = "pendiente"
     ATENDIDA = "atendida"
     CANCELADA = "cancelada"
-
 
 @strawberry.type
 class MetricasTemporales:
@@ -20,10 +19,12 @@ class MetricasTemporales:
 @strawberry.type
 class Cita:
     id: str
-    usuario_id: str | None = None
-    servicio_id: str | None = None
+    cliente_id: str
+    negocio_id: str
+    estacion_id: str
+    servicio_id: str
     fecha: date
-    hora_inicio: str
-    hora_fin: str
-    estado: EstadoCita = EstadoCita.PENDIENTE
-    creado_en: datetime | None = None
+    hora_inicio: time
+    hora_fin: time
+    estado: EstadoCita
+    creado_en: datetime

@@ -1,7 +1,13 @@
 import strawberry
 from typing import List, Optional
 from datetime import datetime
-from gql_types.enums import Rol
+from enum import Enum
+
+@strawberry.enum
+class Rol(Enum):
+    CLIENTE = "cliente"
+    NEGOCIO = "negocio"
+    ADMIN_SISTEMA = "admin_sistema"
 
 @strawberry.type
 class CitaInfo:
@@ -31,5 +37,5 @@ class Usuario:
     password: str
     rol: Rol
     telefono: Optional[str] = None
-    creadoEn: datetime
-    nombreCompleto: str
+    nombre_completo: str
+    creado_en: datetime

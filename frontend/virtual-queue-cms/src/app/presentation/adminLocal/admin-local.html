@@ -37,6 +37,13 @@
         Horarios
       </button>
       <button 
+        (click)="setActiveTab('estaciones')"
+        [class]="activeTab() === 'estaciones' 
+          ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
+          : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
+        Estaciones (Filas)
+      </button>
+      <button 
         (click)="setActiveTab('citas')"
         [class]="activeTab() === 'citas' 
           ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
@@ -58,6 +65,9 @@
       }
       @if (activeTab() === 'horarios') {
         <app-horarios />
+      }
+      @if (activeTab() === 'estaciones') {
+        <app-estaciones />
       }
       @if (activeTab() === 'citas') {
         <app-citas />

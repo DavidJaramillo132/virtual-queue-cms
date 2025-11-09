@@ -48,6 +48,36 @@
     </label>
   </div>
 
+  <!-- Selector de Estación (Fila) -->
+  <div class="mb-4">
+    <label for="estacion" class="block mb-2">
+      <p class="font-semibold">Fila (Estación):<span class="text-red-500">*</span></p>
+      <select 
+        id="estacion"
+        formControlName="estacion_id"
+        class="border p-2 rounded w-full"
+        [class.border-red-500]="nuevaCitaForm.get('estacion_id')?.invalid && nuevaCitaForm.get('estacion_id')?.touched"
+      >
+        <option value="">-- Seleccione una fila --</option>
+        <option *ngFor="let estacion of estaciones" [value]="estacion.id">
+          {{ estacion.nombre }} {{ estacion.tipo ? '(' + estacion.tipo + ')' : '' }}
+        </option>
+      </select>
+      <p *ngIf="estaciones.length === 0" class="text-sm text-gray-500 mt-1">
+        No hay filas disponibles. El negocio debe crear al menos una estación.
+      </p>
+    </label>
+  </div>
+
+  <!-- Mensajes de estado -->
+  <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="successMessage" class="mb-4 p-4 bg-green-50 text-green-700 rounded-lg">
+    {{ successMessage }}
+  </div>
+
   <label for="hora_inicio">
     <p>Hora de inicio:</p>
     <input 
@@ -71,8 +101,9 @@
   
   <button
     (click)="agregarCita()"
-    class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+    class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+    [disabled]="loading || !hora_inicio || !servicio_seleccionado || nuevaCitaForm.get('estacion_id')?.invalid"
   >
-    Agregar al final de la cola
+    {{ loading ? 'Agendando...' : 'Agregar al final de la cola' }}
   </button>
 </div>

@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict
 from services.http_client import http_client
 from gql_types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
-from gql_types.enums import Estado
+from gql_types.enums import EstadoCita
 
 
 def _headers_from_token(token: Optional[str]) -> Optional[Dict[str, str]]:
@@ -36,8 +36,8 @@ class NegociosResolver:
         servicios_negocio = [s for s in servicios if s.negocio_id == negocio_id]
         citas_negocio = [c for c in citas if c.negocio_id == negocio_id]
         
-        citas_pendientes = len([c for c in citas_negocio if c.estado == Estado.PENDIENTE])
-        citas_atendidas = len([c for c in citas_negocio if c.estado == Estado.ATENDIDA])
+        citas_pendientes = len([c for c in citas_negocio if c.EstadoCita == EstadoCita.PENDIENTE])
+        citas_atendidas = len([c for c in citas_negocio if c.EstadoCita == EstadoCita.ATENDIDA])
         
         return DashboardNegocio(
             nombre_negocio=negocio.nombre,

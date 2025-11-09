@@ -4,7 +4,7 @@ from numpy import convolve
 from services.decode import decode_jwt
 from services.http_client import http_client
 from gql_types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario, CitaInfo
-from gql_types.enums import Estado
+from gql_types.enums import EstadoCita 
 from datetime import datetime
 from strawberry.types import Info
 
@@ -46,7 +46,7 @@ class UsuariosResolver:
         citas = await CitasResolver.find_all(token)
         servicios = await ServiciosResolver.find_all(token)
 
-        pendientes = [c for c in citas if c.estado == Estado.PENDIENTE]
+        pendientes = [c for c in citas if c.EstadoCita == EstadoCita.PENDIENTE]
 
         result = []
         for usuario in usuarios:
@@ -76,7 +76,7 @@ class UsuariosResolver:
         citas = await CitasResolver.find_all(token)
         servicios = await ServiciosResolver.find_all(token)
 
-        atendidas = [c for c in citas if c.estado == Estado.ATENDIDA]
+        atendidas = [c for c in citas if c.EstadoCita == EstadoCita.ATENDIDA]
 
         result = []
         for usuario in usuarios:
@@ -121,16 +121,16 @@ class UsuariosResolver:
 
         #  Calcular estadísticas
         total_citas = len(citas_usuario)
-        citas_completadas = len([c for c in citas_usuario if c.estado == Estado.ATENDIDA])
-        citas_pendientes = len([c for c in citas_usuario if c.estado == Estado.PENDIENTE])
-        citas_canceladas = len([c for c in citas_usuario if c.estado == Estado.CANCELADA])
+        citas_completadas = len([c for c in citas_usuario if c.EstadoCita == EstadoCita.ATENDIDA])
+        citas_pendientes = len([c for c in citas_usuario if c.EstadoCita == EstadoCita.PENDIENTE])
+        citas_canceladas = len([c for c in citas_usuario if c.EstadoCita == EstadoCita.CANCELADA])
 
         # Retornar el perfil completo
         return PerfilCompletoUsuario(
-            id=usuario.id,
-            nombreCompleto=usuario.nombreCompleto,
-            email=usuario.email,
-            telefono=usuario.telefono or "",
+            #id=usuario.id,
+            #nombreCompleto=usuario.nombreCompleto,
+            #email=usuario.email,
+            #telefono=usuario.telefono or "",
             totalCitas=total_citas,
             citasCompletadas=citas_completadas,
             citasPendientes=citas_pendientes,

@@ -6,7 +6,6 @@ from resolvers.citas_resolver import CitasResolver
 from resolvers.servicios_resolver import ServiciosResolver
 from resolvers.negocios_resolver import NegociosResolver
 from resolvers.estaciones_resolver import EstacionesResolver
-from resolvers.fila_resolver import FilaResolver
 from resolvers.horarios_atencion_resolver import HorariosAtencionResolver
 from resolvers.admin_sistema_resolver import AdminSistemaResolver
 
@@ -16,7 +15,6 @@ from gql_types.cita_types import Cita, MetricasTemporales
 from gql_types.servicio_types import Servicio, RankingServicios
 from gql_types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
 from gql_types.estacion_types import Estacion, EstacionDTO
-from gql_types.fila_types import Fila
 from gql_types.horario_atencion_types import HorarioAtencion
 from gql_types.admin_sistema_types import AdminSistema
 
@@ -112,17 +110,7 @@ class Query:
         token = info.context["request"].headers.get("authorization")
         return await EstacionesResolver.find_one(id, token)
     
-    # Fila queries
-    @strawberry.field(description="Obtener todas las filas")
-    async def filas(self, info: Info) -> List[Fila]:
-        token = info.context["request"].headers.get("authorization")
-        return await FilaResolver.find_all(token)
-    
-    @strawberry.field(description="Obtener una fila por ID")
-    async def fila(self, info: Info, id: str) -> Fila:
-        token = info.context["request"].headers.get("authorization")
-        return await FilaResolver.find_one(id, token)
-    
+
     # Horarios queries
     @strawberry.field(description="Obtener todos los horarios de atención")
     async def horarios_atencion(self, info: Info) -> List[HorarioAtencion]:

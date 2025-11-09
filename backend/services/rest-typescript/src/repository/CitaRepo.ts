@@ -33,4 +33,25 @@ export class CitaRepo {
   async getById(id: string): Promise<Cita | null> {
     return this.repo.findOneBy({ id });
   }
+
+  async getByNegocioId(negocio_id: string): Promise<Cita[]> {
+    return this.repo.find({ 
+      where: { negocio_id },
+      order: { fecha: 'ASC', hora_inicio: 'ASC' }
+    });
+  }
+
+  async getByEstacionId(estacion_id: string): Promise<Cita[]> {
+    return this.repo.find({ 
+      where: { estacion_id },
+      order: { fecha: 'ASC', hora_inicio: 'ASC' }
+    });
+  }
+
+  async getByClienteId(cliente_id: string): Promise<Cita[]> {
+    return this.repo.find({ 
+      where: { cliente_id },
+      order: { fecha: 'DESC', hora_inicio: 'DESC' }
+    });
+  }
 }

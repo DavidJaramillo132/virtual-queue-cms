@@ -88,7 +88,7 @@ CREATE TABLE "citas" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
   "cliente_id" uuid NOT NULL,
   "negocio_id" uuid NOT NULL,
-  "estacion_id" uuid,
+  "estacion_id" uuid NOT NULL,
   "servicio_id" uuid NOT NULL,
   "fecha" date NOT NULL,
   "hora_inicio" time NOT NULL,
@@ -124,7 +124,7 @@ ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_cliente" FOREIGN KEY ("cliente_id")
 
 ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_negocio" FOREIGN KEY ("negocio_id") REFERENCES "negocios" ("id") ON DELETE RESTRICT;
 
-ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_estacion" FOREIGN KEY ("estacion_id") REFERENCES "estaciones" ("id") ON DELETE SET NULL;
+ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_estacion" FOREIGN KEY ("estacion_id") REFERENCES "estaciones" ("id") ON DELETE RESTRICT;
 
 ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_servicio" FOREIGN KEY ("servicio_id") REFERENCES "servicios" ("id") ON DELETE RESTRICT;
 

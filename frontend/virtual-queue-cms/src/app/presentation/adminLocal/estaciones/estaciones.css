@@ -1,0 +1,50 @@
+/* Estilos para el componente de estaciones */
+
+.container {
+  min-height: 80vh;
+}
+
+/* Animación para el spinner de carga */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Transiciones suaves para hover */
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Estilos para el modal */
+.fixed {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Estilos responsivos */
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  table {
+    font-size: 0.875rem;
+  }
+  
+  th, td {
+    padding: 0.5rem;
+  }
+}
