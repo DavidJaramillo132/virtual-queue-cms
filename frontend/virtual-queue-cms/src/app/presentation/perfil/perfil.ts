@@ -145,43 +145,55 @@ export class PerfilComponent implements OnInit {
     this.saveMessage = 'Generando informe PDF...';
     this.isSaving = true;
 
-    this.userService.descargarInformePDF().subscribe({
-      next: (blob: Blob) => {
-        // Crear un enlace temporal para descargar el PDF
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        
-        // Obtener el nombre del usuario para el archivo
-        const currentUser = this.getUser();
-        const nombreArchivo = currentUser 
-          ? `Informe_${currentUser.nombre_completo?.replace(/\s+/g, '_')}_${Date.now()}.pdf`
-          : `Informe_Usuario_${Date.now()}.pdf`;
-        
-        link.download = nombreArchivo;
-        
-        // Simular click para descargar
-        document.body.appendChild(link);
-        link.click();
-        
-        // Limpiar
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-        
-        this.isSaving = false;
-        this.saveMessage = '¡Informe PDF generado exitosamente!';
-        
-        // Limpiar mensaje después de 3 segundos
-        setTimeout(() => {
-          this.saveMessage = '';
-        }, 3000);
+    // Usar GraphQL directamente para generar el PDF
+    this.userGraphQl.generar_informe_pdf().subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Convertir base64 a Blob
+          const byteCharacters = atob(response.pdfBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+          // Crear enlace de descarga
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = response.nombreArchivo;
+
+          // Simular click para descargar
+          document.body.appendChild(link);
+          link.click();
+
+          // Limpiar
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          this.isSaving = false;
+          this.saveMessage = '¡Informe PDF generado exitosamente!';
+
+          // Limpiar mensaje después de 3 segundos
+          setTimeout(() => {
+            this.saveMessage = '';
+          }, 3000);
+        } else {
+          // Error desde el servidor
+          this.isSaving = false;
+          this.saveMessage = response.mensaje || 'Error al generar el informe PDF.';
+
+          setTimeout(() => {
+            this.saveMessage = '';
+          }, 5000);
+        }
       },
       error: (err) => {
         console.error('Error al generar el PDF:', err);
         this.isSaving = false;
         this.saveMessage = 'Error al generar el informe PDF. Por favor, inténtalo de nuevo.';
-        
-        // Limpiar mensaje después de 5 segundos
+
         setTimeout(() => {
           this.saveMessage = '';
         }, 5000);

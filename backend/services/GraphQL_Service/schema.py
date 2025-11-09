@@ -8,6 +8,7 @@ from resolvers.negocios_resolver import NegociosResolver
 from resolvers.estaciones_resolver import EstacionesResolver
 from resolvers.horarios_atencion_resolver import HorariosAtencionResolver
 from resolvers.admin_sistema_resolver import AdminSistemaResolver
+from resolvers.pdf_resolver import PdfResolver
 
 # Import all types (use gql_types to avoid naming conflict with Python stdlib 'types')
 from gql_types.usuario_types import Usuario, UsuarioCitasDTO, PerfilCompletoUsuario
@@ -17,6 +18,7 @@ from gql_types.negocio_types import Negocio, DashboardNegocio, ResumenNegocio
 from gql_types.estacion_types import Estacion, EstacionDTO
 from gql_types.horario_atencion_types import HorarioAtencion
 from gql_types.admin_sistema_types import AdminSistema
+from gql_types.pdf_types import InformePDF
 
 @strawberry.type
 class Query:
@@ -127,5 +129,10 @@ class Query:
     async def admin_sistema(self, info: Info) -> List[AdminSistema]:
         token = info.context["request"].headers.get("authorization")
         return await AdminSistemaResolver.find_all(token)
+    
+    # PDF queries
+    @strawberry.field(description="Generar informe PDF del perfil del usuario autenticado")
+    async def generar_informe_pdf(self, info: Info) -> InformePDF:
+        return await PdfResolver.generar_informe_usuario(info)
 
 schema = strawberry.Schema(query=Query)

@@ -3,3 +3,5 @@ uvicorn[standard]>=0.34.0
 strawberry-graphql[fastapi]>=0.284.0
 httpx>=0.28.1
 python-dotenv>=1.0.1
+reportlab>=4.0.0
+Pillow>=10.0.0

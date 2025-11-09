@@ -16,6 +16,15 @@ interface PerfilCompletoResponse {
   };
 }
 
+interface InformePDFResponse {
+  generarInformePdf: {
+    success: boolean;
+    pdfBase64: string;
+    nombreArchivo: string;
+    mensaje: string;
+  };
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -44,5 +53,23 @@ export class UserGraphQl {
       }
     `, fetchPolicy: 'network-only'
     }).valueChanges;
+  }
+
+  generar_informe_pdf(): Observable<InformePDFResponse['generarInformePdf']> {
+    return this.apollo.query<InformePDFResponse>({
+      query: gql`
+        query {
+          generarInformePdf {
+            success
+            pdfBase64
+            nombreArchivo
+            mensaje
+          }
+        }
+      `,
+      fetchPolicy: 'network-only'
+    }).pipe(
+      map(result => result.data!.generarInformePdf)
+    );
   }
 }
