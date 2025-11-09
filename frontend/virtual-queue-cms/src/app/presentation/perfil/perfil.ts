@@ -141,6 +141,51 @@ export class PerfilComponent implements OnInit {
   }
 
   ResumenPDF(): void {
-    this.loadUserProfileGraphQL();
+    // Mostrar mensaje de carga
+    this.saveMessage = 'Generando informe PDF...';
+    this.isSaving = true;
+
+    this.userService.descargarInformePDF().subscribe({
+      next: (blob: Blob) => {
+        // Crear un enlace temporal para descargar el PDF
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Obtener el nombre del usuario para el archivo
+        const currentUser = this.getUser();
+        const nombreArchivo = currentUser 
+          ? `Informe_${currentUser.nombre_completo?.replace(/\s+/g, '_')}_${Date.now()}.pdf`
+          : `Informe_Usuario_${Date.now()}.pdf`;
+        
+        link.download = nombreArchivo;
+        
+        // Simular click para descargar
+        document.body.appendChild(link);
+        link.click();
+        
+        // Limpiar
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        this.isSaving = false;
+        this.saveMessage = '¡Informe PDF generado exitosamente!';
+        
+        // Limpiar mensaje después de 3 segundos
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 3000);
+      },
+      error: (err) => {
+        console.error('Error al generar el PDF:', err);
+        this.isSaving = false;
+        this.saveMessage = 'Error al generar el informe PDF. Por favor, inténtalo de nuevo.';
+        
+        // Limpiar mensaje después de 5 segundos
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 5000);
+      }
+    });
   }
 }

@@ -124,6 +124,18 @@ export class UserService {
     );
   }
 
+  // Descargar informe PDF del perfil del usuario
+  descargarInformePDF(): Observable<Blob> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+    
+    return this.http.get(`${this.apiUrl}/usuarios/informe-pdf`, {
+      headers,
+      responseType: 'blob' // Importante para recibir el archivo PDF
+    });
+  }
 
   
 }
