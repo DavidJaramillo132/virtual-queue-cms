@@ -1,15 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-interface NegocioData {
-  nombre: string;
-  categoria: string;
-  descripcion: string;
-  direccion: string;
-  telefono: string;
-  email: string;
-}
+import { NegocioServices } from '../../../services/Rest/negocio-services';
+import { UserService } from '../../../services/Rest/userServices';
+import { INegocio } from '../../../domain/entities';
 
 @Component({
   selector: 'app-negocio-info',
@@ -19,57 +13,107 @@ interface NegocioData {
   styleUrls: ['./negocio-info.css']
 })
 export class NegocioInfoComponent implements OnInit {
-  // Estado de edición
+  // Estado de edición y mensajes
   isEditing = signal<boolean>(false);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  successMessage = signal<string>('');
 
-  // Data del negocio - Preparado para conexión a BD
-  negocio = signal<NegocioData>({
-    nombre: 'Restaurante El Buen Sabor',
-    categoria: 'Restaurante',
-    descripcion: 'Comida tradicional y deliciosa',
-    direccion: 'Calle Principal 123',
-    telefono: '555-0101',
-    email: 'contacto@buensabor.com'
-  });
+  // Data del negocio
+  negocio = signal<INegocio | null>(null);
+  negocioTemp: Partial<INegocio> = {};
+  
+  private negocioId: string = '';
 
-  // Copia temporal para edición
-  negocioTemp: NegocioData = { ...this.negocio() };
-
-  ngOnInit() {
-    // TODO: Aquí se cargará la data desde el servicio
-    // this.cargarNegocio();
+  constructor(
+    private negocioService: NegocioServices,
+    private userService: UserService
+  ) {
+    // Obtener el negocio_id del usuario autenticado
+    const currentUser = this.userService.currentUserValue;
+    if (currentUser && currentUser.negocio_id) {
+      this.negocioId = currentUser.negocio_id;
+    }
   }
 
-  // Método preparado para conexión con BD
+  ngOnInit() {
+    if (this.negocioId) {
+      this.cargarNegocio();
+    } else {
+      this.errorMessage.set('No se encontró información del negocio. Por favor, inicie sesión nuevamente.');
+    }
+  }
+
   cargarNegocio() {
-    // TODO: Implementar llamada al servicio
-    // this.negocioService.getNegocio().subscribe(data => {
-    //   this.negocio.set(data);
-    // });
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    
+    this.negocioService.getNegocioById(this.negocioId).subscribe({
+      next: (data) => {
+        this.negocio.set(data);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message || 'Error al cargar la información del negocio');
+        this.isLoading.set(false);
+        console.error('Error al cargar negocio:', error);
+      }
+    });
   }
 
   toggleEdit() {
     if (this.isEditing()) {
       // Cancelar edición
-      this.negocioTemp = { ...this.negocio() };
+      this.negocioTemp = {};
+      this.errorMessage.set('');
+      this.successMessage.set('');
     } else {
-      // Iniciar edición
-      this.negocioTemp = { ...this.negocio() };
+      // Iniciar edición - copiar datos actuales
+      const currentNegocio = this.negocio();
+      if (currentNegocio) {
+        this.negocioTemp = { ...currentNegocio };
+      }
     }
     this.isEditing.set(!this.isEditing());
   }
 
   guardarCambios() {
-    // TODO: Implementar llamada al servicio para guardar
-    // this.negocioService.updateNegocio(this.negocioTemp).subscribe(
-    //   data => {
-    //     this.negocio.set(this.negocioTemp);
-    //     this.isEditing.set(false);
-    //   }
-    // );
-    
-    // Por ahora solo actualizamos localmente
-    this.negocio.set({ ...this.negocioTemp });
-    this.isEditing.set(false);
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    // Validar que tengamos negocio_id
+    if (!this.negocioId) {
+      this.errorMessage.set('Error: No se encontró el ID del negocio');
+      this.isLoading.set(false);
+      return;
+    }
+
+    // Preparar datos para actualizar (solo campos editables)
+    const dataToUpdate: Partial<INegocio> = {
+      nombre: this.negocioTemp.nombre,
+      categoria: this.negocioTemp.categoria,
+      descripcion: this.negocioTemp.descripcion,
+      direccion: this.negocioTemp.direccion,
+      telefono: this.negocioTemp.telefono,
+      correo: this.negocioTemp.correo
+    };
+
+    this.negocioService.updateNegocio(this.negocioId, dataToUpdate).subscribe({
+      next: (negocioActualizado) => {
+        this.negocio.set(negocioActualizado);
+        this.successMessage.set('Información actualizada correctamente');
+        this.isEditing.set(false);
+        this.isLoading.set(false);
+        
+        // Limpiar mensaje de éxito después de 3 segundos
+        setTimeout(() => this.successMessage.set(''), 3000);
+      },
+      error: (error) => {
+        this.errorMessage.set(error.message || 'Error al actualizar la información');
+        this.isLoading.set(false);
+        console.error('Error al actualizar negocio:', error);
+      }
+    });
   }
 }

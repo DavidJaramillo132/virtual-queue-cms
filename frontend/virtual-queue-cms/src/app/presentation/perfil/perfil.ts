@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService } from '../../services/Rest/userServices';
-//import { PerfilService } from '../../services/perfilService';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { IUsuario } from '../../domain/entities';
 
@@ -42,7 +41,7 @@ export class PerfilComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserProfile();
     this.loadUserProfileGraphQL();
-
+  
   }
 
   loadUserProfileGraphQL() {
@@ -50,7 +49,7 @@ export class PerfilComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.perfilGraphQL = res?.data?.perfilCompletoUsuario ? [res.data.perfilCompletoUsuario] : [];
-          
+          console.log("respuesta del graphQL", res);
           // Extraer los datos del resumen de citas
           if (res?.data?.perfilCompletoUsuario) {
             this.resumenCitas = {
@@ -61,7 +60,8 @@ export class PerfilComponent implements OnInit {
             };
           }
         },
-        error: () => {
+        error: (err) => {
+          console.error("Error al cargar perfil desde GraphQL:", err);
           this.perfilGraphQL = [];
           // Mantener valores en 0 en caso de error
         }
@@ -136,6 +136,67 @@ export class PerfilComponent implements OnInit {
         console.error('Error al actualizar el perfil:', err);
         this.isSaving = false;
         this.saveMessage = 'Error al actualizar el perfil. Por favor, inténtalo de nuevo.';
+      }
+    });
+  }
+
+  ResumenPDF(): void {
+    // Mostrar mensaje de carga
+    this.saveMessage = 'Generando informe PDF...';
+    this.isSaving = true;
+
+    // Usar GraphQL directamente para generar el PDF
+    this.userGraphQl.generar_informe_pdf().subscribe({
+      next: (response) => {
+        if (response.success) {
+          // Convertir base64 a Blob
+          const byteCharacters = atob(response.pdfBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+          // Crear enlace de descarga
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = response.nombreArchivo;
+
+          // Simular click para descargar
+          document.body.appendChild(link);
+          link.click();
+
+          // Limpiar
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          this.isSaving = false;
+          this.saveMessage = '¡Informe PDF generado exitosamente!';
+
+          // Limpiar mensaje después de 3 segundos
+          setTimeout(() => {
+            this.saveMessage = '';
+          }, 3000);
+        } else {
+          // Error desde el servidor
+          this.isSaving = false;
+          this.saveMessage = response.mensaje || 'Error al generar el informe PDF.';
+
+          setTimeout(() => {
+            this.saveMessage = '';
+          }, 5000);
+        }
+      },
+      error: (err) => {
+        console.error('Error al generar el PDF:', err);
+        this.isSaving = false;
+        this.saveMessage = 'Error al generar el informe PDF. Por favor, inténtalo de nuevo.';
+
+        setTimeout(() => {
+          this.saveMessage = '';
+        }, 5000);
       }
     });
   }

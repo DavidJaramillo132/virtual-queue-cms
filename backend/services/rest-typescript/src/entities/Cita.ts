@@ -15,8 +15,8 @@ export class Cita {
   @Column("uuid", { nullable: false })
   negocio_id!: string;
 
-  @Column("uuid", { nullable: true })
-  estacion_id?: string;
+  @Column("uuid", { nullable: false })
+  estacion_id!: string;
 
   @Column("uuid", { nullable: false })
   servicio_id!: string;
@@ -55,11 +55,11 @@ export class Cita {
   negocio!: Negocio;
 
   @ManyToOne(() => Estacion, (estacion) => estacion.citas, {
-    nullable: true,
-    onDelete: "SET NULL"
+    nullable: false,
+    onDelete: "RESTRICT"
   })
   @JoinColumn({ name: "estacion_id" })
-  estacion?: Estacion;
+  estacion!: Estacion;
 
   @ManyToOne(() => Servicio, (servicio) => servicio.citas, {
     onDelete: "RESTRICT"

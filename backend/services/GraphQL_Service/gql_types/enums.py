@@ -3,25 +3,17 @@ import strawberry
 
 @strawberry.enum
 class Rol(Enum):
-    USUARIO = "USUARIO"
-    ADMIN_NEGOCIO = "ADMIN_NEGOCIO"
-    ADMIN_SISTEMA = "ADMIN_SISTEMA"
+    CLIENTE = "cliente"
+    NEGOCIO = "negocio"
+    ADMIN_SISTEMA = "admin_sistema"
 
 @strawberry.enum
-class Estado(Enum):
-    PENDIENTE = "PENDIENTE"
-    ATENDIDA = "ATENDIDA"
-    CANCELADA = "CANCELADA"
+class EstadoCita(Enum):
+    PENDIENTE = "pendiente"
+    ATENDIDA = "atendida"
+    CANCELADA = "cancelada"
 
 @strawberry.enum
 class EstadoEstacion(Enum):
-    DISPONIBLE = "DISPONIBLE"
-    OCUPADA = "OCUPADA"
-    MANTENIMIENTO = "MANTENIMIENTO"
-
-@strawberry.enum
-class EstadoFila(Enum):
-    ESPERANDO = "ESPERANDO"
-    EN_ATENCION = "EN_ATENCION"
-    ATENDIDO = "ATENDIDO"
-    CANCELADO = "CANCELADO"
+    ACTIVA = "activa"
+    INACTIVA = "inactiva"

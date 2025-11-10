@@ -20,13 +20,14 @@ class ResumenNegocio:
 @strawberry.type
 class Negocio:
     id: str
-    admin_negocio_id: str | None = None
-    nombre: str = ""
-    categoria: str = ""
-    descripcion: str | None = None
-    telefono: str | None = None
-    correo: str | None = None
-    imagen_url: str | None = None
-    estado: bool = True
-    hora_atencion: str | None = None
-    creadoEn: datetime | None = None
+    admin_negocio_id: Optional[str] = None
+    nombre: str
+    categoria: str
+    descripcion: Optional[str] = None
+    telefono: Optional[str] = None
+    correo: Optional[str] = None
+    direccion: Optional[str] = None
+    imagen_url: Optional[str] = None
+    estado: bool
+    horario_general: Optional[str] = None
+    creado_en: datetime

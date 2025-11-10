@@ -1,5 +1,12 @@
 import strawberry
-from gql_types.enums import EstadoEstacion
+from typing import Optional
+from datetime import datetime
+from enum import Enum
+
+@strawberry.enum
+class EstadoEstacion(Enum):
+    ACTIVA = "activa"
+    INACTIVA = "inactiva"
 
 @strawberry.type
 class EstacionDTO:
@@ -10,6 +17,8 @@ class EstacionDTO:
 @strawberry.type
 class Estacion:
     id: str
+    negocio_id: str
     nombre: str
-    ubicacion: str
+    tipo: Optional[str] = None
     estado: EstadoEstacion
+    creado_en: datetime

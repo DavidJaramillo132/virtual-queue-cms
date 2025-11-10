@@ -1,12 +1,12 @@
 import strawberry
 from typing import Optional
-from datetime import time
+from datetime import time, datetime
 
 @strawberry.type
 class HorarioAtencion:
     id: str
-    negocio_id: str
+    estacion_id: str
     dia_semana: int
-    inicio: time
-    fin: time
-    activo: bool
+    hora_inicio: time
+    hora_fin: time
+    creado_en: datetime

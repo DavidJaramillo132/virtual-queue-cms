@@ -2,12 +2,12 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CitaService } from '../../../services/Rest/cita-services';
+import { UserService } from '../../../services/Rest/userServices';
 import { ICita } from '../../../domain/entities';
 
 interface CitaExtendida extends ICita {
   nombreCliente?: string;
   nombreServicio?: string;
-  posicionFila?: number;
 }
 
 @Component({
@@ -23,8 +23,18 @@ export class CitasComponent implements OnInit {
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
   citas = signal<CitaExtendida[]>([]);
+  private negocioId: string = '';
 
-  constructor(private citaService: CitaService) {}
+  constructor(
+    private citaService: CitaService,
+    private userService: UserService
+  ) {
+    // Obtener el negocio_id del usuario autenticado
+    const currentUser = this.userService.currentUserValue;
+    if (currentUser && currentUser.negocio_id) {
+      this.negocioId = currentUser.negocio_id;
+    }
+  }
 
   ngOnInit() {
     this.cargarCitas();
@@ -33,7 +43,15 @@ export class CitasComponent implements OnInit {
   cargarCitas() {
     this.isLoading.set(true);
     this.errorMessage.set('');
-    this.citaService.getAllCitas().subscribe({
+    
+    if (!this.negocioId) {
+      this.errorMessage.set('No se encontró el negocio del usuario');
+      this.isLoading.set(false);
+      return;
+    }
+    
+    // Cargar solo las citas del negocio del usuario
+    this.citaService.getCitasByNegocio(this.negocioId).subscribe({
       next: (data) => {
         this.citas.set(data);
         this.isLoading.set(false);

@@ -47,18 +47,52 @@ export class CitaController {
         res.status(400).json({ error: 'El campo "servicio_id" es requerido' });
         return;
       }
+
+      if (!data.estacion_id) {
+        res.status(400).json({ error: 'El campo "estacion_id" es requerido. Debe seleccionar una fila (estación).' });
+        return;
+      }
       
       const created = await citaRepo.create(data);
       res.status(201).json(created);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating cita:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      // Enviar mensaje de error más descriptivo
+      const errorMessage = error.message || 'Internal server error';
+      res.status(500).json({ 
+        error: 'Error al crear la cita',
+        message: errorMessage,
+        details: error.detail || error.driverError?.detail
+      });
     }
   }
 
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const items = await citaRepo.getAll();
+      const { negocio_id, estacion_id, cliente_id } = req.query;
+      
+      let items: Cita[];
+      
+      // Filtrar por negocio
+      if (negocio_id && typeof negocio_id === 'string') {
+        items = await citaRepo.getByNegocioId(negocio_id);
+      }
+      // Filtrar por estación
+      else if (estacion_id && typeof estacion_id === 'string') {
+        items = await citaRepo.getByEstacionId(estacion_id);
+      }
+      // Filtrar por cliente
+      else if (cliente_id && typeof cliente_id === 'string') {
+        items = await citaRepo.getByClienteId(cliente_id);
+      }
+      // Sin filtros, devolver todas
+      else {
+        items = await citaRepo.getAll();
+      }
+      
       res.json(items);
     } catch (error) {
       console.error('Error fetching citas:', error);

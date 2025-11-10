@@ -17,14 +17,20 @@ func HandleConnections(h *hub.Hub, w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 	claims, err := utils.ValidarJWT(token)
 	if err != nil {
-		http.Error(w, "Token inválido", http.StatusUnauthorized)
-		log.Println("Conexión rechazada: token inválido")
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		log.Println("Connection rejected: invalid token -", err)
 		return
 	}
 
-	userID, ok := claims["user_id"].(string)
-	if !ok || userID == "" {
-		http.Error(w, "Token inválido: sin user_id", http.StatusUnauthorized)
+	// Try to get userID from different fields (REST API compatibility)
+	var userID string
+	if id, ok := claims["id"].(string); ok && id != "" {
+		userID = id // REST API TypeScript token
+	} else if uid, ok := claims["user_id"].(string); ok && uid != "" {
+		userID = uid // WebSocket Go token
+	} else {
+		http.Error(w, "Invalid token: no user_id or id", http.StatusUnauthorized)
+		log.Println("Connection rejected: no user_id or id in claims")
 		return
 	}
 
@@ -34,13 +40,18 @@ func HandleConnections(h *hub.Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &hub.Client{
-		ID:   userID,
-		Conn: conn,
-		Hub:  h,
-	}
+	client := hub.NewClient(userID, conn, h)
 
 	h.Register <- client
+
+	// Start goroutines for read and write
 	go client.ReadPump()
-	log.Printf("✅ Cliente conectado: %s, rol: %v\n", userID, claims["rol"])
+	go client.WritePump()
+
+	log.Printf("Client connected: %s", userID)
+}
+
+// ServeWs is an alias for HandleConnections (compatibility)
+func ServeWs(h *hub.Hub, w http.ResponseWriter, r *http.Request) {
+	HandleConnections(h, w, r)
 }

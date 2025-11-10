@@ -1,7 +1,14 @@
 import strawberry
 from typing import List, Optional
 from datetime import datetime
-from gql_types.enums import Rol
+from enum import Enum
+from gql_types.negocio_types import Negocio
+
+@strawberry.enum
+class Rol(Enum):
+    CLIENTE = "cliente"
+    NEGOCIO = "negocio"
+    ADMIN_SISTEMA = "admin_sistema"
 
 @strawberry.type
 class CitaInfo:
@@ -18,7 +25,7 @@ class PerfilCompletoUsuario:
     id: str
     nombreCompleto: str
     email: str
-    telefono: str
+    telefono: Optional[str] = None
     totalCitas: int
     citasCompletadas: int
     citasPendientes: int
@@ -31,5 +38,6 @@ class Usuario:
     password: str
     rol: Rol
     telefono: Optional[str] = None
+    nombre_completo: str
     creadoEn: datetime
-    nombreCompleto: str
+    negocios: List[Negocio] = strawberry.field(default_factory=list)

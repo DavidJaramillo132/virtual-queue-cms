@@ -40,8 +40,8 @@ export class AuthController {
 
             // Obtener negocio_id si el usuario es de tipo negocio
             let negocio_id = null;
-            if (usuario.rol === 'negocio' && usuario.negociosAdministrados && usuario.negociosAdministrados.length > 0) {
-                negocio_id = usuario.negociosAdministrados[0].id;
+            if (usuario.rol === 'negocio' && usuario.negocios && usuario.negocios.length > 0) {
+                negocio_id = usuario.negocios[0].id;
             }
 
             res.json({

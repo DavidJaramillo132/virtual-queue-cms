@@ -5,6 +5,7 @@ import { NegocioInfoComponent } from './negocio-info/negocio-info';
 import { ServiciosComponent } from './servicios/servicios';
 import { HorariosComponent } from './horarios/horarios';
 import { CitasComponent } from './citas/citas';
+import { EstacionesComponent } from './estaciones/estaciones';
 
 @Component({
   selector: 'app-admin-local',
@@ -15,7 +16,8 @@ import { CitasComponent } from './citas/citas';
     NegocioInfoComponent,
     ServiciosComponent,
     HorariosComponent,
-    CitasComponent
+    CitasComponent,
+    EstacionesComponent
   ],
   templateUrl: './admin-local.html',
   styleUrls: ['./admin-local.css']
