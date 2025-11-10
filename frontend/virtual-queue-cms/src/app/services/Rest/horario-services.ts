@@ -36,7 +36,8 @@ export class HorarioService {
    * Obtiene horarios por estación
    */
   getHorariosByEstacion(estacionId: string): Observable<IHorarioAtencion[]> {
-    return this.http.get<IHorarioAtencion[]>(`${this.apiUrl}?estacion_id=${estacionId}`).pipe(
+    const headers = this.getAuthHeaders();
+    return this.http.get<IHorarioAtencion[]>(`${this.apiUrl}?estacion_id=${estacionId}`, { headers } ).pipe(
       catchError(this.handleError)
     );
   }

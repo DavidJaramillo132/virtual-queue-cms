@@ -51,11 +51,13 @@ export class Login {
           
           this.loginForm.reset();
           this.loading = false;
-          
-          // Redirigir después de un breve delay
-          setTimeout(() => {
+          console.log("negocio id", res.user.rol);
+          if (res.user.rol == 'negocio'){
+            this.router.navigate(['/admin-local'])
+          }else{
             this.router.navigate(['/home']);
-          }, 1000);
+          }
+
         } else {
           this.errorMessage = res.message || 'Error en el inicio de sesión.';
           this.loading = false;

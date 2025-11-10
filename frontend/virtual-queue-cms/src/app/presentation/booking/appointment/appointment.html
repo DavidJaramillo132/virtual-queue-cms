@@ -57,14 +57,18 @@
         formControlName="estacion_id"
         class="border p-2 rounded w-full"
         [class.border-red-500]="nuevaCitaForm.get('estacion_id')?.invalid && nuevaCitaForm.get('estacion_id')?.touched"
+        [disabled]="estaciones.length === 0"
       >
         <option value="">-- Seleccione una fila --</option>
         <option *ngFor="let estacion of estaciones" [value]="estacion.id">
           {{ estacion.nombre }} {{ estacion.tipo ? '(' + estacion.tipo + ')' : '' }}
         </option>
       </select>
-      <p *ngIf="estaciones.length === 0" class="text-sm text-gray-500 mt-1">
-        No hay filas disponibles. El negocio debe crear al menos una estación.
+      <p *ngIf="estaciones.length === 0" class="text-sm text-red-500 mt-1 font-medium">
+        Este negocio aún no ha creado filas de atención. Por favor, contacte al negocio.
+      </p>
+      <p *ngIf="estaciones.length > 0" class="text-sm text-gray-500 mt-1">
+        Solo puede ver las filas de atención de este negocio
       </p>
     </label>
   </div>

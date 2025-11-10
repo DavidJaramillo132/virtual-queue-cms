@@ -138,29 +138,6 @@ internal/
 - Buffer de mensajes de 256 por cliente
 - Graceful shutdown
 
-## 🧪 Testing
-
-### Test manual con HTML
-
-```html
-<!-- test.html -->
-<script>
-  const ws = new WebSocket('ws://localhost:8080/ws?token=YOUR_JWT_TOKEN');
-  
-  ws.onopen = () => {
-    console.log('Connected');
-    ws.send(JSON.stringify({
-      type: 'subscribe',
-      data: { channel: 'estadisticas:negocio_123' }
-    }));
-  };
-  
-  ws.onmessage = (event) => {
-    console.log('Message:', JSON.parse(event.data));
-  };
-</script>
-```
-
 ## 🔄 Flujo de datos
 
 ```mermaid

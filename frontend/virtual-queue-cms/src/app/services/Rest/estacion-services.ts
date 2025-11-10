@@ -38,7 +38,7 @@ export class EstacionServices {
    */
   getEstacionesByNegocio(negocioId: string): Observable<IEstacion[]> {
     const headers = this.getAuthHeaders();
-    return this.http.get<IEstacion[]>(`${this.apiUrl}?negocio_id=${negocioId}`, { headers }).pipe(
+    return this.http.get<IEstacion[]>(`${this.apiUrl}/negocio/${negocioId}`, { headers }).pipe(
       catchError(this.handleError)
     );
   }
