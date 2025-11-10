@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faCalendar, faUsers, faClock, faChartLine, faCheck, faTimes, faCircle } from '@fortawesome/free-solid-svg-icons';
 import { EstadisticasService } from '../../../services/estadisticas.service';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData } from 'chart.js';
 interface EstadisticasData {
   totalCitas: number;
   citasHoy: number;
@@ -16,7 +18,7 @@ interface EstadisticasData {
 @Component({
   selector: 'app-estadisticas',
   standalone: true,
-  imports: [CommonModule, FontAwesomeModule],
+  imports: [CommonModule, FontAwesomeModule, BaseChartDirective],
   templateUrl: './estadisticas.html',
   styleUrls: ['./estadisticas.css']
 })
@@ -46,6 +48,92 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
 
   isConnected = signal<boolean>(false);
   lastUpdate = signal<Date>(new Date());
+
+  // Configuración del gráfico de pastel (Estado de Citas)
+  public pieChartData = signal<ChartData<'pie'>>({
+    labels: ['Completadas', 'Canceladas', 'Pendientes'],
+    datasets: [{
+      data: [0, 0, 0],
+      backgroundColor: [
+        'rgba(34, 197, 94, 0.8)',  // Verde
+        'rgba(239, 68, 68, 0.8)',  // Rojo
+        'rgba(59, 130, 246, 0.8)'  // Azul
+      ],
+      borderColor: [
+        'rgba(34, 197, 94, 1)',
+        'rgba(239, 68, 68, 1)',
+        'rgba(59, 130, 246, 1)'
+      ],
+      borderWidth: 1
+    }]
+  });
+
+  public pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom'
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            return `${label}: ${value} citas`;
+          }
+        }
+      }
+    }
+  };
+
+  // Configuración del gráfico de barras (Resumen)
+  public barChartData = signal<ChartData<'bar'>>({
+    labels: ['Total', 'Hoy', 'Completadas', 'Canceladas'],
+    datasets: [{
+      label: 'Citas',
+      data: [0, 0, 0, 0],
+      backgroundColor: [
+        'rgba(99, 102, 241, 0.8)',  // Índigo
+        'rgba(59, 130, 246, 0.8)',  // Azul
+        'rgba(34, 197, 94, 0.8)',   // Verde
+        'rgba(239, 68, 68, 0.8)'    // Rojo
+      ],
+      borderColor: [
+        'rgba(99, 102, 241, 1)',
+        'rgba(59, 130, 246, 1)',
+        'rgba(34, 197, 94, 1)',
+        'rgba(239, 68, 68, 1)'
+      ],
+      borderWidth: 1
+    }]
+  });
+
+  public barChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            return `${context.parsed.y} citas`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
+  };
 
   ngOnInit() {
     this.conectarWebSocket();
@@ -96,6 +184,9 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
             citasCanceladas: citasCanceladas
           }));
           
+          // Actualizar gráficos
+          this.actualizarGraficos(totalCitas, citasHoy, citasCompletadas, citasCanceladas);
+          
           // Actualizar timestamp
           this.lastUpdate.set(new Date());
         },
@@ -138,5 +229,54 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
   reconectar() {
     this.estadisticasService.desconectar();
     this.conectarWebSocket();
+  }
+
+  /**
+   * Actualiza los gráficos con los nuevos datos
+   */
+  private actualizarGraficos(total: number, hoy: number, completadas: number, canceladas: number) {
+    // Calcular pendientes (total - completadas - canceladas)
+    const pendientes = Math.max(0, total - completadas - canceladas);
+
+    // Actualizar gráfico de pastel
+    this.pieChartData.set({
+      labels: ['Completadas', 'Canceladas', 'Pendientes'],
+      datasets: [{
+        data: [completadas, canceladas, pendientes],
+        backgroundColor: [
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+          'rgba(59, 130, 246, 0.8)'
+        ],
+        borderColor: [
+          'rgba(34, 197, 94, 1)',
+          'rgba(239, 68, 68, 1)',
+          'rgba(59, 130, 246, 1)'
+        ],
+        borderWidth: 1
+      }]
+    });
+
+    // Actualizar gráfico de barras
+    this.barChartData.set({
+      labels: ['Total', 'Hoy', 'Completadas', 'Canceladas'],
+      datasets: [{
+        label: 'Citas',
+        data: [total, hoy, completadas, canceladas],
+        backgroundColor: [
+          'rgba(99, 102, 241, 0.8)',
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(239, 68, 68, 0.8)'
+        ],
+        borderColor: [
+          'rgba(99, 102, 241, 1)',
+          'rgba(59, 130, 246, 1)',
+          'rgba(34, 197, 94, 1)',
+          'rgba(239, 68, 68, 1)'
+        ],
+        borderWidth: 1
+      }]
+    });
   }
 }

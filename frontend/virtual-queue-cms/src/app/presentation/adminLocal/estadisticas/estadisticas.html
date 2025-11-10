@@ -83,4 +83,33 @@
       </div>
     </div>
   </div>
+
+  <!-- Sección de gráficos -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <!-- Gráfico de Barras -->
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Resumen General</h3>
+      <div class="h-64">
+        <canvas 
+          baseChart
+          [data]="barChartData()"
+          [options]="barChartOptions"
+          type="bar">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Gráfico de Pastel -->
+    <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado de Citas</h3>
+      <div class="h-64">
+        <canvas 
+          baseChart
+          [data]="pieChartData()"
+          [options]="pieChartOptions"
+          type="pie">
+        </canvas>
+      </div>
+    </div>
+  </div>
 </div>
