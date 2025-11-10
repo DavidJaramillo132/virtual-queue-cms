@@ -4,7 +4,8 @@ Servidor WebSocket implementado en Go para proporcionar actualizaciones en tiemp
 
 ## 🚀 Características
 
-- ✅ Actualizaciones en tiempo real cada 5 segundos
+- ✅ Actualizaciones en tiempo real cuando se crean/actualizan/cancelan citas
+- ✅ Notificaciones instantáneas desde el REST API (sin polling)
 - ✅ Autenticación JWT
 - ✅ Subscripción por canales (por negocio)
 - ✅ Reconexión automática
@@ -82,7 +83,7 @@ const ws = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
 }
 ```
 
-### Recibir estadísticas
+### Recibir estadísticas (actualizaciones en tiempo real)
 
 ```json
 {
@@ -97,6 +98,27 @@ const ws = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
   }
 }
 ```
+
+## 🔔 Endpoint de Notificaciones (REST API)
+
+El servidor WebSocket expone un endpoint HTTP para recibir notificaciones del REST API cuando se crean, actualizan o cancelan citas:
+
+### POST `/notify/cita`
+
+**Body:**
+```json
+{
+  "negocio_id": "uuid-del-negocio",
+  "action": "created" // "created", "updated", "deleted", "status_changed"
+}
+```
+
+**Response:**
+- `200 OK`: Notificación procesada correctamente
+- `400 Bad Request`: Datos inválidos
+- `500 Internal Server Error`: Error al obtener estadísticas
+
+Este endpoint es llamado automáticamente por el REST API cuando se realizan cambios en las citas. No es necesario llamarlo manualmente desde el frontend.
 
 ## 🏗️ Arquitectura
 
@@ -132,55 +154,37 @@ internal/
 
 ## 📈 Optimizaciones
 
-- Polling cada 5 segundos (ajustable)
+- Actualizaciones en tiempo real (sin polling innecesario)
+- Notificaciones solo cuando hay cambios reales
 - Query optimizado con `FILTER` en PostgreSQL
 - Broadcast solo a clientes suscritos
 - Buffer de mensajes de 256 por cliente
 - Graceful shutdown
 
-## 🧪 Testing
-
-### Test manual con HTML
-
-```html
-<!-- test.html -->
-<script>
-  const ws = new WebSocket('ws://localhost:8080/ws?token=YOUR_JWT_TOKEN');
-  
-  ws.onopen = () => {
-    console.log('Connected');
-    ws.send(JSON.stringify({
-      type: 'subscribe',
-      data: { channel: 'estadisticas:negocio_123' }
-    }));
-  };
-  
-  ws.onmessage = (event) => {
-    console.log('Message:', JSON.parse(event.data));
-  };
-</script>
-```
-
 ## 🔄 Flujo de datos
 
 ```mermaid
 graph LR
-    A[Base de Datos] -->|Polling 5s| B[Estadisticas Service]
-    B --> C[Hub]
-    C --> D[Client 1]
-    C --> E[Client 2]
-    C --> F[Client N]
-    D --> G[Frontend Angular]
-    E --> G
-    F --> G
+    A[Frontend] -->|Crea/Actualiza Cita| B[REST API]
+    B -->|Notifica| C[WebSocket Server]
+    C -->|Consulta BD| D[Base de Datos]
+    D -->|Estadísticas| C
+    C -->|Broadcast| E[Hub]
+    E -->|Mensaje WebSocket| F[Client 1]
+    E -->|Mensaje WebSocket| G[Client 2]
+    E -->|Mensaje WebSocket| H[Client N]
+    F -->|Actualiza UI| I[Frontend Angular]
+    G -->|Actualiza UI| I
+    H -->|Actualiza UI| I
 ```
 
 ## 📝 Notas
 
 - El servidor funciona independientemente del REST API
-- Si el REST está caído, las estadísticas siguen actualizándose
+- Las actualizaciones se envían solo cuando hay cambios reales (creación, actualización, cancelación de citas)
 - Conexión persistente con reconexión automática
 - Compatible con múltiples negocios simultáneamente
+- El REST API debe estar configurado para notificar al WebSocket cuando se realizan cambios en las citas
 
 ## 🐛 Troubleshooting
 

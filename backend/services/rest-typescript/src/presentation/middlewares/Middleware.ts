@@ -13,7 +13,6 @@ declare global {
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // Extraer el token del header Authorization
   const authHeader = req.headers.authorization;
-  
   if (!authHeader) {
     return res.status(401).json({ message: 'Token no proporcionado' });
   }

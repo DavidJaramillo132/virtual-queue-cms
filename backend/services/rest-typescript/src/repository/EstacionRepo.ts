@@ -33,4 +33,11 @@ export class EstacionRepo {
   async getById(id: string): Promise<Estacion | null> {
     return this.repo.findOneBy({ id });
   }
+
+  async getByNegocioId(negocio_id: string): Promise<Estacion[]> {
+    return this.repo.find({
+      where: { negocio_id },
+      order: { nombre: 'ASC' }
+    });
+  }
 }

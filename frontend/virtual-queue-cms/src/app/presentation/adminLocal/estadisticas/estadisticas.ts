@@ -169,11 +169,15 @@ export class EstadisticasComponent implements OnInit, OnDestroy {
     this.estadisticasService.obtenerEstadisticasEnTiempoReal(token, negocioId)
       .subscribe({
         next: (stats: any) => {
+          console.log('📊 Estadísticas recibidas:', stats);
+          
           // Extraer valores con múltiples formatos posibles
           const totalCitas = stats.total_citas || stats.totalCitas || 0;
           const citasHoy = stats.citas_hoy || stats.citasHoy || 0;
           const citasCompletadas = stats.citas_completadas || stats.citasCompletadas || 0;
           const citasCanceladas = stats.citas_canceladas || stats.citasCanceladas || 0;
+          
+          console.log(`📈 Valores extraídos: total=${totalCitas}, hoy=${citasHoy}, completadas=${citasCompletadas}, canceladas=${citasCanceladas}`);
           
           // Actualizar las estadísticas
           this.estadisticas.update(current => ({

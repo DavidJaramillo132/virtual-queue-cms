@@ -11,6 +11,12 @@
       </button>
     </div>
 
+    <!-- Info importante -->
+    <div class="mb-4 p-4 bg-blue-50 text-blue-800 rounded-lg border border-blue-200">
+      <p class="font-medium">Información importante:</p>
+      <p class="text-sm mt-1">Las estaciones (filas) son necesarias para que los clientes puedan agendar citas. Cada cita debe ser asignada a una estación específica. Los clientes solo verán las estaciones activas de su negocio.</p>
+    </div>
+
     <!-- Mensajes -->
     <div *ngIf="errorMessage()" class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
       <strong>Error:</strong> {{ errorMessage() }}

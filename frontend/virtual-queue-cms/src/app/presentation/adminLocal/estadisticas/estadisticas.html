@@ -15,9 +15,7 @@
             [ngClass]="isConnected() ? 'text-green-500 animate-pulse' : 'text-red-500'"
             class="text-xs">
           </fa-icon>
-          <span class="text-sm font-medium" [ngClass]="isConnected() ? 'text-green-600' : 'text-red-600'">
-            {{ isConnected() ? 'Conectado' : 'Desconectado' }}
-          </span>
+
         </div>
         
         <!-- Botón de reconexión (solo visible si está desconectado) -->

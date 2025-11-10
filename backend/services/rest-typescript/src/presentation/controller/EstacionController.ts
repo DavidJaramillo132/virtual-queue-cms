@@ -71,4 +71,15 @@ export class EstacionController {
       res.status(500).json({ error: 'Internal server error' });
     }
   }
+
+  async getByNegocioId(req: Request, res: Response): Promise<void> {
+    const { negocioId } = req.params;
+    try {
+      const items = await estacionRepo.getByNegocioId(negocioId);
+      res.json(items);
+    } catch (error) {
+      console.error(`Error fetching estaciones for negocio ${negocioId}:`, error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
 }

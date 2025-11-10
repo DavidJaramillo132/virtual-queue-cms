@@ -65,7 +65,10 @@ export class WebsocketService {
         }
       })
     ).subscribe({
-      next: (message) => this.messagesSubject$.next(message),
+      next: (message) => {
+        console.log('📨 Mensaje WebSocket recibido:', message);
+        this.messagesSubject$.next(message);
+      },
       error: (error) => {
         console.error('WebSocket error:', error);
         this.connectionStatus$.next(false);
@@ -133,8 +136,19 @@ export class WebsocketService {
    */
   filterByType<T>(messageType: string): Observable<T> {
     return this.messages$.pipe(
-      filter(msg => msg.type === messageType),
-      map(msg => msg.data as T)
+      filter(msg => {
+        const matches = msg.type === messageType;
+        if (!matches) {
+          console.log(`🔍 Mensaje filtrado (tipo: ${msg.type}, esperado: ${messageType}):`, msg);
+        } else {
+          console.log(`✅ Mensaje de tipo '${messageType}' encontrado:`, msg);
+        }
+        return matches;
+      }),
+      map(msg => {
+        console.log(`📦 Extrayendo data del mensaje:`, msg.data);
+        return msg.data as T;
+      })
     );
   }
 
