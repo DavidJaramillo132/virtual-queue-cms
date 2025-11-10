@@ -73,22 +73,15 @@ func (c *Client) WritePump() {
 		c.Conn.Close()
 	}()
 
-	for {
-		select {
-		case message, ok := <-c.send:
-			if !ok {
-				// Channel was closed
-				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-
-			err := c.Conn.WriteMessage(websocket.TextMessage, message)
-			if err != nil {
-				log.Printf("Error sending message to client %s: %v", c.ID, err)
-				return
-			}
+	for message := range c.send {
+		if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			log.Printf("Error sending message to client %s: %v", c.ID, err)
+			return
 		}
 	}
+
+	// Channel closed, send close message to the client
+	c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 }
 
 func (c *Client) SendJSON(msg models.Message) {

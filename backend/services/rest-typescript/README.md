@@ -18,6 +18,7 @@ Crear un archivo `.env` en esta carpeta con las siguientes variables mínimas:
 - `DB_PASS` - contraseña de la DB
 - `DB_NAME` - nombre de la base de datos
 - `JWT_SECRET` - secreto para firmar y verificar JWTs
+- `WEBSOCKET_URL` - (opcional) URL del servidor WebSocket para notificaciones en tiempo real. Por defecto: `http://websocket-server:8080` (Docker) o `http://localhost:8080` (local)
 
 Ejemplo de `.env`:
 
@@ -29,7 +30,13 @@ DB_USER=postgres
 DB_PASS=postgres
 DB_NAME=virtual_queue_dev
 JWT_SECRET=mi_secreto_seguro
+WEBSOCKET_URL=http://localhost:8080
 ```
+
+**Nota sobre WEBSOCKET_URL:**
+- En Docker: usar `http://websocket-server:8080` (nombre del servicio)
+- En desarrollo local: usar `http://localhost:8080`
+- Si no se especifica, se usa `http://websocket-server:8080` por defecto
 
 > Nota: `synchronize: true` está activado en `src/database/database.ts` para desarrollo. No lo uses en producción.
 
@@ -41,11 +48,15 @@ Rutas montadas en `/api`:
 - `/api/estaciones` — CRUD estaciones
 - `/api/horarios` — CRUD horarios de atención
 - `/api/servicios` — CRUD servicios
-- `/api/citas` — CRUD citas
+- `/api/citas` — CRUD citas (notifica automáticamente al WebSocket cuando se crean/actualizan/eliminan)
 - `/api/filas` — CRUD filas
 - `/api/admins` — CRUD administradores del sistema
 
 Protección: la mayoría de las rutas (GET/PUT/DELETE) están protegidas por JWT mediante `authMiddleware`. El POST de creación quedó público por defecto (registro/creación). Ajusta según tus reglas de seguridad.
+
+### Notificaciones en tiempo real
+
+Cuando se crean, actualizan o eliminan citas a través de `/api/citas`, el servicio automáticamente notifica al servidor WebSocket para que los clientes suscritos reciban actualizaciones en tiempo real de las estadísticas. Esto permite que el frontend se actualice instantáneamente sin necesidad de polling.
 
 ## Desarrollo y pruebas
 
