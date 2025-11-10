@@ -1,0 +1,30 @@
+# Build stage
+FROM golang:1.21-alpine AS builder
+
+WORKDIR /app
+
+# Copiar archivos de módulos
+COPY go.mod ./
+RUN go mod download
+
+# Copiar el código fuente
+COPY . .
+
+# Compilar la aplicación
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o websocket-server ./cmd/main.go
+
+# Production stage
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+# Copiar el binario compilado
+COPY --from=builder /app/websocket-server .
+
+# Exponer el puerto
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+CMD ["./websocket-server"]
