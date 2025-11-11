@@ -53,21 +53,21 @@ func (h *Hub) Run() {
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
-				// Remove from all channels
+				// Elimina de todos los canales
 				for canal := range h.channels {
 					delete(h.channels[canal], client)
 				}
-				log.Printf("Client unregistered: %s (Total: %d)", client.ID, len(h.clients))
+				log.Printf("Cliente desregistrado: %s (Total: %d)", client.ID, len(h.clients))
 			}
 
 		case message := <-h.Broadcast:
-			// Broadcast a todos los clientes
+			// Difunde a todos los clientes
 			for client := range h.clients {
 				client.SendJSON(message)
 			}
 
 		case data := <-h.broadcast:
-			// Broadcast de bytes a todos
+			// Difusión de bytes a todos
 			for client := range h.clients {
 				err := client.Conn.WriteMessage(websocket.TextMessage, data)
 				if err != nil {
@@ -100,15 +100,15 @@ func (h *Hub) sendInitialStats(client *Client, negocioID string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	log.Printf("📊 Obteniendo estadísticas iniciales para negocio %s (cliente %s)", negocioID, client.ID)
-	
+	log.Printf("Obteniendo estadísticas iniciales para negocio %s (cliente %s)", negocioID, client.ID)
+
 	statsData, err := h.statsProvider(ctx, negocioID)
 	if err != nil {
-		log.Printf("❌ Error getting initial stats for negocio %s: %v", negocioID, err)
+		log.Printf("Error obteniendo estadísticas iniciales para negocio %s: %v", negocioID, err)
 		return
 	}
 
-	log.Printf("✅ Estadísticas obtenidas para negocio %s: %+v", negocioID, statsData)
+	log.Printf("Estadísticas obtenidas para negocio %s: %+v", negocioID, statsData)
 
 	msg := models.Message{
 		Type: models.MessageTypeStats,
@@ -117,20 +117,20 @@ func (h *Hub) sendInitialStats(client *Client, negocioID string) {
 
 	msgJSON, err := json.Marshal(msg)
 	if err != nil {
-		log.Printf("❌ Error marshaling initial stats: %v", err)
+		log.Printf("Error al codificar estadísticas iniciales: %v", err)
 		return
 	}
 
-	log.Printf("📤 Enviando estadísticas iniciales a cliente %s (tamaño: %d bytes)", client.ID, len(msgJSON))
+	log.Printf("Enviando estadísticas iniciales a cliente %s (tamaño: %d bytes)", client.ID, len(msgJSON))
 
-	// Enviar las estadísticas iniciales al cliente
+	// Envía las estadísticas iniciales al cliente
 	select {
 	case client.send <- msgJSON:
-		log.Printf("✅ Initial stats sent to client %s for negocio %s", client.ID, negocioID)
+		log.Printf("Estadísticas iniciales enviadas al cliente %s para negocio %s", client.ID, negocioID)
 	case <-time.After(2 * time.Second):
-		log.Printf("⚠️ Timeout sending initial stats to client %s (buffer may be full)", client.ID)
+		log.Printf("Timeout enviando estadísticas iniciales al cliente %s (buffer puede estar lleno)", client.ID)
 	default:
-		log.Printf("⚠️ Warning: could not send initial stats to client %s (buffer full)", client.ID)
+		log.Printf("Advertencia: no se pueden enviar estadísticas iniciales al cliente %s (buffer lleno)", client.ID)
 	}
 }
 
@@ -138,35 +138,35 @@ func (h *Hub) sendInitialStats(client *Client, negocioID string) {
 func (h *Hub) BroadcastToChannel(canal string, mensaje []byte) {
 	clients, ok := h.channels[canal]
 	if !ok {
-		log.Printf("⚠️ No hay clientes suscritos al canal: %s", canal)
+		log.Printf("No hay clientes suscritos al canal: %s", canal)
 		return
 	}
 
 	clientCount := len(clients)
-	log.Printf("📡 Enviando mensaje a %d cliente(s) en el canal: %s", clientCount, canal)
+	log.Printf("Enviando mensaje a %d cliente(s) en el canal: %s", clientCount, canal)
 
 	sentCount := 0
 	for client := range clients {
 		select {
 		case client.send <- mensaje:
 			sentCount++
-			log.Printf("✅ Mensaje enviado a cliente %s en canal %s", client.ID, canal)
+			log.Printf("Mensaje enviado a cliente %s en canal %s", client.ID, canal)
 		default:
-			log.Printf("⚠️ Warning: send buffer full for client %s, closing connection", client.ID)
+			log.Printf("Advertencia: buffer de envío lleno para cliente %s, cerrando conexión", client.ID)
 			close(client.send)
 			delete(clients, client)
 		}
 	}
-	
-	log.Printf("📊 Resumen: %d de %d mensajes enviados en canal %s", sentCount, clientCount, canal)
+
+	log.Printf("Resumen: %d de %d mensajes enviados en canal %s", sentCount, clientCount, canal)
 }
 
-// GetNegociosSuscritos returns IDs of businesses with active subscriptions
+// GetNegociosSuscritos devuelve IDs de negocios con suscripciones activas
 func (h *Hub) GetNegociosSuscritos() []string {
 	negocios := make(map[string]bool)
 	for canal := range h.channels {
-		// Channels have format "estadisticas:negocio_id"
-		// "estadisticas:" has 13 characters
+		// Los canales tienen formato "estadisticas:negocio_id"
+		// "estadisticas:" tiene 13 caracteres
 		if len(canal) > 13 && canal[:13] == "estadisticas:" {
 			negocioID := canal[13:]
 			negocios[negocioID] = true

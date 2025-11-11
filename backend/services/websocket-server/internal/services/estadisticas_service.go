@@ -52,14 +52,14 @@ func NewEstadisticasService(connStr string) (*EstadisticasService, error) {
 	maxRetries := 5
 	for i := 0; i < maxRetries; i++ {
 		if err := db.PingContext(ctx); err == nil {
-			fmt.Println("✅ Conexión a base de datos exitosa")
+			fmt.Println("Conexión a base de datos exitosa")
 			return &EstadisticasService{db: db}, nil
 		} else {
-			fmt.Printf("⚠️ Intento %d/%d fallido: %v\n", i+1, maxRetries, err)
+			fmt.Printf("Intento %d/%d fallido: %v\n", i+1, maxRetries, err)
 			if i < maxRetries-1 {
 				time.Sleep(3 * time.Second)
 			} else {
-				return nil, fmt.Errorf("eeeerror conectando a BD después de %d intentos: %w", maxRetries, err)
+				return nil, fmt.Errorf("error conectando a BD después de %d intentos: %w", maxRetries, err)
 			}
 		}
 	}
@@ -79,8 +79,8 @@ func (s *EstadisticasService) ObtenerEstadisticas(ctx context.Context, negocioID
 		WHERE negocio_id = $1
 	`
 
-	fmt.Printf("🔍 Consultando estadísticas para negocio_id: %s\n", negocioID)
-	
+	fmt.Printf("Consultando estadísticas para negocio_id: %s\n", negocioID)
+
 	var stats EstadisticasData
 	err := s.db.QueryRowContext(ctx, query, negocioID).Scan(
 		&stats.TotalCitas,
@@ -89,14 +89,14 @@ func (s *EstadisticasService) ObtenerEstadisticas(ctx context.Context, negocioID
 		&stats.CitasCanceladas,
 	)
 	if err != nil {
-		fmt.Printf("❌ Error consultando estadísticas: %v\n", err)
+		fmt.Printf("Error consultando estadísticas: %v\n", err)
 		return nil, fmt.Errorf("error consultando estadísticas: %w", err)
 	}
 
 	stats.Timestamp = time.Now()
-	fmt.Printf("✅ Estadísticas obtenidas: Total=%d, Hoy=%d, Completadas=%d, Canceladas=%d\n", 
+	fmt.Printf("Estadísticas obtenidas: Total=%d, Hoy=%d, Completadas=%d, Canceladas=%d\n",
 		stats.TotalCitas, stats.CitasHoy, stats.CitasCompletadas, stats.CitasCanceladas)
-	
+
 	return &stats, nil
 }
 

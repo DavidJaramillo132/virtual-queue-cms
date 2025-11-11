@@ -22,12 +22,12 @@ func HandleConnections(h *hub.Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Try to get userID from different fields (REST API compatibility)
+	// Intenta obtener userID de diferentes campos (compatibilidad con REST API)
 	var userID string
 	if id, ok := claims["id"].(string); ok && id != "" {
-		userID = id // REST API TypeScript token
+		userID = id // Token de REST API TypeScript
 	} else if uid, ok := claims["user_id"].(string); ok && uid != "" {
-		userID = uid // WebSocket Go token
+		userID = uid // Token de WebSocket Go
 	} else {
 		http.Error(w, "Invalid token: no user_id or id", http.StatusUnauthorized)
 		log.Println("Connection rejected: no user_id or id in claims")
@@ -44,14 +44,14 @@ func HandleConnections(h *hub.Hub, w http.ResponseWriter, r *http.Request) {
 
 	h.Register <- client
 
-	// Start goroutines for read and write
+	// Inicia goroutines para lectura y escritura
 	go client.ReadPump()
 	go client.WritePump()
 
 	log.Printf("Client connected: %s", userID)
 }
 
-// ServeWs is an alias for HandleConnections (compatibility)
+// ServeWs es un alias para HandleConnections (compatibilidad)
 func ServeWs(h *hub.Hub, w http.ResponseWriter, r *http.Request) {
 	HandleConnections(h, w, r)
 }

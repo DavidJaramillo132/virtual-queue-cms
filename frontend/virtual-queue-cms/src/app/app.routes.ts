@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -24,17 +25,22 @@ export const routes: Routes = [
   {
     path: 'admin-local',
     loadComponent: () =>
-      import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal)
+      import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal),
+    canActivate: [AuthGuard],
+    data: { roles: ['negocio', 'adminSistema'] }
   },
   {
     path: 'admin-general',
     loadComponent: () =>
-      import('./presentation/adminGeneral/admin-general').then(m => m.AdminGeneral)
+      import('./presentation/adminGeneral/admin-general').then(m => m.AdminGeneral),
+    canActivate: [AuthGuard],
+    data: { roles: ['adminSistema'] }
   },
   {
     path: 'perfil',
     loadComponent: () =>
-      import('./presentation/perfil/perfil').then(m => m.PerfilComponent)
+      import('./presentation/perfil/perfil').then(m => m.PerfilComponent),
+    canActivate: [AuthGuard]
   },
   {
     path: 'welcome',
