@@ -40,11 +40,26 @@ export class PerfilComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserProfile();
-    this.loadUserProfileGraphQL();
-  
+    // Solo cargar datos de GraphQL si el usuario es cliente
+    if (this.isCliente()) {
+      this.loadUserProfileGraphQL();
+    }
+  }
+
+  /**
+   * Verifica si el usuario actual es un cliente
+   */
+  isCliente(): boolean {
+    const user = this.getUser();
+    return user?.rol === 'cliente';
   }
 
   loadUserProfileGraphQL() {
+    // Solo cargar si el usuario es cliente
+    if (!this.isCliente()) {
+      return;
+    }
+
     this.userGraphQl.perfil_completo_usuario()
       .subscribe({
         next: (res) => {
@@ -85,14 +100,94 @@ export class PerfilComponent implements OnInit {
   }
 
   getUser(): IUsuario | null {
-    return this.userService.currentUserValue;
+    const user = this.userService.currentUserValue;
+    if (!user) {
+      return null;
+    }
+    
+    // Mapear nombreCompleto a nombre_completo si es necesario
+    const mappedUser: any = { ...user };
+    if (user.nombreCompleto && !user.nombre_completo) {
+      mappedUser.nombre_completo = user.nombreCompleto;
+    }
+    
+    // Mapear creado_en a creadoEn si es necesario
+    if (user.creado_en && !user.creadoEn) {
+      mappedUser.creadoEn = user.creado_en;
+    }
+    
+    // Convertir creadoEn a Date si es un string
+    if (mappedUser.creadoEn && typeof mappedUser.creadoEn === 'string') {
+      mappedUser.creadoEn = new Date(mappedUser.creadoEn);
+    }
+    
+    return mappedUser as IUsuario;
+  }
+
+  /**
+   * Obtiene el nombre completo del usuario, manejando ambos formatos
+   */
+  getUserNombreCompleto(): string {
+    const user = this.getUser();
+    if (!user) {
+      return 'No disponible';
+    }
+    
+    // Intentar obtener nombre_completo primero, luego nombreCompleto
+    const nombre = user.nombre_completo || (user as any).nombreCompleto;
+    return nombre || 'No disponible';
+  }
+
+  /**
+   * Obtiene la fecha de creación del usuario formateada
+   */
+  getFechaCreacion(): string {
+    const user = this.userService.currentUserValue;
+    if (!user) {
+      return 'No disponible';
+    }
+    
+    // Intentar obtener creadoEn de diferentes fuentes (el usuario puede tenerlo en diferentes formatos)
+    const fechaValue = user.creadoEn || (user as any).creado_en || (user as any).created_at;
+    
+    if (!fechaValue) {
+      return 'No disponible';
+    }
+    
+    // Convertir a Date (puede venir como string desde JSON)
+    let fecha: Date;
+    try {
+      if (fechaValue instanceof Date) {
+        fecha = fechaValue;
+      } else {
+        fecha = new Date(fechaValue);
+      }
+      
+      // Verificar que la fecha sea válida
+      if (isNaN(fecha.getTime())) {
+        return 'No disponible';
+      }
+      
+      // Formatear fecha en español
+      return fecha.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Error formateando fecha:', error, fechaValue);
+      return 'No disponible';
+    }
   }
   // Modificar el perfil
   habilitarModoEdicion(): void {
     this.isEditMode = true;
     const currentUser = this.getUser();
     if (currentUser) {
-      this.editedProfile = { ...currentUser };
+      this.editedProfile = { 
+        ...currentUser,
+        nombre_completo: currentUser.nombre_completo || (currentUser as any).nombreCompleto || ''
+      };
     }
   }
 
@@ -111,10 +206,12 @@ export class PerfilComponent implements OnInit {
     }
 
     // Crear el objeto completo con el id del usuario actual
+    // Asegurar que nombre_completo esté presente
     const usuarioActualizado: any = {
       ...currentUser,
       ...this.editedProfile,
-      id: currentUser.id
+      id: currentUser.id,
+      nombre_completo: this.editedProfile.nombre_completo || currentUser.nombre_completo || (currentUser as any).nombreCompleto || ''
     };
 
     this.isSaving = true;
@@ -141,6 +238,15 @@ export class PerfilComponent implements OnInit {
   }
 
   ResumenPDF(): void {
+    // Solo permitir generar PDF si el usuario es cliente
+    if (!this.isCliente()) {
+      this.saveMessage = 'Esta funcionalidad solo está disponible para clientes.';
+      setTimeout(() => {
+        this.saveMessage = '';
+      }, 3000);
+      return;
+    }
+
     // Mostrar mensaje de carga
     this.saveMessage = 'Generando informe PDF...';
     this.isSaving = true;
