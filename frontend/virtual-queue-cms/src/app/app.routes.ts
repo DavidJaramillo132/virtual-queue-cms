@@ -27,14 +27,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal),
     canActivate: [AuthGuard],
-    data: { roles: ['negocio', 'adminSistema'] }
+    data: { roles: ['negocio', 'admin_sistema'] }
   },
   {
     path: 'admin-general',
     loadComponent: () =>
       import('./presentation/adminGeneral/admin-general').then(m => m.AdminGeneral),
     canActivate: [AuthGuard],
-    data: { roles: ['adminSistema'] }
+    data: { roles: ['admin_sistema'] }
   },
   {
     path: 'perfil',

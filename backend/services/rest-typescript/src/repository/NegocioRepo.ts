@@ -26,7 +26,16 @@ export class NegocioRepo {
     return (result.affected ?? 0) > 0;
   }
 
-  async getAll(): Promise<Negocio[]> {
+  async getAll(searchQuery?: string): Promise<Negocio[]> {
+    if (searchQuery) {
+      // Búsqueda por nombre, categoría o correo
+      return this.repo
+        .createQueryBuilder('negocio')
+        .where('negocio.nombre ILIKE :search', { search: `%${searchQuery}%` })
+        .orWhere('negocio.categoria ILIKE :search', { search: `%${searchQuery}%` })
+        .orWhere('negocio.correo ILIKE :search', { search: `%${searchQuery}%` })
+        .getMany();
+    }
     return this.repo.find();
   }
 

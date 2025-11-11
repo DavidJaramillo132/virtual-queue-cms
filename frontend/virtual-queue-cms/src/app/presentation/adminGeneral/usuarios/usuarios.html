@@ -9,7 +9,8 @@
     <div class="flex gap-3">
       <!-- Filtro por rol -->
       <select 
-        [(ngModel)]="filtroRol"
+        [ngModel]="filtroRol()"
+        (ngModelChange)="filtroRol.set($event); onFiltroRolChange()"
         class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent"
       >
         <option value="todos">Todos los roles</option>
@@ -25,7 +26,8 @@
         </div>
         <input 
           type="text" 
-          [(ngModel)]="searchQuery"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
           placeholder="Buscar usuarios..."
           class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent w-64"
         />

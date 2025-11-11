@@ -54,7 +54,27 @@ export class UsuarioController {
 
     async getAllUsuarios(req: Request, res: Response): Promise<void> {
         try {
-            const usuarios = await usuarioRepo.getAll();
+            const { rol } = req.query;
+            let usuarios = await usuarioRepo.getAll();
+            
+            // Filtrar por rol si se proporciona
+            if (rol && typeof rol === 'string') {
+                const rolLower = rol.toLowerCase();
+                // Mapear roles del frontend a roles del backend
+                let rolBackend: string | null = null;
+                if (rolLower === 'admin sistema') {
+                    rolBackend = 'admin_sistema';
+                } else if (rolLower === 'admin local') {
+                    rolBackend = 'negocio'; // En el backend, admin local es 'negocio'
+                } else if (rolLower === 'cliente') {
+                    rolBackend = 'cliente';
+                }
+                
+                if (rolBackend) {
+                    usuarios = usuarios.filter(u => u.rol === rolBackend);
+                }
+            }
+            
             res.json(usuarios);
         } catch (error) {
             console.error("Error fetching usuarios:", error);

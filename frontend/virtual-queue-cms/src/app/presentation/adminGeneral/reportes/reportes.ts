@@ -84,14 +84,15 @@ export class ReportesComponent implements OnInit {
     }
   ]);
 
+  constructor() {}
+
   ngOnInit() {
-    // TODO: Inicialización si es necesaria
+    // Inicialización si es necesaria
   }
 
   descargarReporte(reporte: Reporte) {
-    // TODO: Implementar descarga de reporte
-    // this.reportesService.descargarReporte(reporte.id).subscribe(...)
-    console.log('Descargando reporte:', reporte.titulo);
-    alert(`Descargando reporte: ${reporte.titulo}\n\nEsta funcionalidad se implementará con la conexión al backend.`);
+    // TODO: Implementar con GraphQL
+    console.log('Descargar reporte:', reporte.titulo);
+    alert(`La funcionalidad de reportes se implementará con GraphQL`);
   }
 }

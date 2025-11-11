@@ -9,28 +9,7 @@ import {
   faExclamationTriangle,
   faClock
 } from '@fortawesome/free-solid-svg-icons';
-
-interface EstadisticasGeneralData {
-  totalNegocios: number;
-  negociosActivos: number;
-  totalUsuarios: number;
-  totalCitas: number;
-  crecimiento: number;
-  advertencias: number;
-  negociosConAdvertencias: number;
-}
-
-interface CategoriaNegocio {
-  nombre: string;
-  cantidad: number;
-}
-
-interface ActividadReciente {
-  tipo: 'nuevo_negocio' | 'advertencia' | 'usuario_eliminado';
-  titulo: string;
-  descripcion: string;
-  tiempo: string;
-}
+import { AdminGeneralService, EstadisticasGeneralData, CategoriaNegocio } from '../../../services/Rest/admin-general.service';
 
 @Component({
   selector: 'app-estadisticas-general',
@@ -48,56 +27,60 @@ export class EstadisticasGeneralComponent implements OnInit {
   faExclamationTriangle = faExclamationTriangle;
   faClock = faClock;
 
-  // Data signals - Preparado para conexión a BD
+  // Data signals
   estadisticas = signal<EstadisticasGeneralData>({
-    totalNegocios: 45,
-    negociosActivos: 42,
-    totalUsuarios: 1250,
-    totalCitas: 3420,
-    crecimiento: 12.5,
-    advertencias: 3,
-    negociosConAdvertencias: 3
+    totalNegocios: 0,
+    negociosActivos: 0,
+    totalUsuarios: 0,
+    totalCitas: 0,
+    crecimiento: 0,
+    advertencias: 0,
+    negociosConAdvertencias: 0
   });
 
-  categorias = signal<CategoriaNegocio[]>([
-    { nombre: 'Restaurantes', cantidad: 12 },
-    { nombre: 'Veterinarias', cantidad: 8 },
-    { nombre: 'Hospitales', cantidad: 5 },
-    { nombre: 'Salones de Belleza', cantidad: 10 },
-    { nombre: 'Otros', cantidad: 10 }
-  ]);
+  categorias = signal<CategoriaNegocio[]>([]);
+  loading = signal<boolean>(true);
 
-  actividadReciente = signal<ActividadReciente[]>([
-    {
-      tipo: 'nuevo_negocio',
-      titulo: 'Nuevo negocio registrado',
-      descripcion: 'Salón de Belleza Glamour - Hace 2 horas',
-      tiempo: 'Hace 2 horas'
-    },
-    {
-      tipo: 'advertencia',
-      titulo: 'Advertencia emitida',
-      descripcion: 'Restaurante El Buen Sabor - Hace 5 horas',
-      tiempo: 'Hace 5 horas'
-    },
-    {
-      tipo: 'usuario_eliminado',
-      titulo: 'Usuario eliminado',
-      descripcion: 'cliente@example.com - Hace 1 día',
-      tiempo: 'Hace 1 día'
-    }
-  ]);
+  constructor(private adminGeneralService: AdminGeneralService) {}
 
   ngOnInit() {
-    // TODO: Aquí se cargará la data desde el servicio
-    // this.cargarEstadisticas();
+    this.cargarEstadisticas();
   }
 
-  // Método preparado para conexión con BD
+  /**
+   * Calcula el porcentaje de una categoría respecto al total de negocios
+   */
+  calcularPorcentaje(cantidad: number): number {
+    const total = this.estadisticas().totalNegocios;
+    if (total === 0) return 0;
+    return (cantidad / total) * 100;
+  }
+
+  // Carga todas las estadísticas desde el servicio
   cargarEstadisticas() {
-    // TODO: Implementar llamada al servicio
-    // this.estadisticasService.getEstadisticasGenerales().subscribe(data => {
-    //   this.estadisticas.set(data);
-    // });
+    this.loading.set(true);
+    
+    // Cargar estadísticas generales
+    this.adminGeneralService.getEstadisticasGenerales().subscribe({
+      next: (data) => {
+        this.estadisticas.set(data);
+        this.loading.set(false);
+      },
+      error: (error) => {
+        console.error('Error cargando estadísticas:', error);
+        this.loading.set(false);
+      }
+    });
+
+    // Cargar categorías
+    this.adminGeneralService.getCategorias().subscribe({
+      next: (data) => {
+        this.categorias.set(data);
+      },
+      error: (error) => {
+        console.error('Error cargando categorías:', error);
+      }
+    });
+    
   }
 }

@@ -51,10 +51,14 @@ export class Login {
           
           this.loginForm.reset();
           this.loading = false;
-          console.log("negocio id", res.user.rol);
-          if (res.user.rol == 'negocio'){
-            this.router.navigate(['/admin-local'])
-          }else{
+          console.log("Usuario rol:", res.user.rol);
+          
+          // Redirigir según el rol del usuario
+          if (res.user.rol === 'negocio') {
+            this.router.navigate(['/admin-local']);
+          } else if (res.user.rol === 'admin_sistema') {
+            this.router.navigate(['/admin-general']);
+          } else {
             this.router.navigate(['/home']);
           }
 

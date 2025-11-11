@@ -53,6 +53,18 @@
                     Cerrar Sesión
                 </a>
             </div>
+            <!-- Solo para admin sistema -->
+            <div class="flex items-center space-x-3" *ngIf="usuario?.rol === 'admin_sistema'">
+                <a routerLink="/admin-general" class="px-4 py-2 rounded-md bg-[#171717] text-white hover:bg-[#2b2b2b]">
+                    Panel
+                </a>
+                <a routerLink="/perfil" class="px-4 py-2 rounded-md bg-[#171717] text-white hover:bg-[#2b2b2b]">
+                    Mi perfil
+                </a>
+                <a (click)="logout()" class="px-4 py-2 rounded-md bg-[#171717] text-white hover:bg-[#2b2b2b]">
+                    Cerrar Sesión
+                </a>
+            </div>
 
         </div>
     </div>

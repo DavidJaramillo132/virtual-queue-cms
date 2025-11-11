@@ -13,7 +13,8 @@
       </div>
       <input 
         type="text" 
-        [(ngModel)]="searchQuery"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); onSearchChange()"
         placeholder="Buscar negocios..."
         class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent w-64"
       />
@@ -72,22 +73,6 @@
               Ver Detalles
             </button>
 
-            @if (!negocio.tieneAdvertencia) {
-              <button 
-                (click)="emitirAdvertencia(negocio)"
-                class="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-colors flex items-center gap-2"
-                title="Advertir"
-              >
-                <fa-icon [icon]="faExclamationTriangle"></fa-icon>
-                Advertir
-              </button>
-            } @else {
-              <span class="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-medium flex items-center gap-2">
-                <fa-icon [icon]="faExclamationTriangle"></fa-icon>
-                Advertido
-              </span>
-            }
-
             <button 
               (click)="eliminarNegocio(negocio)"
               class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-2"
@@ -102,3 +87,140 @@
     }
   </div>
 </div>
+
+<!-- Modal de Detalles -->
+@if (showModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" (click)="cerrarModal()">
+    <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Header del Modal -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900">Detalles del Negocio</h2>
+        <button 
+          (click)="cerrarModal()"
+          class="text-gray-400 hover:text-gray-600 transition-colors"
+          title="Cerrar"
+        >
+          <fa-icon [icon]="faTimes" class="text-xl"></fa-icon>
+        </button>
+      </div>
+
+      <!-- Contenido del Modal -->
+      <div class="p-6">
+        @if (loadingDetalle()) {
+          <div class="flex items-center justify-center py-12">
+            <div class="text-gray-500">Cargando detalles...</div>
+          </div>
+        } @else if (negocioDetalle()) {
+          @let negocio = negocioDetalle()!;
+          
+          <!-- Información Principal -->
+          <div class="mb-6">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ negocio.nombre }}</h3>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="px-3 py-1 bg-black text-white text-xs font-medium rounded-full">
+                    {{ negocio.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                  <span class="px-3 py-1 bg-gray-200 text-gray-700 text-xs font-medium rounded-full">
+                    {{ negocio.categoria }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            @if (negocio.descripcion) {
+              <p class="text-gray-700 mb-4">{{ negocio.descripcion }}</p>
+            }
+          </div>
+
+          <!-- Información de Contacto -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="space-y-4">
+              <h4 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">Información de Contacto</h4>
+              
+              @if (negocio.direccion) {
+                <div class="flex items-start gap-3">
+                  <fa-icon [icon]="faMapMarkerAlt" class="text-gray-400 mt-1"></fa-icon>
+                  <div>
+                    <p class="text-sm text-gray-500">Dirección</p>
+                    <p class="text-gray-900">{{ negocio.direccion }}</p>
+                  </div>
+                </div>
+              }
+
+              @if (negocio.telefono) {
+                <div class="flex items-start gap-3">
+                  <fa-icon [icon]="faPhone" class="text-gray-400 mt-1"></fa-icon>
+                  <div>
+                    <p class="text-sm text-gray-500">Teléfono</p>
+                    <p class="text-gray-900">{{ negocio.telefono }}</p>
+                  </div>
+                </div>
+              }
+
+              @if (negocio.email) {
+                <div class="flex items-start gap-3">
+                  <fa-icon [icon]="faEnvelope" class="text-gray-400 mt-1"></fa-icon>
+                  <div>
+                    <p class="text-sm text-gray-500">Email</p>
+                    <a [href]="'mailto:' + negocio.email" class="text-gray-900 hover:text-black">{{ negocio.email }}</a>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="space-y-4">
+              <h4 class="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">Información Adicional</h4>
+              
+              @if (negocio.fechaCreacion) {
+                <div class="flex items-start gap-3">
+                  <fa-icon [icon]="faCalendar" class="text-gray-400 mt-1"></fa-icon>
+                  <div>
+                    <p class="text-sm text-gray-500">Fecha de Registro</p>
+                    <p class="text-gray-900">{{ formatearFecha(negocio.fechaCreacion) }}</p>
+                  </div>
+                </div>
+              }
+
+              <div class="flex items-start gap-3">
+                <fa-icon [icon]="faUser" class="text-gray-400 mt-1"></fa-icon>
+                <div>
+                  <p class="text-sm text-gray-500">Estado</p>
+                  <p class="text-gray-900">{{ negocio.activo ? 'Activo' : 'Inactivo' }}</p>
+                </div>
+              </div>
+
+              @if (negocio.adminLocalId) {
+                <div class="flex items-start gap-3">
+                  <fa-icon [icon]="faUser" class="text-gray-400 mt-1"></fa-icon>
+                  <div>
+                    <p class="text-sm text-gray-500">ID Admin Local</p>
+                    <p class="text-gray-900">{{ negocio.adminLocalId }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex gap-3 pt-6 border-t border-gray-200">
+            <button 
+              (click)="eliminarNegocio(negocio); cerrarModal()"
+              class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-2"
+            >
+              <fa-icon [icon]="faTrash"></fa-icon>
+              Eliminar Negocio
+            </button>
+            <button 
+              (click)="cerrarModal()"
+              class="ml-auto px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

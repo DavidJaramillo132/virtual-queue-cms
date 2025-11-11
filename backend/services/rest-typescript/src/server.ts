@@ -11,6 +11,7 @@ import horarioRoutes from './presentation/routes/horarioRoutes';
 import servicioRoutes from './presentation/routes/servicioRoutes';
 import citaRoutes from './presentation/routes/citaRoutes';
 import adminSistemaRoutes from './presentation/routes/adminSistemaRoutes';
+import adminGeneralRoutes from './presentation/routes/adminGeneralRoutes';
 
 const app = express();
 
@@ -37,6 +38,7 @@ AppDataSource.initialize()
     app.use('/api/servicios', servicioRoutes);
     app.use('/api/citas', citaRoutes);
     app.use('/api/admins', adminSistemaRoutes);
+    app.use('/api/admin', adminGeneralRoutes);
 
     // Inicia el servidor
     const port = process.env.PORT ? Number(process.env.PORT) : 3000;
