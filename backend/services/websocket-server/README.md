@@ -1,6 +1,16 @@
-# WebSocket Server - Real-time Statistics
+# 📡 WebSocket Server - Real-time Statistics
 
 Servidor WebSocket implementado en Go para proporcionar actualizaciones en tiempo real de las estadísticas de citas del sistema.
+
+## 📚 Documentación
+
+Este servidor incluye documentación detallada en:
+
+- **[ARQUITECTURA.md](./ARQUITECTURA.md)** - Explicación completa de la arquitectura, estructura, componentes y flujo de datos
+- **[GUIA_PRACTICA.md](./GUIA_PRACTICA.md)** - Guía práctica con ejemplos de código, casos de uso y debugging
+- **[INTEGRACION_REST_API.md](./INTEGRACION_REST_API.md)** - Cómo integra el WebSocket con el REST API
+
+**Recomendación**: Lee ARQUITECTURA.md primero para entender el sistema completo.
 
 ## 🚀 Características
 

@@ -134,5 +134,17 @@ class Query:
     @strawberry.field(description="Generar informe PDF del perfil del usuario autenticado")
     async def generar_informe_pdf(self, info: Info) -> InformePDF:
         return await PdfResolver.generar_informe_usuario(info)
+    
+    @strawberry.field(description="Generar informe PDF de servicios más solicitados del negocio del usuario autenticado")
+    async def generar_reporte_servicios_mas_solicitados_por_negocio(self, info: Info) -> InformePDF:
+        return await PdfResolver.generar_reporte_servicios_mas_solicitados_por_negocio(info)
+    
+    @strawberry.field(description="Generar informe PDF de ocupación por estación del negocio del usuario autenticado")
+    async def generar_reporte_ocupacion_estaciones(self, info: Info) -> InformePDF:
+        return await PdfResolver.generar_reporte_ocupacion_estaciones(info)
+    
+    @strawberry.field(description="Generar informe PDF de ingresos del negocio del usuario autenticado")
+    async def generar_reporte_ingresos(self, info: Info, fecha_inicio: Optional[str] = None, fecha_fin: Optional[str] = None) -> InformePDF:
+        return await PdfResolver.generar_reporte_ingresos(info, fecha_inicio, fecha_fin)
 
 schema = strawberry.Schema(query=Query)

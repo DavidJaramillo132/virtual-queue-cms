@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 // Interfaces para AdminGeneral
 export interface EstadisticasGeneralData {
@@ -17,15 +18,8 @@ export interface CategoriaNegocio {
   cantidad: number;
 }
 
-export interface ActividadReciente {
-  tipo: 'nuevo_negocio' | 'advertencia' | 'usuario_eliminado';
-  titulo: string;
-  descripcion: string;
-  tiempo: string;
-}
-
 export interface Negocio {
-  id: number;
+  id: number | string;
   nombre: string;
   categoria: string;
   descripcion: string;
@@ -35,242 +29,221 @@ export interface Negocio {
   activo: boolean;
   tieneAdvertencia: boolean;
   fechaCreacion?: string;
-  adminLocalId?: number;
+  adminLocalId?: number | string;
 }
 
 export type RolUsuario = 'Cliente' | 'Admin Local' | 'Admin Sistema';
 
 export interface Usuario {
-  id: number;
+  id: number | string;
   nombre: string;
   email: string;
   rol: RolUsuario;
   fechaRegistro: string;
 }
 
-export interface Reporte {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  tipo: 'negocios' | 'usuarios' | 'citas' | 'financiero';
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class AdminGeneralService {
-  // TODO: Inyectar HttpClient cuando se conecte a la API
-  // constructor(private http: HttpClient) {}
+  private readonly API_URL = 'http://localhost:3000/api';
 
-  // Endpoints de la API (configurar según tu backend)
-  private readonly API_URL = 'http://localhost:3000/api'; // Cambiar según tu configuración
+  constructor(private http: HttpClient) {}
+
+  /**
+   * Obtiene los headers de autenticación
+   */
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    });
+  }
 
   // ==================== ESTADÍSTICAS GENERALES ====================
   
   /**
    * Obtiene las estadísticas generales de toda la plataforma
-   * TODO: Conectar con endpoint GET /admin/estadisticas
    */
   getEstadisticasGenerales(): Observable<EstadisticasGeneralData> {
-    // TODO: Implementar
-    // return this.http.get<EstadisticasGeneralData>(`${this.API_URL}/admin/estadisticas`);
-    
-    // Mock data temporal
-    return of({
-      totalNegocios: 45,
-      negociosActivos: 42,
-      totalUsuarios: 1250,
-      totalCitas: 3420,
-      crecimiento: 12.5,
-      advertencias: 3,
-      negociosConAdvertencias: 3
-    });
+    const headers = this.getAuthHeaders();
+    return this.http.get<EstadisticasGeneralData>(`${this.API_URL}/admin/estadisticas`, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Error obteniendo estadísticas:', error);
+          // Retornar datos por defecto en caso de error
+          return of({
+            totalNegocios: 0,
+            negociosActivos: 0,
+            totalUsuarios: 0,
+            totalCitas: 0,
+            crecimiento: 0,
+            advertencias: 0,
+            negociosConAdvertencias: 0
+          });
+        })
+      );
   }
 
   /**
    * Obtiene la distribución de negocios por categoría
-   * TODO: Conectar con endpoint GET /admin/categorias
    */
   getCategorias(): Observable<CategoriaNegocio[]> {
-    // TODO: Implementar
-    // return this.http.get<CategoriaNegocio[]>(`${this.API_URL}/admin/categorias`);
-    
-    // Mock data temporal
-    return of([
-      { nombre: 'Restaurantes', cantidad: 12 },
-      { nombre: 'Veterinarias', cantidad: 8 },
-      { nombre: 'Hospitales', cantidad: 5 },
-      { nombre: 'Salones de Belleza', cantidad: 10 },
-      { nombre: 'Otros', cantidad: 10 }
-    ]);
+    const headers = this.getAuthHeaders();
+    return this.http.get<CategoriaNegocio[]>(`${this.API_URL}/admin/categorias`, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Error obteniendo categorías:', error);
+          return of([]);
+        })
+      );
   }
 
-  /**
-   * Obtiene la actividad reciente de la plataforma
-   * TODO: Conectar con endpoint GET /admin/actividad-reciente
-   */
-  getActividadReciente(): Observable<ActividadReciente[]> {
-    // TODO: Implementar
-    // return this.http.get<ActividadReciente[]>(`${this.API_URL}/admin/actividad-reciente`);
-    
-    // Mock data temporal
-    return of([
-      {
-        tipo: 'nuevo_negocio',
-        titulo: 'Nuevo negocio registrado',
-        descripcion: 'Salón de Belleza Glamour - Hace 2 horas',
-        tiempo: 'Hace 2 horas'
-      },
-      {
-        tipo: 'advertencia',
-        titulo: 'Advertencia emitida',
-        descripcion: 'Restaurante El Buen Sabor - Hace 5 horas',
-        tiempo: 'Hace 5 horas'
-      },
-      {
-        tipo: 'usuario_eliminado',
-        titulo: 'Usuario eliminado',
-        descripcion: 'cliente@example.com - Hace 1 día',
-        tiempo: 'Hace 1 día'
-      }
-    ]);
-  }
 
   // ==================== GESTIÓN DE NEGOCIOS ====================
   
   /**
    * Obtiene todos los negocios de la plataforma
-   * TODO: Conectar con endpoint GET /admin/negocios
    */
-  getAllNegocios(): Observable<Negocio[]> {
-    // TODO: Implementar
-    // return this.http.get<Negocio[]>(`${this.API_URL}/admin/negocios`);
+  getAllNegocios(searchQuery?: string): Observable<Negocio[]> {
+    const headers = this.getAuthHeaders();
+    let params = new HttpParams();
+    if (searchQuery) {
+      params = params.set('search', searchQuery);
+    }
     
-    // Mock data temporal
-    return of([
-      {
-        id: 1,
-        nombre: 'Restaurante El Buen Sabor',
-        categoria: 'Restaurante',
-        descripcion: 'Comida tradicional y deliciosa',
-        direccion: 'Calle Principal 123',
-        telefono: '555-0101',
-        email: 'contacto@buensabor.com',
-        activo: true,
-        tieneAdvertencia: false
-      },
-      {
-        id: 2,
-        nombre: 'Veterinaria Patitas Felices',
-        categoria: 'Veterinaria',
-        descripcion: 'Cuidado integral para tus mascotas',
-        direccion: 'Avenida Central 456',
-        telefono: '555-0102',
-        email: 'info@patitasfelices.com',
-        activo: true,
-        tieneAdvertencia: false
-      }
-    ]);
+    return this.http.get<any[]>(`${this.API_URL}/negocios`, { headers, params })
+      .pipe(
+        map(negocios => negocios.map(negocio => this.mapNegocioFromBackend(negocio))),
+        catchError(error => {
+          console.error('Error obteniendo negocios:', error);
+          return of([]);
+        })
+      );
   }
 
   /**
-   * Emite una advertencia a un negocio
-   * TODO: Conectar con endpoint POST /admin/negocios/:id/advertencia
+   * Obtiene un negocio por su ID
    */
-  emitirAdvertencia(negocioId: number, motivo: string): Observable<void> {
-    // TODO: Implementar
-    // return this.http.post<void>(`${this.API_URL}/admin/negocios/${negocioId}/advertencia`, { motivo });
-    
-    // Mock temporal
-    return of(undefined);
+  getNegocioById(negocioId: number | string): Observable<Negocio> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<any>(`${this.API_URL}/negocios/${negocioId}`, { headers })
+      .pipe(
+        map(negocio => this.mapNegocioFromBackend(negocio)),
+        catchError(error => {
+          console.error('Error obteniendo negocio:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Mapea un negocio del backend al formato del frontend
+   */
+  private mapNegocioFromBackend(negocio: any): Negocio {
+    return {
+      id: negocio.id, // Mantener como string (UUID) o número según el backend
+      nombre: negocio.nombre || '',
+      categoria: negocio.categoria || 'Sin categoría',
+      descripcion: negocio.descripcion || '',
+      direccion: negocio.direccion || '',
+      telefono: negocio.telefono || '',
+      email: negocio.correo || negocio.email || '',
+      activo: negocio.estado !== undefined ? negocio.estado : (negocio.activo !== undefined ? negocio.activo : true),
+      tieneAdvertencia: false,
+      fechaCreacion: negocio.creado_en || negocio.fecha_creacion || negocio.fechaCreacion,
+      adminLocalId: negocio.admin_negocio_id || negocio.adminLocalId
+    };
   }
 
   /**
    * Elimina un negocio de la plataforma
-   * TODO: Conectar con endpoint DELETE /admin/negocios/:id
    */
-  deleteNegocio(negocioId: number): Observable<void> {
-    // TODO: Implementar
-    // return this.http.delete<void>(`${this.API_URL}/admin/negocios/${negocioId}`);
-    
-    // Mock temporal
-    return of(undefined);
+  deleteNegocio(negocioId: number | string): Observable<void> {
+    const headers = this.getAuthHeaders();
+    return this.http.delete<void>(`${this.API_URL}/negocios/${negocioId}`, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Error eliminando negocio:', error);
+          return throwError(() => error);
+        })
+      );
   }
 
   // ==================== GESTIÓN DE USUARIOS ====================
   
   /**
    * Obtiene todos los usuarios de la plataforma
-   * TODO: Conectar con endpoint GET /admin/usuarios
    */
   getAllUsuarios(rol?: RolUsuario): Observable<Usuario[]> {
-    // TODO: Implementar
-    // const params = rol ? `?rol=${rol}` : '';
-    // return this.http.get<Usuario[]>(`${this.API_URL}/admin/usuarios${params}`);
+    const headers = this.getAuthHeaders();
+    let params = new HttpParams();
+    if (rol) {
+      params = params.set('rol', rol);
+    }
     
-    // Mock data temporal
-    return of([
-      {
-        id: 1,
-        nombre: 'María García',
-        email: 'maria@example.com',
-        rol: 'Cliente',
-        fechaRegistro: '2024-01-10'
-      },
-      {
-        id: 2,
-        nombre: 'Juan Pérez',
-        email: 'juan@example.com',
-        rol: 'Admin Local',
-        fechaRegistro: '2024-01-05'
-      },
-      {
-        id: 3,
-        nombre: 'Ana López',
-        email: 'ana@example.com',
-        rol: 'Cliente',
-        fechaRegistro: '2024-01-15'
-      }
-    ]);
+    return this.http.get<any[]>(`${this.API_URL}/usuarios`, { headers, params })
+      .pipe(
+        map(usuarios => usuarios.map(usuario => this.mapUsuarioFromBackend(usuario))),
+        catchError(error => {
+          console.error('Error obteniendo usuarios:', error);
+          return of([]);
+        })
+      );
+  }
+
+  /**
+   * Mapea un usuario del backend al formato del frontend
+   */
+  private mapUsuarioFromBackend(usuario: any): Usuario {
+    // Formatear fecha de creación
+    let fechaRegistro = new Date().toISOString().split('T')[0];
+    if (usuario.creado_en) {
+      const fecha = new Date(usuario.creado_en);
+      fechaRegistro = fecha.toISOString().split('T')[0];
+    } else if (usuario.created_at) {
+      const fecha = new Date(usuario.created_at);
+      fechaRegistro = fecha.toISOString().split('T')[0];
+    } else if (usuario.fecha_registro) {
+      fechaRegistro = usuario.fecha_registro;
+    }
+
+    return {
+      id: usuario.id, // Mantener como string (UUID) o número según el backend
+      nombre: usuario.nombre_completo || usuario.nombre || '',
+      email: usuario.email || '',
+      rol: this.mapRolFromBackend(usuario.rol),
+      fechaRegistro
+    };
+  }
+
+  /**
+   * Mapea el rol del backend al formato del frontend
+   */
+  private mapRolFromBackend(rol: string): RolUsuario {
+    const rolLower = rol?.toLowerCase() || '';
+    if (rolLower === 'admin_sistema' || rolLower === 'admin sistema') {
+      return 'Admin Sistema';
+    }
+    if (rolLower === 'negocio' || rolLower === 'admin_local' || rolLower === 'admin local') {
+      return 'Admin Local';
+    }
+    return 'Cliente';
   }
 
   /**
    * Elimina un usuario de la plataforma
-   * TODO: Conectar con endpoint DELETE /admin/usuarios/:id
    */
-  deleteUsuario(usuarioId: number): Observable<void> {
-    // TODO: Implementar
-    // return this.http.delete<void>(`${this.API_URL}/admin/usuarios/${usuarioId}`);
-    
-    // Mock temporal
-    return of(undefined);
+  deleteUsuario(usuarioId: number | string): Observable<void> {
+    const headers = this.getAuthHeaders();
+    return this.http.delete<void>(`${this.API_URL}/usuarios/${usuarioId}`, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Error eliminando usuario:', error);
+          return throwError(() => error);
+        })
+      );
   }
 
-  // ==================== REPORTES ====================
-  
-  /**
-   * Descarga un reporte en formato PDF o Excel
-   * TODO: Conectar con endpoint GET /admin/reportes/:tipo/descargar
-   */
-  descargarReporte(tipoReporte: string, formato: 'pdf' | 'excel' = 'pdf'): Observable<Blob> {
-    // TODO: Implementar
-    // return this.http.get(`${this.API_URL}/admin/reportes/${tipoReporte}/descargar?formato=${formato}`, {
-    //   responseType: 'blob'
-    // });
-    
-    // Mock temporal
-    return of(new Blob());
-  }
-
-  /**
-   * Obtiene los datos para generar un reporte específico
-   * TODO: Conectar con endpoint GET /admin/reportes/:tipo
-   */
-  getReporteData(tipoReporte: string): Observable<any> {
-    // TODO: Implementar
-    // return this.http.get(`${this.API_URL}/admin/reportes/${tipoReporte}`);
-    
-    // Mock temporal
-    return of({});
-  }
 }

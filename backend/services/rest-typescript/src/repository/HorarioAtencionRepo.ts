@@ -30,6 +30,10 @@ export class HorarioAtencionRepo {
     return this.repo.find();
   }
 
+  async getByEstacionId(estacionId: string): Promise<HorarioAtencion[]> {
+    return this.repo.find({ where: { estacion_id: estacionId } });
+  }
+
   async getById(id: string): Promise<HorarioAtencion | null> {
     return this.repo.findOneBy({ id });
   }

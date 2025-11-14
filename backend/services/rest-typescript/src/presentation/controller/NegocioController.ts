@@ -18,7 +18,9 @@ export class NegocioController {
 
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const items = await negocioRepo.getAll();
+      const { search } = req.query;
+      const searchQuery = search && typeof search === 'string' ? search : undefined;
+      const items = await negocioRepo.getAll(searchQuery);
       res.json(items);
     } catch (error) {
       console.error('Error fetching negocios:', error);

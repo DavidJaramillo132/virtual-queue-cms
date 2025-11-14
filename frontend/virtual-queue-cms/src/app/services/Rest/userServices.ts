@@ -28,7 +28,23 @@ export class UserService {
     }
 
     try {
-      return JSON.parse(user);
+      const parsedUser = JSON.parse(user);
+      // Normalizar nombreCompleto a nombre_completo si es necesario
+      if (parsedUser && parsedUser.nombreCompleto && !parsedUser.nombre_completo) {
+        parsedUser.nombre_completo = parsedUser.nombreCompleto;
+      }
+      
+      // Normalizar creado_en a creadoEn si es necesario
+      if (parsedUser && parsedUser.creado_en && !parsedUser.creadoEn) {
+        parsedUser.creadoEn = parsedUser.creado_en;
+      }
+      
+      // Convertir creadoEn a Date si es un string
+      if (parsedUser && parsedUser.creadoEn && typeof parsedUser.creadoEn === 'string') {
+        parsedUser.creadoEn = new Date(parsedUser.creadoEn);
+      }
+      
+      return parsedUser;
     } catch (error) {
       console.error('Error al parsear currentUser:', error);
       // Limpia el valor inválido del localStorage
@@ -61,8 +77,30 @@ export class UserService {
         // Guardar usuario en localStorage y actualizar BehaviorSubjects
         console.log('Respuesta recibida del backend:', response);
         if (response.successful) {
-          localStorage.setItem('currentUser', JSON.stringify(response.user));
-          this.userActualBehavior.next(response.user);
+          // Mapear nombreCompleto a nombre_completo para consistencia
+          const user = response.user;
+          if (user.nombreCompleto && !user.nombre_completo) {
+            user.nombre_completo = user.nombreCompleto;
+          }
+          
+          // Mapear creado_en a creadoEn si es necesario
+          if (user.creado_en && !user.creadoEn) {
+            user.creadoEn = user.creado_en;
+          } else if (!user.creadoEn && !user.creado_en) {
+            // Si no hay fecha, usar la fecha actual como fallback
+            user.creadoEn = new Date();
+          }
+          
+          // Asegurar que creadoEn sea una fecha válida (se guarda como string en JSON)
+          if (user.creadoEn) {
+            const fecha = user.creadoEn instanceof Date ? user.creadoEn : new Date(user.creadoEn);
+            if (!isNaN(fecha.getTime())) {
+              user.creadoEn = fecha.toISOString(); // Guardar como ISO string para JSON
+            }
+          }
+          
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          this.userActualBehavior.next(user);
           if (response.token) {
             localStorage.setItem('token', response.token);
           }
@@ -92,7 +130,12 @@ export class UserService {
 
   // Obtener todos los usuarios (solo para admin)
   getUsuarios(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/usuarios`);
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    });
+    return this.http.get(`${this.apiUrl}/usuarios`, { headers });
   }
 
   // Verificar si el usuario tiene un rol específico
@@ -113,8 +156,30 @@ export class UserService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
-    return this.http.put<IUsuario>(`${this.apiUrl}/usuarios/${updatedUser.id}`, updatedUser, { headers }).pipe(
+    
+    // Asegurar que el backend reciba nombre_completo (el backend espera nombre_completo)
+    const userToUpdate = {
+      ...updatedUser,
+      nombre_completo: updatedUser.nombre_completo || (updatedUser as any).nombreCompleto
+    };
+    
+    return this.http.put<IUsuario>(`${this.apiUrl}/usuarios/${updatedUser.id}`, userToUpdate, { headers }).pipe(
       tap((user: IUsuario) => {
+        // Normalizar la respuesta del backend
+        if ((user as any).nombreCompleto && !user.nombre_completo) {
+          (user as any).nombre_completo = (user as any).nombreCompleto;
+        }
+        
+        // Normalizar creado_en a creadoEn si es necesario
+        if ((user as any).creado_en && !user.creadoEn) {
+          (user as any).creadoEn = (user as any).creado_en;
+        }
+        
+        // Convertir creadoEn a Date si es un string
+        if ((user as any).creadoEn && typeof (user as any).creadoEn === 'string') {
+          (user as any).creadoEn = new Date((user as any).creadoEn);
+        }
+        
         // Actualizar el usuario en localStorage y BehaviorSubject si es el usuario actual
         if (user.id === this.currentUserValue?.id) {
           localStorage.setItem('currentUser', JSON.stringify(user));

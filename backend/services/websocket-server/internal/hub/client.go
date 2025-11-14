@@ -41,7 +41,7 @@ func (c *Client) ReadPump() {
 
 		switch msg.Type {
 		case models.MessageTypeSubscribe:
-			// Extract channel from message (can come in msg.Channel or msg.Data)
+			// Extrae el canal del mensaje (puede venir en msg.Channel o msg.Data)
 			var canal string
 			if msg.Channel != "" {
 				canal = msg.Channel
@@ -52,14 +52,14 @@ func (c *Client) ReadPump() {
 			}
 
 			if canal == "" {
-				log.Printf("Warning: Client %s tried to subscribe without channel", c.ID)
+				log.Printf("Advertencia: Cliente %s intentó suscribirse sin canal", c.ID)
 				continue
 			}
 
 			c.Hub.SuscribirCanal(c, canal)
 
 		case models.MessageTypeUnsubscribe:
-			// TODO: Implement unsubscribe if needed
+			// TODO: Implementar desuscripción si es necesario
 
 		case "nueva_cita", "avance_fila", "cerrar_fila", "usuario_en_fila":
 			c.Hub.Broadcast <- msg
@@ -67,7 +67,7 @@ func (c *Client) ReadPump() {
 	}
 }
 
-// WritePump reads from send channel and sends messages to WebSocket client
+// WritePump lee del canal de envío y envía mensajes al cliente WebSocket
 func (c *Client) WritePump() {
 	defer func() {
 		c.Conn.Close()
@@ -75,12 +75,12 @@ func (c *Client) WritePump() {
 
 	for message := range c.send {
 		if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-			log.Printf("Error sending message to client %s: %v", c.ID, err)
+			log.Printf("Error enviando mensaje al cliente %s: %v", c.ID, err)
 			return
 		}
 	}
 
-	// Channel closed, send close message to the client
+	// Canal cerrado, envía mensaje de cierre al cliente
 	c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 }
 

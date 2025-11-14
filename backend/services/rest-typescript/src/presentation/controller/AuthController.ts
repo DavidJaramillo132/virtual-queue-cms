@@ -44,6 +44,9 @@ export class AuthController {
                 negocio_id = usuario.negocios[0].id;
             }
 
+            // Obtener fecha de creación (TypeORM puede devolverla como creadoEn o como objeto Date)
+            const fechaCreacion = usuario.creadoEn || (usuario as any).creado_en || new Date();
+
             res.json({
                 successful: true,
                 message: 'Login exitoso',
@@ -52,9 +55,12 @@ export class AuthController {
                     id: usuario.id, 
                     email: usuario.email, 
                     rol: usuario.rol,
-                    nombreCompleto: usuario.nombre_completo,
+                    nombre_completo: usuario.nombre_completo,
+                    nombreCompleto: usuario.nombre_completo, // Mantener compatibilidad
                     telefono: usuario.telefono,
-                    negocio_id: negocio_id
+                    negocio_id: negocio_id,
+                    creadoEn: fechaCreacion instanceof Date ? fechaCreacion.toISOString() : fechaCreacion,
+                    creado_en: fechaCreacion instanceof Date ? fechaCreacion.toISOString() : fechaCreacion
                 }
             });
 

@@ -1,0 +1,140 @@
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Mis Citas</h1>
+      <p class="text-gray-600">Gestiona y consulta todas tus citas programadas</p>
+    </div>
+
+    <!-- Filtro de estado -->
+    <div class="mb-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <label for="filtro" class="text-sm font-medium text-gray-700">Filtrar por estado:</label>
+        <select 
+          id="filtro"
+          [(ngModel)]="filtroEstado"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-transparent bg-white"
+        >
+          <option value="todas">Todas las citas</option>
+          <option value="pendiente">Pendientes</option>
+          <option value="atendida">Atendidas</option>
+          <option value="cancelada">Canceladas</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Mensajes de error -->
+    @if (errorMessage()) {
+      <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+        <p class="text-sm font-medium">{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <!-- Indicador de carga -->
+    @if (isLoading()) {
+      <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
+        <p class="text-sm font-medium">Cargando citas...</p>
+      </div>
+    }
+
+    <!-- Lista de citas -->
+    <div class="space-y-4">
+      @if (citasFiltradas().length === 0 && !isLoading()) {
+        <div class="bg-white rounded-lg shadow-md p-12 border border-gray-200 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p class="text-gray-500 text-lg font-medium">No hay citas para mostrar</p>
+          <p class="text-gray-400 text-sm mt-2">
+            @if (filtroEstado() === 'todas') {
+              No tienes citas programadas
+            } @else {
+              No hay citas con el estado seleccionado
+            }
+          </p>
+        </div>
+      }
+
+      @for (cita of citasFiltradas(); track cita.id) {
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+          <div class="flex items-start justify-between">
+            <!-- Información de la cita -->
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-4">
+                <h3 class="text-xl font-bold text-gray-900">
+                  {{ cita.nombreNegocio || 'Negocio' }}
+                </h3>
+                <span [class]="getEstadoBadgeClass(cita.estado)">
+                  {{ getEstadoTexto(cita.estado) }}
+                </span>
+              </div>
+
+              <p class="text-lg text-gray-700 mb-4 font-medium">
+                {{ cita.nombreServicio || 'Servicio' }}
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <div>
+                    <span class="text-gray-500 block">Fecha:</span>
+                    <p class="font-medium text-gray-900">{{ formatearFecha(cita.fecha) }}</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <span class="text-gray-500 block">Hora de inicio:</span>
+                    <p class="font-medium text-gray-900">{{ formatearHora(cita.hora_inicio) }}</p>
+                  </div>
+                </div>
+
+                @if (cita.hora_fin) {
+                  <div class="flex items-start gap-2">
+                    <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <span class="text-gray-500 block">Hora de fin:</span>
+                      <p class="font-medium text-gray-900">{{ formatearHora(cita.hora_fin) }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="flex flex-col gap-2 ml-6">
+              @if (cita.estado === 'pendiente') {
+                <button 
+                  (click)="cancelarCita(cita)"
+                  class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 hover:text-red-800 transition-colors whitespace-nowrap"
+                  [disabled]="isLoading()"
+                >
+                  Cancelar Cita
+                </button>
+              }
+
+              @if (cita.estado === 'atendida') {
+                <div class="px-4 py-2 text-sm text-green-600 font-medium bg-green-50 rounded-lg text-center">
+                  ✓ Completada
+                </div>
+              }
+
+              @if (cita.estado === 'cancelada') {
+                <div class="px-4 py-2 text-sm text-red-600 font-medium bg-red-50 rounded-lg text-center">
+                  ✗ Cancelada
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

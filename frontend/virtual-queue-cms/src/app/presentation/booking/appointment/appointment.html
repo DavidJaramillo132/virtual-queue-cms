@@ -1,7 +1,8 @@
 <div class="p-4 max-w-3xl mx-auto">
   <h2 class="text-2xl font-bold mb-4">Cola de citas de hoy</h2>
 
-  <div class="border rounded-lg overflow-hidden mb-6 shadow">
+  <!-- Tabla de citas - solo visible cuando hay servicio y estación seleccionados -->
+  <div *ngIf="servicio_seleccionado && estacionSeleccionadaId" class="border rounded-lg overflow-hidden mb-6 shadow">
     <table class="w-full text-left border-collapse">
       <thead class="bg-gray-100">
         <tr>
@@ -18,8 +19,11 @@
           <td class="border p-2">{{ cita.hora_fin }}</td>
           <td class="border p-2">{{ cita.estado }}</td>
         </tr>
-        <tr *ngIf="citas.length === 0">
+        <tr *ngIf="citas.length === 0 && !loading">
           <td colspan="4" class="border p-2 text-center text-gray-500">No hay citas hoy</td>
+        </tr>
+        <tr *ngIf="loading">
+          <td colspan="4" class="border p-2 text-center text-gray-500">Cargando citas...</td>
         </tr>
       </tbody>
     </table>
@@ -48,27 +52,31 @@
     </label>
   </div>
 
-  <!-- Selector de Estación (Fila) -->
+  <!-- Selector de Estación (Fila) - solo habilitado después de seleccionar servicio -->
   <div class="mb-4">
     <label for="estacion" class="block mb-2">
       <p class="font-semibold">Fila (Estación):<span class="text-red-500">*</span></p>
       <select 
         id="estacion"
         formControlName="estacion_id"
+        (change)="onEstacionSeleccionada($event)"
         class="border p-2 rounded w-full"
         [class.border-red-500]="nuevaCitaForm.get('estacion_id')?.invalid && nuevaCitaForm.get('estacion_id')?.touched"
-        [disabled]="estaciones.length === 0"
+        [disabled]="!servicio_seleccionado || estaciones.length === 0"
       >
         <option value="">-- Seleccione una fila --</option>
         <option *ngFor="let estacion of estaciones" [value]="estacion.id">
           {{ estacion.nombre }} {{ estacion.tipo ? '(' + estacion.tipo + ')' : '' }}
         </option>
       </select>
-      <p *ngIf="estaciones.length === 0" class="text-sm text-red-500 mt-1 font-medium">
+      <p *ngIf="!servicio_seleccionado" class="text-sm text-gray-500 mt-1">
+        Primero debe seleccionar un servicio
+      </p>
+      <p *ngIf="servicio_seleccionado && estaciones.length === 0" class="text-sm text-red-500 mt-1 font-medium">
         Este negocio aún no ha creado filas de atención. Por favor, contacte al negocio.
       </p>
-      <p *ngIf="estaciones.length > 0" class="text-sm text-gray-500 mt-1">
-        Solo puede ver las filas de atención de este negocio
+      <p *ngIf="servicio_seleccionado && estaciones.length > 0" class="text-sm text-gray-500 mt-1">
+        Seleccione una fila para ver las citas disponibles
       </p>
     </label>
   </div>
@@ -82,15 +90,23 @@
     {{ successMessage }}
   </div>
 
-  <label for="hora_inicio">
-    <p>Hora de inicio:</p>
-    <input 
-      type="time" 
-      id="hora_inicio" 
+  <label for="hora_inicio" *ngIf="servicio_seleccionado && estacionSeleccionadaId">
+    <p>Hora de inicio:<span class="text-red-500">*</span></p>
+    <select
+      id="hora_inicio"
       [(ngModel)]="hora_inicio"
       (ngModelChange)="onHoraInicioChange()"
-      class="border p-2 rounded mr-4" 
-    />
+      class="border p-2 rounded mr-4"
+      [disabled]="horasDisponibles.length === 0"
+    >
+      <option value="">-- Seleccione una hora disponible --</option>
+      <option *ngFor="let hora of horasDisponibles" [value]="hora">
+        {{ hora }}
+      </option>
+    </select>
+    <p *ngIf="horasDisponibles.length === 0 && servicio_seleccionado && estacionSeleccionadaId" class="text-sm text-red-500 mt-1">
+      No hay horas disponibles para hoy en esta fila
+    </p>
   </label>
   <label for="Tiempo_servicio">
     <p>Tiempo de servicio:</p>

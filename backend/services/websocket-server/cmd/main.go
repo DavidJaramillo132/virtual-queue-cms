@@ -31,32 +31,32 @@ func main() {
 
 	// Cargar variables de entorno
 	if err := godotenv.Load("../.env"); err != nil {
-		log.Println("No .env file found, using system environment variables")
+		log.Println("Archivo .env no encontrado, usando variables de entorno del sistema")
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		log.Fatal("DATABASE_URL environment variable is required")
+		log.Fatal("La variable de entorno DATABASE_URL es requerida")
 	}
 
 	// Conexión a la base de datos
 	estadisticasService, err := services.NewEstadisticasService(dbURL)
 	if err != nil {
-		log.Fatalf("Error connecting to database: %v", err)
+		log.Fatalf("Error conectando a la base de datos: %v", err)
 	}
 	defer estadisticasService.Close()
 
-	log.Println("Database connection established")
+	log.Println("Conexión a la base de datos establecida")
 
 	h := hub.NewHub()
-	
+
 	// Configurar el proveedor de estadísticas para el Hub
 	h.SetStatsProvider(func(ctx context.Context, negocioID string) (map[string]interface{}, error) {
 		stats, err := estadisticasService.ObtenerEstadisticas(ctx, negocioID)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		return map[string]interface{}{
 			"negocio_id":        negocioID,
 			"citas_hoy":         stats.CitasHoy,
@@ -66,15 +66,15 @@ func main() {
 			"timestamp":         time.Now().Unix(),
 		}, nil
 	})
-	
+
 	go h.Run()
 
 	// Handler para notificaciones de citas (llamado desde REST API)
 	http.HandleFunc("/notify/cita", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("📨 Notificación recibida desde REST API: %s %s", r.Method, r.URL.Path)
-		
+		log.Printf("Notificación recibida desde REST API: %s %s", r.Method, r.URL.Path)
+
 		if r.Method != http.MethodPost {
-			log.Printf("❌ Método no permitido: %s", r.Method)
+			log.Printf("Método no permitido: %s", r.Method)
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
@@ -85,31 +85,31 @@ func main() {
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&notification); err != nil {
-			log.Printf("❌ Error decoding notification: %v", err)
+			log.Printf("Error decodificando notificación: %v", err)
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
 
-		log.Printf("📋 Notificación decodificada: negocio_id=%s, action=%s", notification.NegocioID, notification.Action)
+		log.Printf("Notificación decodificada: negocio_id=%s, action=%s", notification.NegocioID, notification.Action)
 
 		if notification.NegocioID == "" {
-			log.Printf("❌ negocio_id está vacío")
+			log.Printf("negocio_id está vacío")
 			http.Error(w, "negocio_id is required", http.StatusBadRequest)
 			return
 		}
 
 		// Obtener estadísticas actualizadas para el negocio
 		ctx := context.Background()
-		log.Printf("🔍 Consultando estadísticas para negocio %s...", notification.NegocioID)
-		
+		log.Printf("Consultando estadísticas para negocio %s...", notification.NegocioID)
+
 		stats, err := estadisticasService.ObtenerEstadisticas(ctx, notification.NegocioID)
 		if err != nil {
-			log.Printf("❌ Error getting stats for negocio %s: %v", notification.NegocioID, err)
+			log.Printf("Error obteniendo estadísticas para negocio %s: %v", notification.NegocioID, err)
 			http.Error(w, "Error getting statistics", http.StatusInternalServerError)
 			return
 		}
 
-		log.Printf("✅ Estadísticas obtenidas: Total=%d, Hoy=%d, Completadas=%d, Canceladas=%d", 
+		log.Printf("Estadísticas obtenidas: Total=%d, Hoy=%d, Completadas=%d, Canceladas=%d",
 			stats.TotalCitas, stats.CitasHoy, stats.CitasCompletadas, stats.CitasCanceladas)
 
 		// Enviar actualización a los clientes suscritos
@@ -127,16 +127,16 @@ func main() {
 
 		msgJSON, err := json.Marshal(msg)
 		if err != nil {
-			log.Printf("❌ Error marshaling stats: %v", err)
+			log.Printf("Error codificando estadísticas: %v", err)
 			http.Error(w, "Error preparing update", http.StatusInternalServerError)
 			return
 		}
 
 		channelName := "estadisticas:" + notification.NegocioID
-		log.Printf("📤 Enviando actualización al canal: %s (tamaño: %d bytes)", channelName, len(msgJSON))
-		
+		log.Printf("Enviando actualización al canal: %s (tamaño: %d bytes)", channelName, len(msgJSON))
+
 		h.BroadcastToChannel(channelName, msgJSON)
-		log.Printf("✅ Stats updated for negocio %s (action: %s) - Mensaje enviado a clientes suscritos", notification.NegocioID, notification.Action)
+		log.Printf("Estadísticas actualizadas para negocio %s (acción: %s) - Mensaje enviado a clientes suscritos", notification.NegocioID, notification.Action)
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Notification processed"))
@@ -152,8 +152,8 @@ func main() {
 		handlers.HandleConnections(h, w, r)
 	})
 
-	log.Println("WebSocket server running on :8080")
-	log.Println("Real-time statistics: updates triggered by REST API notifications")
-	log.Println("Health check endpoint available at: http://localhost:8080/health")
+	log.Println("Servidor WebSocket ejecutándose en :8080")
+	log.Println("Estadísticas en tiempo real: actualizaciones activadas por notificaciones de REST API")
+	log.Println("Endpoint de verificación de salud disponible en: http://localhost:8080/health")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
