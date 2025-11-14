@@ -27,7 +27,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./presentation/adminLocal/admin-local').then(m => m.AdminLocal),
     canActivate: [AuthGuard],
-    data: { roles: ['negocio', 'admin_sistema'] }
+    data: { roles: ['negocio'] }
   },
   {
     path: 'admin-general',
@@ -41,6 +41,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./presentation/perfil/perfil').then(m => m.PerfilComponent),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'citasUsuario',
+    loadComponent: () =>
+      import('./presentation/citas-usuario/citas-usuario').then(m => m.CitasUsuario),
+    canActivate: [AuthGuard],
   },
   {
     path: 'welcome',

@@ -50,6 +50,13 @@
           : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
         Citas
       </button>
+      <button 
+        (click)="setActiveTab('reportes')"
+        [class]="activeTab() === 'reportes' 
+          ? 'px-6 py-3 bg-white rounded-lg shadow-md border-2 border-gray-300 font-medium text-gray-900' 
+          : 'px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 font-medium text-gray-600 hover:border-gray-300'">
+        Reportes
+      </button>
     </div>
 
     <!-- Content -->
@@ -72,6 +79,9 @@
       @if (activeTab() === 'citas') {
         <app-citas />
       }
+      @if (activeTab() === 'reportes') {
+        <app-reportes />
+      } 
     </div>
   </div>
 </div>

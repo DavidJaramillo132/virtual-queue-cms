@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { EstadisticasGeneralComponent } from './estadisticas-general/estadisticas-general';
 import { NegociosComponent } from './negocios/negocios';
 import { UsuariosComponent } from './usuarios/usuarios';
-import { ReportesComponent } from './reportes/reportes';
 
 @Component({
   selector: 'app-admin-general',
@@ -12,8 +11,7 @@ import { ReportesComponent } from './reportes/reportes';
     CommonModule,
     EstadisticasGeneralComponent,
     NegociosComponent,
-    UsuariosComponent,
-    ReportesComponent
+    UsuariosComponent
   ],
   templateUrl: './admin-general.html',
   styleUrls: ['./admin-general.css']

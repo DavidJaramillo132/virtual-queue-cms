@@ -1,0 +1,107 @@
+<div class="space-y-6">
+  <!-- Encabezado -->
+  <div class="mb-6">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Reportes</h2>
+      <p class="text-sm text-gray-600 mt-1">Genera y descarga reportes de tu negocio</p>
+    </div>
+  </div>
+
+  <!-- Selección de tipo de reporte -->
+  <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+    <h3 class="text-lg font-medium text-gray-700 mb-4">Tipo de Reporte</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <!-- Reporte de Servicios Más Solicitados -->
+      <button
+        (click)="seleccionarTipoReporte('servicios-mas-solicitados')"
+        [class]="tipoReporte() === 'servicios-mas-solicitados' 
+          ? 'p-4 border border-gray-400 bg-gray-50 rounded-lg transition-colors text-left' 
+          : 'p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left'"
+      >
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-medium text-gray-900 text-sm">Servicios Más Solicitados</h4>
+            <p class="text-xs text-gray-500 mt-0.5">Ranking de servicios</p>
+          </div>
+        </div>
+      </button>
+
+      <!-- Reporte de Ocupación por Estación -->
+      <button
+        (click)="seleccionarTipoReporte('ocupacion-estaciones')"
+        [class]="tipoReporte() === 'ocupacion-estaciones' 
+          ? 'p-4 border border-gray-400 bg-gray-50 rounded-lg transition-colors text-left' 
+          : 'p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left'"
+      >
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-medium text-gray-900 text-sm">Ocupación por Estación</h4>
+            <p class="text-xs text-gray-500 mt-0.5">Rendimiento de estaciones</p>
+          </div>
+        </div>
+      </button>
+
+      <!-- Reporte de Ingresos -->
+      <button
+        (click)="seleccionarTipoReporte('ingresos')"
+        [class]="tipoReporte() === 'ingresos' 
+          ? 'p-4 border border-gray-400 bg-gray-50 rounded-lg transition-colors text-left' 
+          : 'p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors text-left'"
+      >
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gray-100 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-medium text-gray-900 text-sm">Reporte de Ingresos</h4>
+            <p class="text-xs text-gray-500 mt-0.5">Ingresos por período</p>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensajes de éxito/error -->
+  @if (mensaje()) {
+    <div [class]="mensajeTipo() === 'success' 
+      ? 'bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg' 
+      : 'bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg'">
+      <p class="text-sm font-medium">{{ mensaje() }}</p>
+    </div>
+  }
+
+  <!-- Botón de generar reporte -->
+  <div class="flex justify-end">
+    <button
+      (click)="generarReporte()"
+      [disabled]="isLoading()"
+      class="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+    >
+      @if (isLoading()) {
+        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Generando...
+      } @else {
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        Generar Reporte
+      }
+    </button>
+  </div>
+
+</div>

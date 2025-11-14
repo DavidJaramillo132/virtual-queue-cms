@@ -130,7 +130,12 @@ export class UserService {
 
   // Obtener todos los usuarios (solo para admin)
   getUsuarios(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/usuarios`);
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    });
+    return this.http.get(`${this.apiUrl}/usuarios`, { headers });
   }
 
   // Verificar si el usuario tiene un rol específico

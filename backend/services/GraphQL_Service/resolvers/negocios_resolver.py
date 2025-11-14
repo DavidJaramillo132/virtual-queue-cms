@@ -9,11 +9,20 @@ def _headers_from_token(token: Optional[str]) -> Optional[Dict[str, str]]:
 
 class NegociosResolver:
     @staticmethod
+    def _normalize_negocio_data(negocio_data: dict) -> dict:
+        """Normaliza los datos del negocio del formato REST API al formato GraphQL"""
+        normalized = negocio_data.copy()
+        # Normalizar creadoEn a creado_en
+        if 'creadoEn' in normalized and 'creado_en' not in normalized:
+            normalized['creado_en'] = normalized.pop('creadoEn')
+        return normalized
+    
+    @staticmethod
     async def find_all(token: Optional[str] = None) -> List[Negocio]:
         """Get all businesses from REST API. Forward token if provided."""
         headers = _headers_from_token(token)
         data = await http_client.get("/api/negocios/", headers=headers)
-        return [Negocio(**negocio) for negocio in data]
+        return [Negocio(**NegociosResolver._normalize_negocio_data(negocio)) for negocio in data]
     
     @staticmethod
     async def find_one(id: str, token: Optional[str] = None) -> Negocio:
@@ -21,7 +30,7 @@ class NegociosResolver:
         headers = _headers_from_token(token)
         data = await http_client.get(f"/api/negocios/{id}", headers=headers)
         print(data)
-        return Negocio(**data)
+        return Negocio(**NegociosResolver._normalize_negocio_data(data))
     
     @staticmethod
     async def dashboard_negocio(negocio_id: str, token: Optional[str] = None) -> DashboardNegocio:
