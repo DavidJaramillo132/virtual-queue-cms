@@ -18,7 +18,10 @@ export class HorarioAtencionController {
 
   async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const items = await horarioRepo.getAll();
+      const estacionId = req.query.estacion_id as string;
+      const items = estacionId 
+        ? await horarioRepo.getByEstacionId(estacionId)
+        : await horarioRepo.getAll();
       res.json(items);
     } catch (error) {
       console.error('Error fetching horarios:', error);
