@@ -114,8 +114,8 @@ export class CitasComponent implements OnInit {
               // Normalizar IDs de clientes a strings para comparación
               const clientesIdsStr = clientesIds.map(id => String(id));
               
-              console.log('🔍 Depuración - IDs de clientes buscados:', clientesIdsStr);
-              console.log('🔍 Depuración - Usuarios recibidos:', usuarios.map((u: any) => ({
+              console.log(' Depuración - IDs de clientes buscados:', clientesIdsStr);
+              console.log(' Depuración - Usuarios recibidos:', usuarios.map((u: any) => ({
                 id: String(u.id),
                 nombre_completo: u.nombre_completo,
                 email: u.email
@@ -136,17 +136,17 @@ export class CitasComponent implements OnInit {
                     
                     if (nombreCompleto && nombreCompleto.trim() !== '') {
                       clientesMap.set(userId, nombreCompleto);
-                      console.log(`✅ Cliente mapeado: ${userId} -> ${nombreCompleto}`);
+                      console.log(` Cliente mapeado: ${userId} -> ${nombreCompleto}`);
                     } else {
-                      console.warn(`⚠️ Cliente ${userId} sin nombre_completo. Datos:`, u);
+                      console.warn(` Cliente ${userId} sin nombre_completo. Datos:`, u);
                     }
                   }
                 }
               });
               
-              console.log('📋 Mapa de clientes final:', Array.from(clientesMap.entries()));
+              console.log(' Mapa de clientes final:', Array.from(clientesMap.entries()));
             } else {
-              console.warn('⚠️ No se recibieron usuarios o el array está vacío');
+              console.warn(' No se recibieron usuarios o el array está vacío');
             }
 
             // Enriquecer las citas con los nombres

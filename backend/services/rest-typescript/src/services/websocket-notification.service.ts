@@ -12,7 +12,7 @@ export class WebSocketNotificationService {
     // Prioridad: variable de entorno > detección automática por entorno
     if (process.env.WEBSOCKET_URL) {
       this.websocketUrl = process.env.WEBSOCKET_URL;
-      console.log(`🔗 [WebSocketNotificationService] URL configurada desde variable de entorno: ${this.websocketUrl}`);
+      console.log(` [WebSocketNotificationService] URL configurada desde variable de entorno: ${this.websocketUrl}`);
     } else {
       // Detectar si estamos en Docker o desarrollo local
       // En Docker: usar el nombre del servicio
@@ -36,21 +36,25 @@ export class WebSocketNotificationService {
       
       if (isDocker) {
         this.websocketUrl = 'http://websocket-server:8080';
-        console.log(`🔗 [WebSocketNotificationService] URL usando valor por defecto (Docker): ${this.websocketUrl}`);
+        console.log(` [WebSocketNotificationService] URL usando valor por defecto (Docker): ${this.websocketUrl}`);
       } else {
         // Desarrollo local - usar localhost
         this.websocketUrl = 'http://localhost:8080';
-        console.log(`🔗 [WebSocketNotificationService] URL usando valor por defecto (desarrollo local): ${this.websocketUrl}`);
-        console.log(`💡 [WebSocketNotificationService] Si estás en Docker, configura WEBSOCKET_URL=http://websocket-server:8080 en el archivo .env`);
+        console.log(` [WebSocketNotificationService] URL usando valor por defecto (desarrollo local): ${this.websocketUrl}`);
+        console.log(` [WebSocketNotificationService] Si estás en Docker, configura WEBSOCKET_URL=http://websocket-server:8080 en el archivo .env`);
       }
     }
-    
-    // Verificar conectividad al iniciar (opcional, solo para debugging)
-    this.verifyConnection().catch(err => {
-      console.warn(`⚠️ [WebSocketNotificationService] No se pudo verificar conexión al WebSocket: ${err.message}`);
-      console.warn(`⚠️ [WebSocketNotificationService] Asegúrate de que el servidor WebSocket esté ejecutándose en ${this.websocketUrl}`);
-    });
   }
+
+      // para debugging 
+    async init(): Promise<void> {
+      try {
+        await this.verifyConnection();
+      } catch (err) {
+        console.warn(` [WebSocketNotificationService] No se pudo verificar conexión al WebSocket: ${err instanceof Error ? err.message : String(err)}`);
+        console.warn(` [WebSocketNotificationService] Asegúrate de que el servidor WebSocket esté ejecutándose en ${this.websocketUrl}`);
+      }
+    }
 
   /**
    * Verifica la conectividad con el servidor WebSocket
@@ -60,9 +64,9 @@ export class WebSocketNotificationService {
       const response = await axios.get(`${this.websocketUrl}/health`, {
         timeout: 3000
       });
-      console.log(`✅ [WebSocketNotificationService] Conexión verificada con WebSocket: ${response.status}`);
+      console.log(` [WebSocketNotificationService] Conexión verificada con WebSocket: ${response.status}`);
     } catch (error: any) {
-      console.warn(`⚠️ [WebSocketNotificationService] No se pudo verificar conexión: ${error.message}`);
+      console.warn(` [WebSocketNotificationService] No se pudo verificar conexión: ${error.message}`);
     }
   }
 
@@ -72,8 +76,8 @@ export class WebSocketNotificationService {
    * @param action Acción realizada: "created", "updated", "deleted", "status_changed"
    */
   async notifyCitaChange(negocioId: string, action: string): Promise<void> {
-    console.log(`📤 Intentando notificar al WebSocket: ${action} para negocio ${negocioId}`);
-    console.log(`🔗 URL del WebSocket: ${this.websocketUrl}/notify/cita`);
+    console.log(` Intentando notificar al WebSocket: ${action} para negocio ${negocioId}`);
+    console.log(` URL del WebSocket: ${this.websocketUrl}/notify/cita`);
     
     try {
       const response = await axios.post(
@@ -90,13 +94,13 @@ export class WebSocketNotificationService {
         }
       );
       
-      console.log(`✅ Notificación enviada al WebSocket: ${action} para negocio ${negocioId}`);
+      console.log(` Notificación enviada al WebSocket: ${action} para negocio ${negocioId}`);
       console.log(`   Response status: ${response.status}`);
       console.log(`   Response data: ${JSON.stringify(response.data)}`);
     } catch (error: any) {
       // No lanzar error para no afectar la operación principal
       // Solo loggear el error
-      console.error(`❌ Error notificando al WebSocket: ${error.message}`);
+      console.error(` Error notificando al WebSocket: ${error.message}`);
       console.error(`   URL intentada: ${this.websocketUrl}/notify/cita`);
       
       if (error.code) {

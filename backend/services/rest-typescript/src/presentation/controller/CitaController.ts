@@ -57,38 +57,38 @@ export class CitaController {
       
       const created = await citaRepo.create(data);
       
-      console.log('✅ Cita creada exitosamente:', JSON.stringify(created, null, 2));
+      console.log(' Cita creada exitosamente:', JSON.stringify(created, null, 2));
       
       // Notificar al WebSocket sobre la nueva cita (de forma asíncrona, no bloquea la respuesta)
       // Usar el negocio_id del objeto creado para asegurarse de que sea el correcto
       const negocioId = created.negocio_id || data.negocio_id;
       
       if (negocioId) {
-        console.log(`📤 [CitaController] Notificando WebSocket sobre nueva cita para negocio: ${negocioId}`);
-        console.log(`📤 [CitaController] Cita ID: ${created.id}`);
+        console.log(` [CitaController] Notificando WebSocket sobre nueva cita para negocio: ${negocioId}`);
+        console.log(` [CitaController] Cita ID: ${created.id}`);
         
         // Llamar de forma asíncrona pero asegurarse de que se ejecute
         websocketNotificationService.notifyCitaChange(negocioId, 'created')
           .then(() => {
-            console.log(`✅ [CitaController] Notificación WebSocket completada para negocio: ${negocioId}`);
+            console.log(` [CitaController] Notificación WebSocket completada para negocio: ${negocioId}`);
           })
           .catch(err => {
-            console.error(`❌ [CitaController] Error notificando nueva cita al WebSocket:`, err.message);
+            console.error(` [CitaController] Error notificando nueva cita al WebSocket:`, err.message);
             if (err.code) {
-              console.error(`❌ [CitaController] Error code: ${err.code}`);
+              console.error(` [CitaController] Error code: ${err.code}`);
             }
             if (err.response) {
-              console.error(`❌ [CitaController] Response status: ${err.response.status}`);
-              console.error(`❌ [CitaController] Response data:`, err.response.data);
+              console.error(` [CitaController] Response status: ${err.response.status}`);
+              console.error(` [CitaController] Response data:`, err.response.data);
             }
             if (err.stack) {
-              console.error(`❌ [CitaController] Stack trace:`, err.stack);
+              console.error(` [CitaController] Stack trace:`, err.stack);
             }
           });
       } else {
-        console.warn('⚠️ [CitaController] No se pudo obtener negocio_id para notificar al WebSocket');
-        console.warn('⚠️ [CitaController] Created object:', JSON.stringify(created, null, 2));
-        console.warn('⚠️ [CitaController] Data object:', JSON.stringify(data, null, 2));
+        console.warn(' [CitaController] No se pudo obtener negocio_id para notificar al WebSocket');
+        console.warn(' [CitaController] Created object:', JSON.stringify(created, null, 2));
+        console.warn(' [CitaController] Data object:', JSON.stringify(data, null, 2));
       }
       
       res.status(201).json(created);

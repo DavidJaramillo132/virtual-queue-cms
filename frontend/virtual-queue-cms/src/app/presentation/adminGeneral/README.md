@@ -210,7 +210,7 @@ this.router.navigate(['/admin-general']);
 
 ## Seguridad
 
-⚠️ **IMPORTANTE**: Este módulo debe tener las siguientes medidas de seguridad:
+ **IMPORTANTE**: Este módulo debe tener las siguientes medidas de seguridad:
 
 - [ ] Autenticación obligatoria
 - [ ] Verificación de rol Admin Sistema

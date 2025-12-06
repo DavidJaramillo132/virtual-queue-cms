@@ -3,7 +3,7 @@ applyTo: 'rules'
 ---
 # Reglas de Programación con IA y Humanos
 
-## 📋 Reglas Fundamentales
+##  Reglas Fundamentales
 
 ### Idioma y Comunicación
 
@@ -25,14 +25,14 @@ applyTo: 'rules'
 - *Un archivo = Una responsabilidad*
 - *Carpetas por funcionalidad*, no por tipo de archivo
 
-## 🎯 Estándares por Tecnología
+##  Estándares por Tecnología
 
 ## TypeScript/JavaScript
 
 ### Nomenclatura
 
 typescript
-// ✅ Correcto
+//  Correcto
 const nombreUsuario = "Juan"; // camelCase para variables
 const CONFIGURACION_API = "https://..."; // UPPER_CASE para constantes
 class ManejadorEventos {} // PascalCase para clases
@@ -67,7 +67,7 @@ function calcularPrecioConDescuento(
 ### Nomenclatura
 
 python
-# ✅ Correcto
+#  Correcto
 nombre_usuario = "Juan"                 # snake_case para variables
 CONFIGURACION_API = "https://..."       # UPPER_CASE para constantes
 class ManejadorEventos:                 # PascalCase para clases
@@ -115,7 +115,7 @@ def calcular_precio_con_descuento(
 ### Nomenclatura
 
 go
-// ✅ Correcto
+//  Correcto
 var nombreUsuario string               // camelCase para privadas
 var ConfiguracionAPI string           // PascalCase para exportadas
 const TiempoEsperaMaximo = 30         // PascalCase para constantes exportadas
@@ -146,7 +146,7 @@ func CalcularPrecioConDescuento(precioBase float64, porcentajeDescuento float64)
 }
 
 
-## 🛠 Herramientas y Configuración
+##  Herramientas y Configuración
 
 ### Control de Calidad Obligatorio
 
@@ -164,14 +164,14 @@ func CalcularPrecioConDescuento(precioBase float64, porcentajeDescuento float64)
 ### Git y Commits
 
 bash
-# ✅ Formato de commits
+#  Formato de commits
 feat(eventos): añadir validación de fechas
 fix(api): corregir error en autenticación
 docs(readme): actualizar instrucciones de instalación
 test(usuarios): añadir tests para validación de email
 
 
-## 🚨 Reglas Críticas para IA
+##  Reglas Críticas para IA
 
 ### Antes de Escribir Código
 
@@ -190,9 +190,9 @@ test(usuarios): añadir tests para validación de email
 
 ### Revisión Final
 
-- ✅ ¿Código en español?
-- ✅ ¿Sigue convenciones de nomenclatura?
-- ✅ ¿Documentación completa?
-- ✅ ¿Manejo de errores?
-- ✅ ¿Tests incluidos?
-- ✅ ¿Menos de 100 líneas por archivo?
+-  ¿Código en español?
+-  ¿Sigue convenciones de nomenclatura?
+-  ¿Documentación completa?
+-  ¿Manejo de errores?
+-  ¿Tests incluidos?
+-  ¿Menos de 100 líneas por archivo?

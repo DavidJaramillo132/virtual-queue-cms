@@ -22,7 +22,7 @@ export class Navbar implements OnInit {
   ) {}
 
   ngOnInit() {
-    // 🔄 Escucha los cambios del usuario en tiempo real
+    //  Escucha los cambios del usuario en tiempo real
     this.userService.userActual.subscribe((user) => {
       this.usuario = user;
     });

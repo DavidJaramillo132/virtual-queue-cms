@@ -152,7 +152,7 @@ export class PdfController {
                     const pdfBuffer = await fs.readFile(outputPath);
 
                     // Configurar headers para la descarga
-                    const fileName = `Informe_${perfilData.nombreCompleto.replace(/\s+/g, '_')}_${timestamp}.pdf`;
+                    const fileName = `Informe_${perfilData.nombreCompleto.replaceAll(/\s+/g, '_')}_${timestamp}.pdf`;
                     res.setHeader('Content-Type', 'application/pdf');
                     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
                     res.setHeader('Content-Length', pdfBuffer.length);

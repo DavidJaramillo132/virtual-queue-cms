@@ -1,8 +1,8 @@
-# 📡 WebSocket Server - Real-time Statistics
+#  WebSocket Server - Real-time Statistics
 
 Servidor WebSocket implementado en Go para proporcionar actualizaciones en tiempo real de las estadísticas de citas del sistema.
 
-## 📚 Documentación
+##  Documentación
 
 Este servidor incluye documentación detallada en:
 
@@ -12,24 +12,24 @@ Este servidor incluye documentación detallada en:
 
 **Recomendación**: Lee ARQUITECTURA.md primero para entender el sistema completo.
 
-## 🚀 Características
+##  Características
 
-- ✅ Actualizaciones en tiempo real cuando se crean/actualizan/cancelan citas
-- ✅ Notificaciones instantáneas desde el REST API (sin polling)
-- ✅ Autenticación JWT
-- ✅ Subscripción por canales (por negocio)
-- ✅ Reconexión automática
-- ✅ Independiente del servicio REST (alta disponibilidad)
-- ✅ Optimizado con Gorilla WebSocket
+-  Actualizaciones en tiempo real cuando se crean/actualizan/cancelan citas
+-  Notificaciones instantáneas desde el REST API (sin polling)
+-  Autenticación JWT
+-  Subscripción por canales (por negocio)
+-  Reconexión automática
+-  Independiente del servicio REST (alta disponibilidad)
+-  Optimizado con Gorilla WebSocket
 
-## 📊 Estadísticas proporcionadas
+##  Estadísticas proporcionadas
 
 - **Citas Hoy**: Total de citas programadas para hoy
 - **Total de Citas**: Todas las citas en el sistema
 - **Citas Completadas**: Citas con estado "atendida"
 - **Citas Canceladas**: Citas con estado "cancelada"
 
-## 🔧 Configuración
+##  Configuración
 
 ### Variables de entorno
 
@@ -56,7 +56,7 @@ go run cmd/main.go
 go build -o websocket-server cmd/main.go
 ```
 
-## 🐳 Docker
+##  Docker
 
 ### Construir imagen
 
@@ -73,7 +73,7 @@ docker run -p 8080:8080 \
   websocket-server
 ```
 
-## 📡 Uso del WebSocket
+##  Uso del WebSocket
 
 ### Conectar (desde el frontend)
 
@@ -109,7 +109,7 @@ const ws = new WebSocket(`ws://localhost:8080/ws?token=${token}`);
 }
 ```
 
-## 🔔 Endpoint de Notificaciones (REST API)
+##  Endpoint de Notificaciones (REST API)
 
 El servidor WebSocket expone un endpoint HTTP para recibir notificaciones del REST API cuando se crean, actualizan o cancelan citas:
 
@@ -130,7 +130,7 @@ El servidor WebSocket expone un endpoint HTTP para recibir notificaciones del RE
 
 Este endpoint es llamado automáticamente por el REST API cuando se realizan cambios en las citas. No es necesario llamarlo manualmente desde el frontend.
 
-## 🏗️ Arquitectura
+##  Arquitectura
 
 ```
 cmd/
@@ -149,20 +149,20 @@ internal/
     auth.go         # Validación JWT
 ```
 
-## 🔐 Seguridad
+##  Seguridad
 
-- ✅ Autenticación JWT obligatoria
-- ✅ Validación de token en cada conexión
-- ✅ Subscripción solo a canales autorizados
-- ✅ Sin exposición de datos sensibles
+-  Autenticación JWT obligatoria
+-  Validación de token en cada conexión
+-  Subscripción solo a canales autorizados
+-  Sin exposición de datos sensibles
 
-## 🚦 Estados de conexión
+##  Estados de conexión
 
 - **Conectado** (verde): Recibiendo actualizaciones en tiempo real
 - **Desconectado** (rojo): Sin conexión, intentando reconectar
 - **Reconectando**: Reintentos automáticos con backoff exponencial
 
-## 📈 Optimizaciones
+##  Optimizaciones
 
 - Actualizaciones en tiempo real (sin polling innecesario)
 - Notificaciones solo cuando hay cambios reales
@@ -171,7 +171,7 @@ internal/
 - Buffer de mensajes de 256 por cliente
 - Graceful shutdown
 
-## 🔄 Flujo de datos
+##  Flujo de datos
 
 ```mermaid
 graph LR
@@ -188,7 +188,7 @@ graph LR
     H -->|Actualiza UI| I
 ```
 
-## 📝 Notas
+##  Notas
 
 - El servidor funciona independientemente del REST API
 - Las actualizaciones se envían solo cuando hay cambios reales (creación, actualización, cancelación de citas)
@@ -196,7 +196,7 @@ graph LR
 - Compatible con múltiples negocios simultáneamente
 - El REST API debe estar configurado para notificar al WebSocket cuando se realizan cambios en las citas
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Error: "Cannot connect to database"
 - Verificar DATABASE_URL
@@ -213,7 +213,7 @@ graph LR
 - Comprobar que el negocio_id existe en la BD
 - Revisar logs del servidor
 
-## 📚 Referencias
+##  Referencias
 
 - [Gorilla WebSocket](https://github.com/gorilla/websocket)
 - [PostgreSQL FILTER](https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-AGGREGATES)

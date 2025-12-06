@@ -29,7 +29,7 @@ export class WebsocketService {
    */
   connect(token: string): void {
     if (this.isConnected) {
-      console.warn('⚠️ WebSocket already connected');
+      console.warn(' WebSocket already connected');
       return;
     }
 
@@ -66,7 +66,7 @@ export class WebsocketService {
       })
     ).subscribe({
       next: (message) => {
-        console.log('📨 Mensaje WebSocket recibido:', message);
+        console.log(' Mensaje WebSocket recibido:', message);
         this.messagesSubject$.next(message);
       },
       error: (error) => {
@@ -139,14 +139,14 @@ export class WebsocketService {
       filter(msg => {
         const matches = msg.type === messageType;
         if (!matches) {
-          console.log(`🔍 Mensaje filtrado (tipo: ${msg.type}, esperado: ${messageType}):`, msg);
+          console.log(` Mensaje filtrado (tipo: ${msg.type}, esperado: ${messageType}):`, msg);
         } else {
-          console.log(`✅ Mensaje de tipo '${messageType}' encontrado:`, msg);
+          console.log(` Mensaje de tipo '${messageType}' encontrado:`, msg);
         }
         return matches;
       }),
       map(msg => {
-        console.log(`📦 Extrayendo data del mensaje:`, msg.data);
+        console.log(` Extrayendo data del mensaje:`, msg.data);
         return msg.data as T;
       })
     );
