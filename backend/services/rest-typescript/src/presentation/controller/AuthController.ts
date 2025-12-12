@@ -19,12 +19,11 @@ export class AuthController {
             }
 
             const usuario = await usuarioRepo.getByEmail(email);
-            console.log('Usuario encontrado:', usuario);
+            console.log('Usuario encontrado:', usuario ? 'Sí' : 'No');
             if(!usuario){
                 res.status(404).json({ message: 'Usuario no encontrado' });
                 return;
             }
-
             const passwordsMatch = await bcrypt.compare(password, usuario.password);
             if(!passwordsMatch){
                 res.status(401).json({ message: 'Contraseña incorrecta' });

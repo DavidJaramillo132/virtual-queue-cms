@@ -15,10 +15,10 @@ import adminGeneralRoutes from './presentation/routes/adminGeneralRoutes';
 
 const app = express();
 
-// 1⃣ Middleware para parsear JSON
+// Middleware para parsear JSON
 app.use(express.json());
 
-// 2⃣ Middleware CORS - ¡importante que vaya antes de las rutas!
+//  Middleware CORS - ¡importante que vaya antes de las rutas!
 app.use(cors({
   origin: 'http://localhost:4200', // URL de tu frontend Angular
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
