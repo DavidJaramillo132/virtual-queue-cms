@@ -1,5 +1,5 @@
 import { Request , Response } from "express";
-import jwt from "jsonwebtoken";
+import axios from 'axios';
 import bcrypt from "bcrypt";
 import { UsuarioRepo } from "../../repository/UsuarioRepo";
 
@@ -30,12 +30,28 @@ export class AuthController {
                 return;
             }
 
-            // Token con expiración de 24 horas
-            const token = jwt.sign(
-                { id: usuario.id, email: usuario.email },
-                process.env.JWT_SECRET!,
-                { expiresIn: '24h' }, 
-            );
+            // Solicitar al microservicio Token: asegurar usuario y solicitar login para obtener access+refresh
+            const tokenServiceUrl = process.env.TOKEN_SERVICE_URL || 'http://token-service:4000';
+            let tokenResp;
+            try {
+                // Intentar registrar en token service (si ya existe responde 409 y lo ignoramos)
+                await axios.post(`${tokenServiceUrl}/auth/register`, { email: usuario.email, password });
+            } catch (err: any) {
+                // 409 -> usuario ya existe en token service
+                if (!(err.response && err.response.status === 409)) {
+                    console.warn('Warning registering user in token service:', err.message || err);
+                }
+            }
+
+            try {
+                tokenResp = await axios.post(`${tokenServiceUrl}/auth/login`, { email: usuario.email, password });
+            } catch (err: any) {
+                console.error('Error logging in to token service', err.response?.data || err.message || err);
+                return res.status(500).json({ message: 'Error autenticando en token service' });
+            }
+
+            const token = tokenResp.data?.accessToken;
+            const refreshToken = tokenResp.data?.refreshToken;
 
             // Obtener negocio_id si el usuario es de tipo negocio
             let negocio_id = null;

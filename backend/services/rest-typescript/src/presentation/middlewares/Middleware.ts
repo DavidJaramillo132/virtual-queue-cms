@@ -5,7 +5,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload;
+      user?: JwtPayload | any;
     }
   }
 }
@@ -26,12 +26,11 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
   const token = parts[1];
 
   try {
-    // Verificar y decodificar el token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-
-    // Guardar info del usuario en req para usarla en los controladores
+    // Verificación local: comprobar firma y expiración
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return res.status(500).json({ message: 'JWT_SECRET no configurado' });
+    const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = decoded;
-
     next();
   } catch (err: any) {
     if (err.name === 'TokenExpiredError') {
@@ -40,6 +39,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     if (err.name === 'JsonWebTokenError') {
       return res.status(401).json({ message: 'Token inválido' });
     }
+    console.error('Error al verificar token localmente', err.message || err);
     return res.status(500).json({ message: 'Error al verificar token' });
   }
 };
