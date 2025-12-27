@@ -1,34 +1,47 @@
-#version: '3.9'
+version: '3.9'
+
 services:
   # Servicio REST (TypeScript)
   rest-typescript:
     build: 
       context: ./backend/services/rest-typescript
       dockerfile: Dockerfile
+    command: npm run dev
     container_name: rest-typescript
     restart: always
     ports:
-      - "3000:3001"
+      - "3000:3000"
     env_file:
       - ./backend/services/rest-typescript/.env
-    # depends_on:
-    #   - db
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      #- GRAPHQL_URL=http://graphql-service:5000/graphql
     networks:
       - app-net
+    volumes:
+      - ./backend/services/rest-typescript:/app
+      - /app/node_modules
 
   # Servicio GraphQL (Python)
-  # graphql-python:
-  #   build: ./backend/graphql-python
-  #   container_name: graphql-python
-  #   restart: always
-  #   ports:
-  #     - "5000:5000"
-  #   env_file:
-  #     - ./backend/graphql-python/.env
-  #   depends_on:
-  #     - db
-  #   networks:
-  #     - app-net
+  graphql-service:
+    build: 
+      context: ./backend/services/GraphQL_Service
+      dockerfile: Dockerfile
+    container_name: graphql-service
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/services/GraphQL_Service/.env
+    environment:
+      - REST_API_URL=http://rest-typescript:3000
+    depends_on:
+      - rest-typescript
+    networks:
+      - app-net
+    volumes:
+      - ./backend/services/GraphQL_Service:/app
 
   # Servicio WebSocket (Go)
   websocket-server:
@@ -40,22 +53,56 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    networks:
-      - app-net
-
-
-  # Frontend (Angular)
-  frontend:
-    build: ./frontend/virtual-queue-cms
-    container_name: angular-frontend
-    ports:
-      - "4200:4200"
+      - DATABASE_URL=postgresql://postgres.ahyeuobiaxqzezqubjox:J5SBRXQBNa2nVAU9@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+      - JWT_SECRET=clave123
+      - PORT=8080
+      - REST_API_URL=http://rest-typescript:3000
+      - ALLOWED_ORIGINS=http://localhost:4200
     depends_on:
       - rest-typescript
     networks:
       - app-net
+
+  # Microservicio MCP (Python)
+  mcp-service:
+    build: 
+      context: ./microservicios/MCP
+      dockerfile: Dockerfile
+    container_name: mcp-service
+    restart: always
+    ports:
+      - "8001:8000"
+    env_file:
+      - ./microservicios/MCP/.env
+    networks:
+      - app-net
+    volumes:
+      - ./microservicios/MCP/app:/app
+
+  # Frontend (Angular)
+  frontend:
+    build: 
+      context: ./frontend/virtual-queue-cms
+      dockerfile: Dockerfile
+    command: npm run start
+    container_name: angular-frontend
+    restart: always
+    ports:
+      - "4200:4200"
+    environment:
+      - REST_API_URL=http://rest-typescript:3000
+      - GRAPHQL_API_URL=http://graphql-service:5000/graphql
+      - WEBSOCKET_URL=ws://websocket-server:8080
+
+    depends_on:
+      - rest-typescript
+      - graphql-service
+      - websocket-server
+    networks:
+      - app-net
+    volumes:
+      - ./frontend/virtual-queue-cms:/app
+      - /app/node_modules
 
 networks:
   app-net:

@@ -30,7 +30,7 @@ func main() {
 	}
 
 	// Cargar variables de entorno
-	if err := godotenv.Load("../.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println("Archivo .env no encontrado, usando variables de entorno del sistema")
 	}
 

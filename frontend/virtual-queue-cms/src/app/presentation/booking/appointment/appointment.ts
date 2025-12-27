@@ -55,7 +55,7 @@ export class Appointment implements OnInit, OnChanges {
       servicio_id: ['', Validators.required],
       cliente_id: ['', Validators.required],
       negocio_id: ['', Validators.required],
-      estacion_id: ['', Validators.required], // REQUERIDO - cada cita debe tener una estación (fila)
+      estacion_id: [{ value: '', disabled: true }, Validators.required], // Deshabilitado inicialmente
     });
 
     // Obtener el ID del usuario autenticado (cliente)
@@ -133,10 +133,18 @@ export class Appointment implements OnInit, OnChanges {
       next: (data: IEstacion[]) => {
         // Filtrar solo estaciones activas
         this.estaciones = data.filter(e => e.estado === 'activa');
+        
+        // Habilitar el select de estaciones si hay estaciones disponibles
+        if (this.estaciones.length > 0) {
+          this.nuevaCitaForm.get('estacion_id')?.enable();
+        } else {
+          this.nuevaCitaForm.get('estacion_id')?.disable();
+        }
       },
       error: (error) => {
         console.error('Error al cargar estaciones:', error);
         this.errorMessage = 'No se pudieron cargar las filas del negocio';
+        this.nuevaCitaForm.get('estacion_id')?.disable();
       }
     });
   }

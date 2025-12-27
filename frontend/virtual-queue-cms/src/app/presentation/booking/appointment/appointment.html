@@ -29,57 +29,58 @@
     </table>
   </div>
  
-  <div class="mb-4">
-    <label for="servicio" class="block mb-2">
-      <p class="font-semibold">Servicio:</p>
-      <div *ngIf="servicioPreseleccionado" class="border p-3 rounded w-full bg-gray-50">
-        <p class="font-medium">{{ servicioPreseleccionado.nombre }}</p>
-        <p class="text-sm text-gray-600">Duración: {{ servicioPreseleccionado.duracion_minutos }} minutos</p>
-        <p *ngIf="servicioPreseleccionado.descripcion" class="text-sm text-gray-500 mt-1">{{ servicioPreseleccionado.descripcion }}</p>
-      </div>
-      <select 
-        *ngIf="!servicioPreseleccionado"
-        id="servicio" 
-        [(ngModel)]="servicio_seleccionado"
-        (change)="onServicioSeleccionado($event)"
-        class="border p-2 rounded w-full"
-      >
-        <option value="">-- Seleccione un servicio --</option>
-        <option *ngFor="let servicio of servicios" [value]="servicio.id">
-          {{ servicio.nombre }} ({{ servicio.duracion_minutos }} min)
-        </option>
-      </select>
-    </label>
-  </div>
+  <form [formGroup]="nuevaCitaForm">
+    <div class="mb-4">
+      <label for="servicio" class="block mb-2">
+        <p class="font-semibold">Servicio:</p>
+        <div *ngIf="servicioPreseleccionado" class="border p-3 rounded w-full bg-gray-50">
+          <p class="font-medium">{{ servicioPreseleccionado.nombre }}</p>
+          <p class="text-sm text-gray-600">Duración: {{ servicioPreseleccionado.duracion_minutos }} minutos</p>
+          <p *ngIf="servicioPreseleccionado.descripcion" class="text-sm text-gray-500 mt-1">{{ servicioPreseleccionado.descripcion }}</p>
+        </div>
+        <select 
+          *ngIf="!servicioPreseleccionado"
+          id="servicio" 
+          formControlName="servicio_id"
+          (change)="onServicioSeleccionado($event)"
+          class="border p-2 rounded w-full"
+        >
+          <option value="">-- Seleccione un servicio --</option>
+          <option *ngFor="let servicio of servicios" [value]="servicio.id">
+            {{ servicio.nombre }} ({{ servicio.duracion_minutos }} min)
+          </option>
+        </select>
+      </label>
+    </div>
 
-  <!-- Selector de Estación (Fila) - solo habilitado después de seleccionar servicio -->
-  <div class="mb-4">
-    <label for="estacion" class="block mb-2">
-      <p class="font-semibold">Fila (Estación):<span class="text-red-500">*</span></p>
-      <select 
-        id="estacion"
-        formControlName="estacion_id"
-        (change)="onEstacionSeleccionada($event)"
-        class="border p-2 rounded w-full"
-        [class.border-red-500]="nuevaCitaForm.get('estacion_id')?.invalid && nuevaCitaForm.get('estacion_id')?.touched"
-        [disabled]="!servicio_seleccionado || estaciones.length === 0"
-      >
-        <option value="">-- Seleccione una fila --</option>
-        <option *ngFor="let estacion of estaciones" [value]="estacion.id">
-          {{ estacion.nombre }} {{ estacion.tipo ? '(' + estacion.tipo + ')' : '' }}
-        </option>
-      </select>
-      <p *ngIf="!servicio_seleccionado" class="text-sm text-gray-500 mt-1">
-        Primero debe seleccionar un servicio
-      </p>
-      <p *ngIf="servicio_seleccionado && estaciones.length === 0" class="text-sm text-red-500 mt-1 font-medium">
-        Este negocio aún no ha creado filas de atención. Por favor, contacte al negocio.
-      </p>
-      <p *ngIf="servicio_seleccionado && estaciones.length > 0" class="text-sm text-gray-500 mt-1">
-        Seleccione una fila para ver las citas disponibles
-      </p>
-    </label>
-  </div>
+    <!-- Selector de Estación (Fila) - solo habilitado después de seleccionar servicio -->
+    <div class="mb-4">
+      <label for="estacion" class="block mb-2">
+        <p class="font-semibold">Fila (Estación):<span class="text-red-500">*</span></p>
+        <select 
+          id="estacion"
+          formControlName="estacion_id"
+          (change)="onEstacionSeleccionada($event)"
+          class="border p-2 rounded w-full"
+          [class.border-red-500]="nuevaCitaForm.get('estacion_id')?.invalid && nuevaCitaForm.get('estacion_id')?.touched"
+        >
+          <option value="">-- Seleccione una fila --</option>
+          <option *ngFor="let estacion of estaciones" [value]="estacion.id">
+            {{ estacion.nombre }} {{ estacion.tipo ? '(' + estacion.tipo + ')' : '' }}
+          </option>
+        </select>
+        <p *ngIf="!servicio_seleccionado" class="text-sm text-gray-500 mt-1">
+          Primero debe seleccionar un servicio
+        </p>
+        <p *ngIf="servicio_seleccionado && estaciones.length === 0" class="text-sm text-red-500 mt-1 font-medium">
+          Este negocio aún no ha creado filas de atención. Por favor, contacte al negocio.
+        </p>
+        <p *ngIf="servicio_seleccionado && estaciones.length > 0" class="text-sm text-gray-500 mt-1">
+          Seleccione una fila para ver las citas disponibles
+        </p>
+      </label>
+    </div>
+  </form>
 
   <!-- Mensajes de estado -->
   <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg">

@@ -1,10 +1,10 @@
 # Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.25.4-alpine AS builder
 
 WORKDIR /app
 
 # Copiar archivos de módulos
-COPY go.mod ./
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copiar el código fuente
@@ -22,6 +22,9 @@ WORKDIR /root/
 
 # Copiar el binario compilado
 COPY --from=builder /app/websocket-server .
+
+# Copiar el archivo .env
+COPY --from=builder /app/.env .env
 
 # Exponer el puerto
 EXPOSE 8080

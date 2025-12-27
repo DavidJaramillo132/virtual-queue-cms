@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "ng": "ng",
-    "start": "node dist/index.js",
+    "start": "ng serve --host 0.0.0.0",
     "build": "tsc",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
