@@ -89,6 +89,18 @@ func (s *EstadisticasService) ObtenerEstadisticas(ctx context.Context, negocioID
 		&stats.CitasCanceladas,
 	)
 	if err != nil {
+		// Si no hay filas, devolver estadísticas en cero en lugar de error
+		if err == sql.ErrNoRows {
+			fmt.Printf("No se encontraron citas para negocio_id: %s, devolviendo estadísticas en cero\n", negocioID)
+			stats = EstadisticasData{
+				TotalCitas:       0,
+				CitasHoy:         0,
+				CitasCompletadas: 0,
+				CitasCanceladas:  0,
+				Timestamp:        time.Now(),
+			}
+			return &stats, nil
+		}
 		fmt.Printf("Error consultando estadísticas: %v\n", err)
 		return nil, fmt.Errorf("error consultando estadísticas: %w", err)
 	}

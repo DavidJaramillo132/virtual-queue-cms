@@ -31,7 +31,7 @@ interface InformePDFResponse {
 })
 export class UserGraphQl {
   private PATH = "/graphql";
-  private HOST = "http://localhost:3001";
+  private HOST = "http://localhost:5000";
   //private fullUrl = this.HOST + this.PATH;
 
   constructor(private apollo: Apollo) { }

@@ -98,6 +98,10 @@ func main() {
 			return
 		}
 
+		// Pequeño delay para asegurar que la transacción de la base de datos se complete
+		// Esto evita el problema de consultar antes de que el COMMIT se complete
+		time.Sleep(200 * time.Millisecond)
+
 		// Obtener estadísticas actualizadas para el negocio
 		ctx := context.Background()
 		log.Printf("Consultando estadísticas para negocio %s...", notification.NegocioID)
