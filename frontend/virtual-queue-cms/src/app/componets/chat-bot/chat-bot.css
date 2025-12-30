@@ -1,0 +1,43 @@
+/* Animación slide-up */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease;
+}
+
+/* Scroll personalizado */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f3f4f6;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .chat-window {
+    width: calc(100vw - 32px) !important;
+    height: calc(100vh - 140px) !important;
+    right: 16px !important;
+    bottom: 90px !important;
+  }
+}

@@ -7,7 +7,6 @@ export class HorarioAtencionRepo extends BaseRepository<HorarioAtencion> {
     super(HorarioAtencion);
   }
 
-
   async getByEstacionId(estacionId: string): Promise<HorarioAtencion[]> {
     return this.repo.find({ where: { estacion_id: estacionId } });
   }

@@ -72,10 +72,13 @@ services:
       - "8001:8000"
     env_file:
       - ./microservicios/MCP/.env
+    environment:
+      - TZ=America/Guayaquil
     networks:
       - app-net
     volumes:
-      - ./microservicios/MCP/app:/app
+      - ./microservicios/MCP:/app
+
 
   # Frontend (Angular)
   frontend:

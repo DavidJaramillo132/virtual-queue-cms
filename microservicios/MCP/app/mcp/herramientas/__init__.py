@@ -1,15 +1,17 @@
 """
-Registro central de herramientas MCP disponibles
+Módulo de herramientas MCP
+Exporta todas las herramientas disponibles y funciones de registro
 """
+
 from typing import Dict, Callable, Any
-from app.mcp.herramientas.ver_horarios_disponibles import ver_horarios_disponibles
-from app.mcp.herramientas.crear_cita import crear_cita
-from app.mcp.herramientas.cancelar_cita import cancelar_cita
-from app.mcp.herramientas.consultar_citas import consultar_citas
-from app.mcp.herramientas.buscar_negocios import buscar_negocios
-from app.mcp.herramientas.obtener_servicios import obtener_servicios
-from app.mcp.herramientas.obtener_estaciones import obtener_estaciones
-from app.mcp.herramientas.obtener_info_negocio import obtener_info_negocio
+from .ver_horarios_disponibles import ver_horarios_disponibles
+from .crear_cita import crear_cita
+from .cancelar_cita import cancelar_cita
+from .consultar_citas import consultar_citas
+from .buscar_negocios import buscar_negocios
+from .obtener_servicios import obtener_servicios
+from .obtener_info_negocio import obtener_info_negocio
+from .obtener_estaciones import obtener_estaciones
 
 
 def obtener_herramientas_disponibles() -> Dict[str, Callable]:
@@ -26,8 +28,8 @@ def obtener_herramientas_disponibles() -> Dict[str, Callable]:
         "consultar_citas": consultar_citas,
         "buscar_negocios": buscar_negocios,
         "obtener_servicios": obtener_servicios,
-        "obtener_estaciones": obtener_estaciones,
-        "obtener_info_negocio": obtener_info_negocio
+        "obtener_info_negocio": obtener_info_negocio,
+        "obtener_estaciones": obtener_estaciones
     }
 
 
@@ -42,15 +44,15 @@ def obtener_definiciones_herramientas() -> list[Dict[str, Any]]:
     return [
         {
             "nombre": "ver_horarios_disponibles",
-            "descripcion": "Obtiene los horarios disponibles para agendar una cita en un negocio específico. Permite filtrar por servicio, fecha y estación.",
+            "descripcion": "ÚSALO cuando el usuario ELIGE una estación. Obtiene los horarios disponibles y muéstrale opciones de fecha/hora para que elija.",
             "parametros": {
                 "negocio_id": {
                     "type": "string",
-                    "description": "ID único del negocio (UUID)"
+                    "description": "ID único del negocio previamente elegido (UUID)"
                 },
                 "servicio_id": {
                     "type": "string",
-                    "description": "ID del servicio específico (UUID, opcional)"
+                    "description": "ID del servicio previamente elegido (UUID, opcional)"
                 },
                 "fecha": {
                     "type": "string",
@@ -58,42 +60,42 @@ def obtener_definiciones_herramientas() -> list[Dict[str, Any]]:
                 },
                 "estacion_id": {
                     "type": "string",
-                    "description": "ID de la estación específica (UUID, opcional)"
+                    "description": "ID de la estación previamente elegida (UUID, opcional)"
                 }
             },
             "requeridos": ["negocio_id"]
         },
         {
             "nombre": "crear_cita",
-            "descripcion": "Crea una nueva cita en el sistema. Requiere todos los detalles de la cita incluyendo cliente, negocio, servicio, estación y horario.",
+            "descripcion": "Crea una nueva cita en el sistema. SOLO USA ESTA HERRAMIENTA cuando ya tengas TODOS los datos necesarios: cliente_id (obtenido automáticamente), negocio_id, servicio_id, estacion_id, fecha, hora_inicio y hora_fin. NUNCA pidas estos datos directamente al usuario, guíalo paso a paso usando las otras herramientas primero.",
             "parametros": {
                 "cliente_id": {
                     "type": "string",
-                    "description": "ID del cliente que agenda la cita (UUID)"
+                    "description": "ID del cliente que agenda la cita (UUID) - Se obtiene automáticamente del sistema"
                 },
                 "negocio_id": {
                     "type": "string",
-                    "description": "ID del negocio donde se agenda la cita (UUID)"
+                    "description": "ID del negocio donde se agenda la cita (UUID) - Obtener de buscar_negocios"
                 },
                 "servicio_id": {
                     "type": "string",
-                    "description": "ID del servicio a solicitar (UUID)"
+                    "description": "ID del servicio a solicitar (UUID) - Obtener de obtener_servicios"
                 },
                 "estacion_id": {
                     "type": "string",
-                    "description": "ID de la estación asignada (UUID)"
+                    "description": "ID de la estación asignada (UUID) - Obtener de obtener_estaciones"
                 },
                 "fecha": {
                     "type": "string",
-                    "description": "Fecha de la cita en formato YYYY-MM-DD"
+                    "description": "Fecha de la cita en formato YYYY-MM-DD - Obtener de ver_horarios_disponibles"
                 },
                 "hora_inicio": {
                     "type": "string",
-                    "description": "Hora de inicio en formato HH:MM (24h)"
+                    "description": "Hora de inicio en formato HH:MM (24h) - Obtener de ver_horarios_disponibles"
                 },
                 "hora_fin": {
                     "type": "string",
-                    "description": "Hora de fin en formato HH:MM (24h)"
+                    "description": "Hora de fin en formato HH:MM (24h) - Obtener de ver_horarios_disponibles"
                 }
             },
             "requeridos": ["cliente_id", "negocio_id", "servicio_id", "estacion_id", "fecha", "hora_inicio", "hora_fin"]
@@ -143,7 +145,7 @@ def obtener_definiciones_herramientas() -> list[Dict[str, Any]]:
         },
         {
             "nombre": "buscar_negocios",
-            "descripcion": "Busca negocios en el sistema. Permite filtrar por nombre, categoría y estado.",
+            "descripcion": "Busca negocios en el sistema. USA ESTA HERRAMIENTA SOLO UNA VEZ al inicio cuando el usuario pregunta por primera vez qué negocios hay disponibles. IMPORTANTE: Después de mostrar los resultados al usuario, NO VUELVAS A LLAMAR A ESTA HERRAMIENTA. Cuando el usuario elija un negocio (ejemplo: 'Quiero hacer una cita en Veterinaria San juan'), DEBES INMEDIATAMENTE llamar a 'obtener_servicios' usando el negocio_id que ya obtuviste.",
             "parametros": {
                 "nombre": {
                     "type": "string",
@@ -151,48 +153,40 @@ def obtener_definiciones_herramientas() -> list[Dict[str, Any]]:
                 },
                 "categoria": {
                     "type": "string",
-                    "description": "Categoría del negocio (ej: 'restaurante', 'salud', 'belleza') (opcional)"
+                    "description": "Categoría del negocio (opcional)"
                 },
-                "estado": {
+                "activo": {
                     "type": "boolean",
-                    "description": "Estado del negocio: true para activos, false para inactivos (opcional)"
-                },
-                "limite": {
-                    "type": "integer",
-                    "description": "Número máximo de resultados a retornar (opcional)"
+                    "description": "Filtrar solo negocios activos (opcional)"
                 }
             },
             "requeridos": []
         },
         {
             "nombre": "obtener_servicios",
-            "descripcion": "Obtiene la lista de servicios disponibles de un negocio específico.",
+            "descripcion": "LLAMAR AUTOMÁTICAMENTE cuando el usuario elige/menciona un negocio específico. Esta herramienta obtiene TODOS los servicios disponibles del negocio. FLUJO OBLIGATORIO: 1) Usuario dice 'Quiero cita en [NEGOCIO]' -> 2) INMEDIATAMENTE llama obtener_servicios con negocio_id -> 3) Muestra los servicios al usuario con sus precios -> 4) Usuario elige servicio -> 5) Llama obtener_estaciones. NO preguntes al usuario qué quiere antes de mostrar los servicios.",
             "parametros": {
                 "negocio_id": {
                     "type": "string",
-                    "description": "ID del negocio (UUID)"
-                },
-                "nombre": {
-                    "type": "string",
-                    "description": "Filtrar servicios por nombre (opcional)"
+                    "description": "ID del negocio que el usuario ELIGIÓ. Este ID ya lo tienes del resultado de buscar_negocios (UUID)"
                 }
             },
             "requeridos": ["negocio_id"]
         },
         {
             "nombre": "obtener_estaciones",
-            "descripcion": "Obtiene la lista de estaciones disponibles de un negocio específico.",
+            "descripcion": "LLAMAR AUTOMÁTICAMENTE cuando el usuario elige/menciona un servicio específico. Obtiene las estaciones (puestos de trabajo) disponibles en el negocio. FLUJO: Usuario elige servicio -> Llamas obtener_estaciones -> Muestras estaciones -> Usuario elige estación -> Llamas ver_horarios_disponibles. Siempre muestra las estaciones al usuario para que elija.",
             "parametros": {
                 "negocio_id": {
                     "type": "string",
-                    "description": "ID del negocio (UUID)"
+                    "description": "ID del negocio previamente elegido (UUID)"
                 }
             },
             "requeridos": ["negocio_id"]
         },
         {
             "nombre": "obtener_info_negocio",
-            "descripcion": "Obtiene información detallada de un negocio específico incluyendo nombre, descripción, ubicación, horarios, etc.",
+            "descripcion": "Obtiene información completa de un negocio específico, incluyendo horarios, servicios y estaciones.",
             "parametros": {
                 "negocio_id": {
                     "type": "string",
@@ -202,3 +196,17 @@ def obtener_definiciones_herramientas() -> list[Dict[str, Any]]:
             "requeridos": ["negocio_id"]
         }
     ]
+
+
+__all__ = [
+    "ver_horarios_disponibles",
+    "crear_cita",
+    "cancelar_cita",
+    "consultar_citas",
+    "buscar_negocios",
+    "obtener_servicios",
+    "obtener_estaciones",
+    "obtener_info_negocio",
+    "obtener_herramientas_disponibles",
+    "obtener_definiciones_herramientas"
+]
