@@ -1,130 +1,96 @@
-CREATE TYPE "rol_usuario_enum" AS ENUM (
-  'cliente',
-  'negocio',
-  'admin_sistema'
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.admin_sistema (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  usuario_id uuid NOT NULL UNIQUE,
+  nombre character varying NOT NULL DEFAULT ''::character varying,
+  apellidos character varying NOT NULL DEFAULT ''::character varying,
+  telefono character varying,
+  CONSTRAINT admin_sistema_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_admin_sistema_usuario FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id)
 );
-
-CREATE TYPE "citas_estado_enum" AS ENUM (
-  'pendiente',
-  'atendida',
-  'cancelada'
+CREATE TABLE public.citas (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  cliente_id uuid NOT NULL,
+  negocio_id uuid NOT NULL,
+  estacion_id uuid,
+  servicio_id uuid NOT NULL,
+  fecha date NOT NULL,
+  hora_inicio time without time zone NOT NULL,
+  hora_fin time without time zone NOT NULL,
+  estado USER-DEFINED NOT NULL DEFAULT 'pendiente'::citas_estado_enum,
+  creado_en timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT citas_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_citas_cliente FOREIGN KEY (cliente_id) REFERENCES public.usuarios(id),
+  CONSTRAINT fk_citas_negocio FOREIGN KEY (negocio_id) REFERENCES public.negocios(id),
+  CONSTRAINT fk_citas_estacion FOREIGN KEY (estacion_id) REFERENCES public.estaciones(id),
+  CONSTRAINT fk_citas_servicio FOREIGN KEY (servicio_id) REFERENCES public.servicios(id)
 );
-
-CREATE TYPE "estaciones_estado_enum" AS ENUM (
-  'activa',
-  'inactiva'
+CREATE TABLE public.estacion_servicios (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  estacion_id uuid NOT NULL,
+  servicio_id uuid NOT NULL,
+  CONSTRAINT estacion_servicios_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_estacion_servicios_estacion FOREIGN KEY (estacion_id) REFERENCES public.estaciones(id),
+  CONSTRAINT fk_estacion_servicios_servicio FOREIGN KEY (servicio_id) REFERENCES public.servicios(id)
 );
-
-CREATE TABLE "usuarios" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "email" varchar UNIQUE NOT NULL,
-  "password" varchar NOT NULL,
-  "rol" rol_usuario_enum NOT NULL DEFAULT 'cliente',
-  "telefono" varchar,
-  "nombre_completo" varchar NOT NULL DEFAULT '',
-  "creado_en" timestamp NOT NULL DEFAULT (now())
+CREATE TABLE public.estaciones (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  negocio_id uuid NOT NULL,
+  nombre character varying NOT NULL DEFAULT ''::character varying,
+  tipo character varying,
+  estado USER-DEFINED NOT NULL DEFAULT 'activa'::estaciones_estado_enum,
+  creado_en timestamp without time zone NOT NULL DEFAULT now(),
+  solo_premium boolean NOT NULL DEFAULT false,
+  CONSTRAINT estaciones_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_estaciones_negocio FOREIGN KEY (negocio_id) REFERENCES public.negocios(id)
 );
-
-CREATE TABLE "admin_sistema" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "usuario_id" uuid UNIQUE NOT NULL,
-  "nombre" varchar NOT NULL DEFAULT '',
-  "apellidos" varchar NOT NULL DEFAULT '',
-  "telefono" varchar
+CREATE TABLE public.horarios_atencion (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  estacion_id uuid NOT NULL,
+  dia_semana smallint NOT NULL CHECK (dia_semana >= 0 AND dia_semana <= 6),
+  hora_inicio time without time zone NOT NULL,
+  hora_fin time without time zone NOT NULL,
+  creado_en timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT horarios_atencion_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_horarios_estacion FOREIGN KEY (estacion_id) REFERENCES public.estaciones(id)
 );
-
-CREATE TABLE "negocios" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "admin_negocio_id" uuid,
-  "nombre" varchar NOT NULL DEFAULT '',
-  "categoria" varchar NOT NULL DEFAULT '',
-  "descripcion" text,
-  "telefono" varchar,
-  "correo" varchar,
-  "direccion" varchar,
-  "imagen_url" varchar,
-  "estado" boolean NOT NULL DEFAULT true,
-  "horario_general" varchar,
-  "creado_en" timestamp NOT NULL DEFAULT (now())
+CREATE TABLE public.negocios (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  admin_negocio_id uuid,
+  nombre character varying NOT NULL DEFAULT ''::character varying,
+  categoria character varying NOT NULL DEFAULT ''::character varying,
+  descripcion text,
+  telefono character varying,
+  correo character varying,
+  direccion character varying,
+  imagen_url character varying,
+  estado boolean NOT NULL DEFAULT true,
+  horario_general character varying,
+  creado_en timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT negocios_pkey PRIMARY KEY (id),
+  CONSTRAINT negocios_admin_negocio_id_fkey FOREIGN KEY (admin_negocio_id) REFERENCES public.usuarios(id)
 );
-
-CREATE TABLE "estaciones" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "negocio_id" uuid NOT NULL,
-  "nombre" varchar NOT NULL DEFAULT '',
-  "tipo" varchar,
-  "estado" estaciones_estado_enum NOT NULL DEFAULT 'activa',
-  "creado_en" timestamp NOT NULL DEFAULT (now())
+CREATE TABLE public.servicios (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  negocio_id uuid NOT NULL,
+  nombre character varying NOT NULL DEFAULT ''::character varying,
+  descripcion text,
+  duracion_minutos integer NOT NULL,
+  precio_centavos integer NOT NULL DEFAULT 0,
+  creado_en timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT servicios_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_servicios_negocio FOREIGN KEY (negocio_id) REFERENCES public.negocios(id)
 );
-
-CREATE TABLE "servicios" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "negocio_id" uuid NOT NULL,
-  "nombre" varchar NOT NULL DEFAULT '',
-  "descripcion" text,
-  "duracion_minutos" integer NOT NULL,
-  "precio_centavos" integer NOT NULL DEFAULT 0,
-  "creado_en" timestamp NOT NULL DEFAULT (now())
+CREATE TABLE public.usuarios (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  email character varying NOT NULL UNIQUE,
+  password character varying NOT NULL,
+  rol USER-DEFINED NOT NULL DEFAULT 'cliente'::rol_usuario_enum,
+  telefono character varying,
+  nombre_completo character varying NOT NULL DEFAULT ''::character varying,
+  creado_en timestamp without time zone NOT NULL DEFAULT now(),
+  es_premium boolean NOT NULL DEFAULT false,
+  CONSTRAINT usuarios_pkey PRIMARY KEY (id)
 );
-
-CREATE TABLE "estacion_servicios" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "estacion_id" uuid NOT NULL,
-  "servicio_id" uuid NOT NULL
-);
-
-CREATE TABLE "horarios_atencion" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "estacion_id" uuid NOT NULL,
-  "dia_semana" smallint NOT NULL,
-  "hora_inicio" time NOT NULL,
-  "hora_fin" time NOT NULL,
-  "creado_en" timestamp NOT NULL DEFAULT (now()),
-  CONSTRAINT "ck_dia_semana" CHECK (dia_semana BETWEEN 0 AND 6),
-  CONSTRAINT "ck_hora_rango" CHECK (hora_fin > hora_inicio)
-);
-
-CREATE TABLE "citas" (
-  "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "cliente_id" uuid NOT NULL,
-  "negocio_id" uuid NOT NULL,
-  "estacion_id" uuid NOT NULL,
-  "servicio_id" uuid NOT NULL,
-  "fecha" date NOT NULL,
-  "hora_inicio" time NOT NULL,
-  "hora_fin" time NOT NULL,
-  "estado" citas_estado_enum NOT NULL DEFAULT 'pendiente',
-  "creado_en" timestamp NOT NULL DEFAULT (now()),
-  CONSTRAINT "ck_citas_hora_rango" CHECK (hora_fin > hora_inicio)
-);
-
-CREATE UNIQUE INDEX "uq_estacion_servicio" ON "estacion_servicios" ("estacion_id", "servicio_id");
-
-CREATE INDEX "idx_horarios_estacion_dia" ON "horarios_atencion" ("estacion_id", "dia_semana");
-
-CREATE INDEX "idx_citas_cliente_fecha" ON "citas" ("cliente_id", "fecha");
-
-CREATE INDEX "idx_citas_negocio_fecha" ON "citas" ("negocio_id", "fecha");
-
-ALTER TABLE "admin_sistema" ADD CONSTRAINT "fk_admin_sistema_usuario" FOREIGN KEY ("usuario_id") REFERENCES "usuarios" ("id") ON DELETE CASCADE;
-
-ALTER TABLE "negocios" ADD FOREIGN KEY ("admin_negocio_id") REFERENCES "usuarios" ("id") ON DELETE SET NULL;
-
-ALTER TABLE "estaciones" ADD CONSTRAINT "fk_estaciones_negocio" FOREIGN KEY ("negocio_id") REFERENCES "negocios" ("id") ON DELETE CASCADE;
-
-ALTER TABLE "servicios" ADD CONSTRAINT "fk_servicios_negocio" FOREIGN KEY ("negocio_id") REFERENCES "negocios" ("id") ON DELETE CASCADE;
-
-ALTER TABLE "estacion_servicios" ADD CONSTRAINT "fk_estacion_servicios_estacion" FOREIGN KEY ("estacion_id") REFERENCES "estaciones" ("id") ON DELETE CASCADE;
-
-ALTER TABLE "estacion_servicios" ADD CONSTRAINT "fk_estacion_servicios_servicio" FOREIGN KEY ("servicio_id") REFERENCES "servicios" ("id") ON DELETE CASCADE;
-
-ALTER TABLE "horarios_atencion" ADD CONSTRAINT "fk_horarios_estacion" FOREIGN KEY ("estacion_id") REFERENCES "estaciones" ("id") ON DELETE CASCADE;
-
-ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_cliente" FOREIGN KEY ("cliente_id") REFERENCES "usuarios" ("id") ON DELETE RESTRICT;
-
-ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_negocio" FOREIGN KEY ("negocio_id") REFERENCES "negocios" ("id") ON DELETE RESTRICT;
-
-ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_estacion" FOREIGN KEY ("estacion_id") REFERENCES "estaciones" ("id") ON DELETE RESTRICT;
-
-ALTER TABLE "citas" ADD CONSTRAINT "fk_citas_servicio" FOREIGN KEY ("servicio_id") REFERENCES "servicios" ("id") ON DELETE RESTRICT;
-

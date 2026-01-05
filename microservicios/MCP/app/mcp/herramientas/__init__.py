@@ -12,6 +12,7 @@ from .buscar_negocios import buscar_negocios
 from .obtener_servicios import obtener_servicios
 from .obtener_info_negocio import obtener_info_negocio
 from .obtener_estaciones import obtener_estaciones
+from .crear_negocio import crear_negocio
 
 
 def obtener_herramientas_disponibles() -> Dict[str, Callable]:
@@ -29,7 +30,8 @@ def obtener_herramientas_disponibles() -> Dict[str, Callable]:
         "buscar_negocios": buscar_negocios,
         "obtener_servicios": obtener_servicios,
         "obtener_info_negocio": obtener_info_negocio,
-        "obtener_estaciones": obtener_estaciones
+        "obtener_estaciones": obtener_estaciones,
+        "crear_negocio": crear_negocio
     }
 
 
@@ -194,6 +196,41 @@ def obtener_definiciones_herramientas() -> list[Dict[str, Any]]:
                 }
             },
             "requeridos": ["negocio_id"]
+        },
+        {
+            "nombre": "crear_negocio",
+            "descripcion": "Crea un nuevo negocio en el sistema con la información proporcionada. Usa esta herramienta cuando el usuario quiera registrar un nuevo negocio, especialmente cuando envía un PDF o documento con información del negocio. Extrae la información del documento y crea el negocio automáticamente.",
+            "parametros": {
+                "nombre": {
+                    "type": "string",
+                    "description": "Nombre del negocio (requerido)"
+                },
+                "categoria": {
+                    "type": "string",
+                    "description": "Categoría del negocio: Salud, Belleza, Consultoría, Restaurante, Tecnología, etc. (requerido)"
+                },
+                "descripcion": {
+                    "type": "string",
+                    "description": "Descripción detallada del negocio y sus servicios (opcional)"
+                },
+                "telefono": {
+                    "type": "string",
+                    "description": "Número de teléfono de contacto (opcional)"
+                },
+                "correo": {
+                    "type": "string",
+                    "description": "Correo electrónico de contacto (opcional)"
+                },
+                "direccion": {
+                    "type": "string",
+                    "description": "Dirección física del negocio (opcional)"
+                },
+                "horario_general": {
+                    "type": "string",
+                    "description": "Horario de atención general, ej: 'Lunes a Viernes 9:00-18:00' (opcional)"
+                }
+            },
+            "requeridos": ["nombre", "categoria"]
         }
     ]
 
@@ -207,6 +244,7 @@ __all__ = [
     "obtener_servicios",
     "obtener_estaciones",
     "obtener_info_negocio",
+    "crear_negocio",
     "obtener_herramientas_disponibles",
     "obtener_definiciones_herramientas"
 ]

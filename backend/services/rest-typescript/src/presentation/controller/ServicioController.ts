@@ -76,8 +76,19 @@ export class ServicioController {
         return;
       }
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Error deleting servicio ${id}:`, error);
+      
+      // Detectar error de clave foránea
+      if (error.code === '23503' || error.constraint === 'fk_citas_servicio') {
+        res.status(409).json({ 
+          error: 'No se puede eliminar el servicio porque tiene citas asociadas',
+          detail: 'Para eliminar este servicio, primero debe cancelar o eliminar todas las citas que lo utilizan.',
+          code: 'FOREIGN_KEY_VIOLATION'
+        });
+        return;
+      }
+      
       res.status(500).json({ error: 'Internal server error' });
     }
   }

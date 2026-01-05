@@ -91,7 +91,16 @@ export class ServicioServicios {
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      errorMessage = error.error?.message || `Código de error: ${error.status}`;
+      // Detectar errores específicos
+      if (error.status === 409 && error.error?.code === 'FOREIGN_KEY_VIOLATION') {
+        errorMessage = error.error.error || 'No se puede eliminar el servicio porque tiene citas asociadas';
+      } else if (error.error?.error) {
+        errorMessage = error.error.error;
+      } else if (error.error?.message) {
+        errorMessage = error.error.message;
+      } else {
+        errorMessage = `Error del servidor (código: ${error.status})`;
+      }
     }
     
     return throwError(() => new Error(errorMessage));

@@ -4,6 +4,7 @@ import { CitaService } from '../../../services/Rest/cita-services';
 import { UserService } from '../../../services/Rest/userServices';
 import { EstacionServices } from '../../../services/Rest/estacion-services';
 import { HorarioService } from '../../../services/Rest/horario-services';
+import { SuscripcionService } from '../../../services/Rest/suscripcion.service';
 import { CommonModule } from '@angular/common';
 import { ICita } from '../../../domain/entities';
 import { IServicio } from '../../../domain/entities/IServicio';
@@ -40,13 +41,15 @@ export class Appointment implements OnInit, OnChanges {
   estacionSeleccionadaId: string = '';
 
   private clienteId: string = '';
+  usuarioEsPremium: boolean = false; // Expuesto para el template
 
   constructor(
     private citaService: CitaService, 
     private fb: FormBuilder,
     private userService: UserService,
     private estacionService: EstacionServices,
-    private horarioService: HorarioService
+    private horarioService: HorarioService,
+    private suscripcionService: SuscripcionService
   ) {
     this.nuevaCitaForm = this.fb.group({
       fecha: [new Date().toISOString().split('T')[0], Validators.required],
@@ -62,6 +65,8 @@ export class Appointment implements OnInit, OnChanges {
     const currentUser = this.userService.currentUserValue;
     if (currentUser && currentUser.id) {
       this.clienteId = currentUser.id;
+      // Valor inicial del localStorage (puede estar desactualizado)
+      this.usuarioEsPremium = currentUser.es_premium || false;
       this.nuevaCitaForm.patchValue({ cliente_id: currentUser.id });
     }
   }
@@ -74,10 +79,32 @@ export class Appointment implements OnInit, OnChanges {
       this.nuevaCitaForm.patchValue({ negocio_id: this.negocioId });
     }
 
+    // Verificar estado premium del usuario con el servicio de suscripciones (fuente de verdad)
+    if (this.clienteId) {
+      this.verificarEstadoPremium();
+    }
+
     // Inicializar servicio preseleccionado con un pequeño delay para asegurar que los inputs estén disponibles
     setTimeout(() => {
       this.inicializarServicioPreseleccionado();
     }, 0);
+  }
+
+  /**
+   * Verifica el estado premium del usuario consultando el servicio de suscripciones
+   */
+  verificarEstadoPremium(): void {
+    if (!this.clienteId) return;
+
+    this.suscripcionService.verificarPremium(this.clienteId).subscribe({
+      next: (verificacion) => {
+        this.usuarioEsPremium = verificacion.es_premium || false;
+      },
+      error: (error) => {
+        // Si falla la verificación, usar el valor del localStorage como fallback
+        console.warn('Error verificando estado premium, usando valor del localStorage:', error);
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -132,6 +159,7 @@ export class Appointment implements OnInit, OnChanges {
     this.estacionService.getEstacionesByNegocio(this.negocioId).subscribe({
       next: (data: IEstacion[]) => {
         // Filtrar solo estaciones activas
+        // Las estaciones premium se mantienen en la lista pero no serán seleccionables
         this.estaciones = data.filter(e => e.estado === 'activa');
         
         // Habilitar el select de estaciones si hay estaciones disponibles
@@ -147,6 +175,24 @@ export class Appointment implements OnInit, OnChanges {
         this.nuevaCitaForm.get('estacion_id')?.disable();
       }
     });
+  }
+
+  /**
+   * Verifica si una estación puede ser seleccionada por el usuario actual
+   */
+  puedeSeleccionarEstacion(estacion: IEstacion): boolean {
+    // Si la estación es premium y el usuario no es premium, no puede seleccionarla
+    if (estacion.solo_premium && !this.usuarioEsPremium) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Verifica si hay estaciones premium disponibles pero el usuario no es premium
+   */
+  hayEstacionesPremiumNoDisponibles(): boolean {
+    return this.estaciones.some(estacion => estacion.solo_premium && !this.usuarioEsPremium);
   }
 
   onEstacionSeleccionada(event: Event): void {

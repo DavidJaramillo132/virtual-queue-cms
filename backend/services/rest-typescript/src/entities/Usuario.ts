@@ -28,6 +28,9 @@ export class Usuario {
   @Column({ type: 'varchar', nullable: false, default: '', name: "nombre_completo" })
   nombre_completo!: string;
 
+  @Column({ type: 'boolean', nullable: false, default: false })
+  es_premium!: boolean;
+
   @CreateDateColumn({ name: "creado_en" })
   creadoEn!: Date;
 

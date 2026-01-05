@@ -1,8 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCommentDots, faTimes, faTrash, faPaperPlane, faUser, faRobot } from '@fortawesome/free-solid-svg-icons';
+import { faCommentDots, faTimes, faTrash, faPaperPlane, faUser, faRobot, faPaperclip, faFilePdf, faImage } from '@fortawesome/free-solid-svg-icons';
 import { ChatBotService, ChatMessage, ChatOption } from '../../services/chat-bot.service';
 
 @Component({
@@ -20,11 +20,18 @@ export class ChatBotComponent {
   faPaperPlane = faPaperPlane;
   faUser = faUser;
   faRobot = faRobot;
+  faPaperclip = faPaperclip;
+  faFilePdf = faFilePdf;
+  faImage = faImage;
+
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   isOpen = signal(false);
   messages = signal<ChatMessage[]>([]);
   currentMessage = signal('');
   isLoading = signal(false);
+  selectedFile = signal<File | null>(null);
+  filePreview = signal<string>('');
   
   // Contexto para rastrear IDs seleccionados
   private conversationContext = signal<{
@@ -60,6 +67,14 @@ export class ChatBotComponent {
 
   sendMessage() {
     const messageText = this.currentMessage().trim();
+    const file = this.selectedFile();
+    
+    // Si hay archivo, usar el método con archivo
+    if (file) {
+      this.sendMessageWithFile();
+      return;
+    }
+    
     if (!messageText || this.isLoading()) return;
 
     // Detectar si el usuario quiere reiniciar el contexto
@@ -85,46 +100,133 @@ export class ChatBotComponent {
     // Enviar al servicio con contexto
     this.chatService.sendMessage(messageText, this.conversationContext()).subscribe({
       next: (response) => {
-        // Limpiar formato Markdown de la respuesta
-        const respuestaLimpia = this.limpiarMarkdown(response.respuesta);
-        
-        // Actualizar contexto con IDs de las herramientas ejecutadas
-        this.actualizarContexto(response);
-        
-        // Generar opciones si hay herramientas ejecutadas con resultados
-        const opciones = this.generarOpciones(response, respuestaLimpia);
-        
-        const assistantMessage: ChatMessage = {
-          role: 'assistant',
-          content: respuestaLimpia,
-          timestamp: new Date(),
-          options: opciones
-        };
-        
-        // Guardar herramientas ejecutadas en el mensaje para acceso posterior
-        (assistantMessage as any).herramientas = response.herramientas_ejecutadas;
-        
-        this.messages.update(msgs => [...msgs, assistantMessage]);
-        this.isLoading.set(false);
-        
-        // Auto-scroll al final
-        setTimeout(() => this.scrollToBottom(), 100);
+        this.procesarRespuesta(response);
       },
       error: (error) => {
-        console.error('Error al enviar mensaje:', error);
-        const errorMessage: ChatMessage = {
-          role: 'assistant',
-          content: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.',
-          timestamp: new Date()
-        };
-        
-        this.messages.update(msgs => [...msgs, errorMessage]);
-        this.isLoading.set(false);
+        this.manejarError(error);
       }
     });
 
     // Auto-scroll al final
     setTimeout(() => this.scrollToBottom(), 100);
+  }
+
+  sendMessageWithFile() {
+    const file = this.selectedFile();
+    const messageText = this.currentMessage().trim() || 'Por favor procesa este archivo';
+    
+    if (!file || this.isLoading()) return;
+
+    // Agregar mensaje del usuario con indicador de archivo
+    const fileType = file.type.includes('pdf') ? '📄' : '🖼️';
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: `${fileType} ${file.name}\n\n${messageText}`,
+      timestamp: new Date()
+    };
+
+    this.messages.update(msgs => [...msgs, userMessage]);
+    this.currentMessage.set('');
+    this.isLoading.set(true);
+
+    // Enviar al servicio con archivo
+    this.chatService.sendMessageWithFile(messageText, file, this.conversationContext()).subscribe({
+      next: (response) => {
+        this.procesarRespuesta(response);
+        this.clearFileSelection();
+      },
+      error: (error) => {
+        this.manejarError(error);
+        this.clearFileSelection();
+      }
+    });
+
+    // Auto-scroll al final
+    setTimeout(() => this.scrollToBottom(), 100);
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      
+      // Validar tipo de archivo
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('Por favor selecciona un archivo PDF o imagen (JPG, PNG, WEBP)');
+        return;
+      }
+
+      // Validar tamaño (máximo 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('El archivo es demasiado grande. Máximo 10MB.');
+        return;
+      }
+
+      this.selectedFile.set(file);
+      
+      // Crear preview si es imagen
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.filePreview.set(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        this.filePreview.set('');
+      }
+    }
+  }
+
+  clearFileSelection() {
+    this.selectedFile.set(null);
+    this.filePreview.set('');
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  triggerFileInput() {
+    this.fileInput?.nativeElement.click();
+  }
+
+  private procesarRespuesta(response: any) {
+    // Limpiar formato Markdown de la respuesta
+    const respuestaLimpia = this.limpiarMarkdown(response.respuesta);
+    
+    // Actualizar contexto con IDs de las herramientas ejecutadas
+    this.actualizarContexto(response);
+    
+    // Generar opciones si hay herramientas ejecutadas con resultados
+    const opciones = this.generarOpciones(response, respuestaLimpia);
+    
+    const assistantMessage: ChatMessage = {
+      role: 'assistant',
+      content: respuestaLimpia,
+      timestamp: new Date(),
+      options: opciones
+    };
+    
+    // Guardar herramientas ejecutadas en el mensaje para acceso posterior
+    (assistantMessage as any).herramientas = response.herramientas_ejecutadas;
+    
+    this.messages.update(msgs => [...msgs, assistantMessage]);
+    this.isLoading.set(false);
+    
+    // Auto-scroll al final
+    setTimeout(() => this.scrollToBottom(), 100);
+  }
+
+  private manejarError(error: any) {
+    console.error('Error al enviar mensaje:', error);
+    const errorMessage: ChatMessage = {
+      role: 'assistant',
+      content: 'Lo siento, ocurrió un error. Por favor intenta de nuevo.',
+      timestamp: new Date()
+    };
+    
+    this.messages.update(msgs => [...msgs, errorMessage]);
+    this.isLoading.set(false);
   }
 
   onKeyPress(event: KeyboardEvent) {

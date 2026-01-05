@@ -188,7 +188,8 @@ export class ServiciosComponent implements OnInit {
           setTimeout(() => this.successMessage.set(''), 3000);
         },
         error: (error) => {
-          this.errorMessage.set(error.message || 'Error al eliminar el servicio');
+          const mensaje = error?.message || error || 'Error al eliminar el servicio';
+          this.errorMessage.set(mensaje);
           this.isLoading.set(false);
         }
       });

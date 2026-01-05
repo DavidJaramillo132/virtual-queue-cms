@@ -82,4 +82,58 @@ export class EstacionController {
       res.status(500).json({ error: 'Internal server error' });
     }
   }
+
+  /**
+   * Actualiza el estado solo_premium de una estación
+   * Solo puede ser llamado por el admin del negocio
+   */
+  async updateSoloPremium(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    const { solo_premium } = req.body;
+
+    if (typeof solo_premium !== 'boolean') {
+      res.status(400).json({ error: 'solo_premium debe ser un booleano' });
+      return;
+    }
+
+    try {
+      const updated = await estacionRepo.actualizarSoloPremium(id, solo_premium);
+      if (!updated) {
+        res.status(404).json({ error: 'Estación no encontrada' });
+        return;
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error(`Error updating solo_premium for estacion ${id}:`, error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  /**
+   * Obtiene estaciones premium de un negocio
+   */
+  async getPremiumByNegocioId(req: Request, res: Response): Promise<void> {
+    const { negocioId } = req.params;
+    try {
+      const items = await estacionRepo.getPremiumByNegocioId(negocioId);
+      res.json(items);
+    } catch (error) {
+      console.error(`Error fetching premium estaciones for negocio ${negocioId}:`, error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  /**
+   * Obtiene estaciones normales (no premium) de un negocio
+   */
+  async getNormalesByNegocioId(req: Request, res: Response): Promise<void> {
+    const { negocioId } = req.params;
+    try {
+      const items = await estacionRepo.getNormalesByNegocioId(negocioId);
+      res.json(items);
+    } catch (error) {
+      console.error(`Error fetching normal estaciones for negocio ${negocioId}:`, error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
 }

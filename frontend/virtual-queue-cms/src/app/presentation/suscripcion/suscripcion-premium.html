@@ -1,0 +1,246 @@
+<div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-6">
+    <h2 class="text-xl font-bold text-gray-900">Suscripción Premium</h2>
+    <p class="text-sm text-gray-600 mt-1">Gestiona tu suscripción premium y accede a beneficios exclusivos</p>
+  </div>
+
+  <!-- Cargando -->
+  @if (cargando) {
+    <div class="flex flex-col items-center justify-center py-12">
+      <div class="w-12 h-12 border-4 border-gray-200 border-t-gray-600 rounded-full animate-spin"></div>
+      <p class="mt-4 text-gray-600">Cargando...</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error) {
+    <div class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+      <div class="flex items-start gap-3">
+        <div class="flex-shrink-0 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-sm">!</div>
+        <p>{{ error }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Estado Premium Activo -->
+  @if (esPremiumActivo && suscripcion && !cargando) {
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <!-- Badge Premium -->
+      <div class="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold mb-6">
+        <span>★</span>
+        <span>PREMIUM</span>
+      </div>
+      
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">Tu suscripción Premium</h3>
+      
+      <!-- Información de la suscripción -->
+      <div class="bg-gray-50 rounded-lg p-6 mb-6 space-y-4">
+        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+          <span class="text-sm font-medium text-gray-700">Estado:</span>
+          <span class="font-semibold text-sm" 
+            [class.text-green-600]="suscripcion.estado === 'activa'"
+            [class.text-amber-600]="suscripcion.estado === 'prueba'"
+            [class.text-red-600]="suscripcion.estado === 'cancelada'">
+            {{ estadoSuscripcion }}
+          </span>
+        </div>
+        
+        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+          <span class="text-sm font-medium text-gray-700">Precio:</span>
+          <span class="font-semibold text-gray-900">${{ suscripcion.precio_mensual }} / mes</span>
+        </div>
+
+        @if (verificacionPremium?.nivel_prioridad) {
+          <div class="flex justify-between items-center bg-white -mx-6 px-6 py-3 border-y border-gray-200">
+            <span class="text-sm font-medium text-gray-700">Prioridad en Fila:</span>
+            <span class="font-bold text-gray-900">
+              {{ verificacionPremium?.nivel_prioridad === 1 ? '⚡ VIP (Prioritario)' : 'Normal' }}
+            </span>
+          </div>
+        }
+        
+        @if (suscripcion.dias_prueba_restantes > 0) {
+          <div class="flex justify-between items-center bg-amber-50 -mx-6 px-6 py-3 border-y border-amber-200">
+            <span class="text-sm font-medium text-amber-700">Días de prueba restantes:</span>
+            <span class="font-semibold text-amber-900">{{ suscripcion.dias_prueba_restantes }} días</span>
+          </div>
+        }
+        
+        @if (suscripcion.fecha_proximo_cobro) {
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-medium text-gray-700">Próximo cobro:</span>
+            <span class="font-semibold text-gray-900">{{ suscripcion.fecha_proximo_cobro | date:'dd/MM/yyyy' }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Beneficios -->
+      <div class="mb-6">
+        <h4 class="text-lg font-semibold text-gray-900 mb-4">Tus beneficios</h4>
+        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+          @if (suscripcion.beneficios.prioridad_cola) {
+            <div class="flex items-center gap-2 text-gray-700">
+              <span class="text-green-600 font-bold">✓</span>
+              <span>Prioridad exclusiva en colas de atención</span>
+            </div>
+          }
+          @if (suscripcion.beneficios.fila_vip) {
+            <div class="flex items-center gap-2 text-gray-700">
+              <span class="text-green-600 font-bold">✓</span>
+              <span>Acceso a fila VIP exclusiva</span>
+            </div>
+          }
+          @if (suscripcion.beneficios.reservas_prioritarias) {
+            <div class="flex items-center gap-2 text-gray-700">
+              <span class="text-green-600 font-bold">✓</span>
+              <span>Reservas prioritarias de citas</span>
+            </div>
+          }
+          @if (suscripcion.beneficios.cancelacion_flexible) {
+            <div class="flex items-center gap-2 text-gray-700">
+              <span class="text-green-600 font-bold">✓</span>
+              <span>Cancelación flexible sin penalización</span>
+            </div>
+          }
+          @if (suscripcion.beneficios.soporte_prioritario) {
+            <div class="flex items-center gap-2 text-gray-700">
+              <span class="text-green-600 font-bold">✓</span>
+              <span>Soporte prioritario</span>
+            </div>
+          }
+          @if (suscripcion.beneficios.notificaciones_avanzadas) {
+            <div class="flex items-center gap-2 text-gray-700">
+              <span class="text-green-600 font-bold">✓</span>
+              <span>Notificaciones personalizadas</span>
+            </div>
+          }
+          @if (suscripcion.beneficios.sin_publicidad) {
+            <div class="flex items-center gap-2 text-gray-700">
+              <span class="text-green-600 font-bold">✓</span>
+              <span>Sin publicidad</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Botón cancelar -->
+      <div class="flex justify-center pt-4">
+        <button 
+          (click)="abrirModalCancelar()"
+          class="px-6 py-3 border-2 border-red-600 text-red-600 rounded-lg font-medium hover:bg-red-600 hover:text-white transition-colors">
+          Cancelar suscripción
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Sin Suscripcion Premium -->
+  @if (!esPremiumActivo && !cargando) {
+    <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="text-center mb-8">
+        <div class="text-6xl mb-3 text-gray-400">★</div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">Hazte Premium</h3>
+        <p class="text-gray-600">Obtén prioridad en todas tus citas</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @for (plan of planes; track plan.tipo) {
+          <div class="border-2 border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
+            <h4 class="text-xl font-bold text-gray-900 mb-4">{{ plan.nombre }}</h4>
+            
+            <div class="mb-4">
+              <span class="text-4xl font-bold text-gray-900">${{ plan.precio_mensual }}</span>
+              <span class="text-gray-600 text-lg">/ mes</span>
+            </div>
+            
+            @if (plan.dias_prueba > 0) {
+              <div class="inline-block bg-green-50 text-green-700 border border-green-200 px-4 py-2 rounded-lg text-sm font-medium mb-6">
+                {{ plan.dias_prueba }} días de prueba gratis
+              </div>
+            }
+
+            <div class="bg-gray-50 rounded-lg p-4 mb-6 space-y-2">
+              @if (plan.beneficios.prioridad_cola) {
+                <div class="flex items-center gap-2 text-gray-700">
+                  <span class="text-green-600 font-bold">✓</span>
+                  <span class="text-sm">Prioridad en todas las colas</span>
+                </div>
+              }
+              @if (plan.beneficios.fila_vip) {
+                <div class="flex items-center gap-2 text-gray-700">
+                  <span class="text-green-600 font-bold">✓</span>
+                  <span class="text-sm">Fila VIP exclusiva</span>
+                </div>
+              }
+              @if (plan.beneficios.reservas_prioritarias) {
+                <div class="flex items-center gap-2 text-gray-700">
+                  <span class="text-green-600 font-bold">✓</span>
+                  <span class="text-sm">Reserva de citas prioritaria</span>
+                </div>
+              }
+              @if (plan.beneficios.cancelacion_flexible) {
+                <div class="flex items-center gap-2 text-gray-700">
+                  <span class="text-green-600 font-bold">✓</span>
+                  <span class="text-sm">Cancelación sin penalización</span>
+                </div>
+              }
+              @if (plan.beneficios.soporte_prioritario) {
+                <div class="flex items-center gap-2 text-gray-700">
+                  <span class="text-green-600 font-bold">✓</span>
+                  <span class="text-sm">Soporte prioritario</span>
+                </div>
+              }
+              <div class="flex items-center gap-2 text-gray-700">
+                <span class="text-green-600 font-bold">✓</span>
+                <span class="text-sm">Hasta {{ plan.beneficios.limite_citas_diarias }} citas/día</span>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <button 
+                (click)="suscribirsePremium(true)"
+                class="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors">
+                Iniciar prueba gratis
+              </button>
+              <button 
+                (click)="suscribirsePremium(false)"
+                class="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                Suscribirse ahora
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Modal Cancelar -->
+  @if (mostrarModalCancelar) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="cerrarModalCancelar()">
+      <div class="bg-white rounded-lg p-8 max-w-md w-full shadow-lg" (click)="$event.stopPropagation()">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Cancelar Suscripción</h3>
+        <p class="text-gray-600 mb-6">¿Estás seguro de que deseas cancelar tu suscripción premium?</p>
+        
+        <div class="space-y-3 mb-4">
+          <button 
+            (click)="cancelarSuscripcion(false)"
+            class="w-full bg-amber-50 border border-amber-300 text-amber-800 py-3 rounded-lg font-medium hover:bg-amber-100 transition-colors">
+            Cancelar al final del periodo
+          </button>
+          <button 
+            (click)="cancelarSuscripcion(true)"
+            class="w-full bg-red-50 border border-red-300 text-red-800 py-3 rounded-lg font-medium hover:bg-red-100 transition-colors">
+            Cancelar inmediatamente
+          </button>
+        </div>
+        
+        <button 
+          (click)="cerrarModalCancelar()"
+          class="w-full bg-gray-200 text-gray-700 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition-colors">
+          Volver
+        </button>
+      </div>
+    </div>
+  }
+</div>

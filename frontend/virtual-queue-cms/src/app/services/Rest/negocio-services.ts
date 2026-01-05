@@ -28,6 +28,20 @@ export class NegocioServices {
     return this.http.get(this.apiUrl) as Observable<INegocio[]>;
   }
 
+  /**
+   * Obtiene negocios con premium ordenados primero
+   */
+  getNegociosConPremiumPrimero(): Observable<INegocio[]> {
+    return this.http.get(`${this.apiUrl}?premium_first=true`) as Observable<INegocio[]>;
+  }
+
+  /**
+   * Obtiene solo negocios premium
+   */
+  getNegociosPremium(): Observable<INegocio[]> {
+    return this.http.get(`${this.apiUrl}/premium`) as Observable<INegocio[]>;
+  }
+
   getNegocioById(id: string): Observable<INegocio> {
     return this.http.get(`${this.apiUrl}/${id}`) as Observable<INegocio>;
   }
@@ -46,6 +60,16 @@ export class NegocioServices {
   updateNegocio(id: string, negocioData: Partial<INegocio>): Observable<INegocio> {
     const headers = this.getAuthHeaders();
     return this.http.put(`${this.apiUrl}/${id}`, negocioData, { headers }) as Observable<INegocio>;
+  }
+
+  // Subir imagen del negocio
+  uploadImagen(negocioId: string, formData: FormData): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': token ? `Bearer ${token}` : ''
+      // NO establecer Content-Type para FormData, el navegador lo hace automáticamente
+    });
+    return this.http.post(`${this.apiUrl}/${negocioId}/imagen`, formData, { headers });
   }
 
   // Eliminar un negocio

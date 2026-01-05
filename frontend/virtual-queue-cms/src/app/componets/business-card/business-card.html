@@ -1,12 +1,16 @@
-<article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" (click)="goToBusiness()">
+<article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer relative"
+  (click)="goToBusiness()">
+
   <div class="h-40 bg-gradient-to-r from-[#1B3C53] to-[#26576F] flex items-center justify-center">
     <img *ngIf="negocio.imagen_url" [src]="negocio.imagen_url" [alt]="negocio.nombre" class="w-full h-full object-cover">
-    <div *ngIf="!negocio.imagen_url" class="text-white text-4xl">�</div>
+    <div *ngIf="!negocio.imagen_url" class="text-white text-4xl">🏢</div>
   </div>
 
   <div class="p-4">
     <div class="mb-2">
-      <h3 class="text-lg font-semibold">{{ negocio.nombre }}</h3>
+      <div class="flex items-center gap-2">
+        <h3 class="text-lg font-semibold">{{ negocio.nombre }}</h3>
+      </div>
       <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium mt-1">
         {{ negocio.categoria }}
       </span>

@@ -5,13 +5,13 @@ import { authMiddleware } from '../middlewares/Middleware';
 const router = Router();
 const controller = new NegocioController();
 
-// Todas las rutas de negocios requieren autenticación
-// La ruta es la siguiente: /api/negocios
+// Rutas de negocios
+// La ruta base es: /api/negocios
 
 router.post('/', (req, res) => controller.create(req, res));
-// GET /api/negocios publico
+// GET /api/negocios - Lista todos los negocios (soporta ?search=termino)
 router.get('/', (req, res) => controller.getAll(req, res));
-// GET /api/negocios/:id publico
+// GET /api/negocios/:id - Obtiene un negocio por ID
 router.get('/:id', (req, res) => controller.getById(req, res));
 router.put('/:id', authMiddleware, (req, res) => controller.update(req, res));
 router.delete('/:id', authMiddleware, (req, res) => controller.delete(req, res));

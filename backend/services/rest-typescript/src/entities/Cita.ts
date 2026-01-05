@@ -62,7 +62,7 @@ export class Cita {
   estacion!: Estacion;
 
   @ManyToOne(() => Servicio, (servicio) => servicio.citas, {
-    onDelete: "RESTRICT"
+    onDelete: "CASCADE"
   })
   @JoinColumn({ name: "servicio_id" })
   servicio!: Servicio;

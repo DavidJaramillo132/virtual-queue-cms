@@ -68,12 +68,14 @@ class AIOrchestrator:
         """
         Procesa un archivo subido y determina qué hacer con él.
         """
+        from app.services.file_processor import extraer_texto_pdf_pypdf2, procesar_texto_para_negocio
+        
         contenido = await file.read()
         tipo_mime = file.content_type or ""
         
-        resultado = {await 
+        resultado = {
             "tipo": "desconocido",
-            "contenido": None,
+            "nombre_archivo": file.filename,
             "texto_extraido": None,
             "error": None
         }
@@ -82,7 +84,6 @@ class AIOrchestrator:
             # Procesar imágenes
             if tipo_mime.startswith("image/"):
                 resultado["tipo"] = "imagen"
-                resultado["contenido"] = contenido
                 # Extraer texto si es necesario (OCR)
                 try:
                     texto = await self.gemini_adapter.extraer_texto_imagen(contenido)
@@ -91,19 +92,27 @@ class AIOrchestrator:
                     resultado["error"] = f"Error al extraer texto de imagen: {str(e)}"
             
             # Procesar PDFs
-            elif tipo_mime == "application/pdf":
+            elif tipo_mime == "application/pdf" or file.filename.endswith('.pdf'):
                 resultado["tipo"] = "pdf"
-                resultado["contenido"] = contenido
                 try:
-                    texto = await self.gemini_adapter.extraer_texto_pdf(contenido)
-                    resultado["texto_extraido"] = texto
-                except Exception as e:
-                    resultado["error"] = f"Error al extraer texto de PDF: {str(e)}"
+                    # Intentar con PyPDF2 primero (más rápido y confiable)
+                    print("📄 Extrayendo texto del PDF con PyPDF2...")
+                    texto = extraer_texto_pdf_pypdf2(contenido)
+                    texto_procesado = procesar_texto_para_negocio(texto)
+                    resultado["texto_extraido"] = texto_procesado
+                    print(f"✅ Texto extraído: {len(texto_procesado)} caracteres")
+                except Exception as e_pypdf:
+                    print(f"⚠️ PyPDF2 falló, intentando con Gemini: {str(e_pypdf)}")
+                    # Fallback: intentar con Gemini
+                    try:
+                        texto = await self.gemini_adapter.extraer_texto_pdf(contenido)
+                        resultado["texto_extraido"] = procesar_texto_para_negocio(texto)
+                    except Exception as e_gemini:
+                        resultado["error"] = f"Error al extraer texto de PDF (PyPDF2: {str(e_pypdf)}, Gemini: {str(e_gemini)})"
             
             # Procesar audio
             elif tipo_mime.startswith("audio/"):
                 resultado["tipo"] = "audio"
-                resultado["contenido"] = contenido
                 try:
                     texto = await self.gemini_adapter.extraer_texto_audio(contenido)
                     resultado["texto_extraido"] = texto
@@ -188,9 +197,62 @@ class AIOrchestrator:
             if file:
                 info_archivo = await self._procesar_archivo(file)
                 
-                # Si se extrajo texto del archivo, agregarlo al mensaje
-                if info_archivo.get("texto_extraido"):
-                    mensaje = f"{mensaje}\n\n[Contenido extraído del archivo: {info_archivo['texto_extraido']}]"
+                # Si se extrajo texto del archivo y es un PDF para crear negocio
+                if info_archivo.get("texto_extraido") and info_archivo.get("tipo") == "pdf":
+                    # Mensaje optimizado para crear negocio desde PDF
+                    mensaje_pdf = f"""
+El usuario ha enviado un PDF con información de su negocio. 
+El contenido extraído del PDF es:
+
+{info_archivo['texto_extraido']}
+
+INSTRUCCIONES CRÍTICAS:
+1. Lee y analiza TODO el contenido del PDF
+
+2. Extrae y MEMORIZA la siguiente información:
+
+   DATOS DEL NEGOCIO:
+   - nombre: Nombre del negocio (REQUERIDO)
+   - categoria: Categoría apropiada (REQUERIDO) - Salud, Belleza, Consultoría, Restaurante, Tecnología, Educación, Fitness, Legal, Automotriz, etc.
+   - descripcion: Resumen de qué hace el negocio y sus servicios
+   - telefono: Número de contacto del negocio
+   - correo: Email del negocio
+   - direccion: Ubicación física
+   - horario_general: Horario de atención
+   
+   DATOS DEL ADMINISTRADOR/PROPIETARIO:
+   - admin_nombre: Nombre completo del dueño/propietario/administrador (REQUERIDO)
+   - admin_email: Email personal del administrador para login (REQUERIDO)
+   - admin_telefono: Teléfono personal del administrador
+
+3. MUESTRA al usuario TODA la información extraída en DOS secciones claras
+
+4. PREGUNTA: "¿Es correcta esta información? Responde 'Sí' para crear el negocio y la cuenta de administrador"
+
+5. ESPERA la confirmación del usuario
+
+6. Cuando el usuario confirme, llama a crear_negocio con EXACTAMENTE estos parámetros:
+   {{
+     "nombre": "[valor extraído]",
+     "categoria": "[valor extraído]",
+     "descripcion": "[valor extraído]",
+     "telefono": "[valor extraído del negocio]",
+     "correo": "[valor extraído del negocio]",
+     "direccion": "[valor extraído]",
+     "horario_general": "[valor extraído]",
+     "admin_nombre": "[valor extraído - nombre del administrador]",
+     "admin_email": "[valor extraído - email del administrador]",
+     "admin_telefono": "[valor extraído - teléfono del administrador]"
+   }}
+   
+   IMPORTANTE: NO omitas los parámetros admin_nombre, admin_email y admin_telefono al llamar la función.
+
+Mensaje del usuario: {mensaje}
+"""
+                    mensaje = mensaje_pdf
+                elif info_archivo.get("texto_extraido"):
+                    # Para otros tipos de archivo, agregar el texto al mensaje
+                    mensaje = f"{mensaje}\n\n[Contenido extraído del archivo ({info_archivo['tipo']}): {info_archivo['texto_extraido']}]"
             
             # Obtener definiciones de herramientas
             herramientas = herramientas_filtradas if herramientas_filtradas else self._obtener_definiciones_herramientas()
@@ -283,8 +345,10 @@ async def manejar_chat(
         mensaje: Mensaje del usuario
         usuario_id: ID del usuario (opcional)
         contexto: Contexto con IDs de negocio, servicio, estación (opcional)
-        archivo: Diccionario con tipo y datos del archivo en base64 (opcional)
+        archivo: UploadFile o diccionario con tipo y datos del archivo en base64 (opcional)
     """
+    print(f"🔍 FUNCIÓN manejar_chat - Archivo recibido: {type(archivo)} = {archivo if not archivo else 'ARCHIVO PRESENTE'}")
+    
     orquestador = obtener_orquestador()
     
     # Enriquecer el mensaje con el contexto si está disponible
@@ -368,10 +432,16 @@ async def manejar_chat(
     
     print(f"📩 MENSAJE ENRIQUECIDO: {mensaje_enriquecido}")
     
-    # Por ahora, ignoramos archivo (lo procesaremos después)
+    # Procesar archivo si existe (viene del endpoint /chat/archivo)
+    file_upload = None
+    if archivo:
+        # El archivo viene como UploadFile desde el endpoint
+        file_upload = archivo
+        print(f"📎 ARCHIVO RECIBIDO: {type(archivo)}")
+    
     resultado = await orquestador.manejar_chat(
         mensaje_enriquecido, 
-        None, 
+        file_upload, 
         True, 
         herramientas_filtradas
     )

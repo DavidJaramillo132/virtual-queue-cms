@@ -1,9 +1,14 @@
 import { Request, Response } from 'express';
+import axios from 'axios';
 import { Cita } from '../../entities/Cita';
 import { CitaRepo } from '../../repository/CitaRepo';
+import { EstacionRepo } from '../../repository/EstacionRepo';
+import { UsuarioRepo } from '../../repository/UsuarioRepo';
 import { WebSocketNotificationService } from '../../services/websocket-notification.service';
 
 const citaRepo = new CitaRepo();
+const estacionRepo = new EstacionRepo();
+const usuarioRepo = new UsuarioRepo();
 const websocketNotificationService = new WebSocketNotificationService();
 
 export class CitaController {
@@ -53,6 +58,49 @@ export class CitaController {
       if (!data.estacion_id) {
         res.status(400).json({ error: 'El campo "estacion_id" es requerido. Debe seleccionar una fila (estación).' });
         return;
+      }
+
+      // Verificar si la estación es solo para premium
+      const estacion = await estacionRepo.getById(data.estacion_id);
+      if (!estacion) {
+        res.status(404).json({ error: 'La estación seleccionada no existe' });
+        return;
+      }
+
+      if (estacion.solo_premium) {
+        // Verificar si el usuario es premium
+        // Primero verificar en la base de datos
+        const usuario = await usuarioRepo.getById(data.cliente_id);
+        let esPremium = usuario?.es_premium || false;
+        
+        // Si no es premium en BD, verificar con el servicio de suscripciones (fuente de verdad)
+        if (!esPremium) {
+          try {
+            const paymentServiceUrl = process.env.PAYMENT_SERVICE_URL || 'http://payments-service:8000';
+            const response = await axios.get(
+              `${paymentServiceUrl}/suscripciones/usuario/${data.cliente_id}/verificar`,
+              { timeout: 3000 }
+            );
+            esPremium = response.data?.es_premium || false;
+            
+            // Si es premium según el servicio, sincronizar la BD
+            if (esPremium && usuario) {
+              await usuarioRepo.actualizarPremium(data.cliente_id, true);
+              console.log(`Sincronizado: Usuario ${data.cliente_id} es premium según servicio de pagos`);
+            }
+          } catch (error: any) {
+            // Si falla la consulta al servicio, usar el valor de BD
+            console.warn(`Error verificando premium con servicio de pagos para usuario ${data.cliente_id}: ${error.message}`);
+          }
+        }
+        
+        if (!esPremium) {
+          res.status(403).json({ 
+            error: 'Esta fila es exclusiva para usuarios Premium. Actualiza tu suscripción para acceder.',
+            code: 'PREMIUM_REQUIRED'
+          });
+          return;
+        }
       }
       
       const created = await citaRepo.create(data);

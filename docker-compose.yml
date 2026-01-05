@@ -79,6 +79,24 @@ services:
     volumes:
       - ./microservicios/MCP:/app
 
+  # Microservicio Payments (Python)
+  payments-service:
+    build: 
+      context: ./microservicios/payment
+      dockerfile: Dockerfile
+    container_name: payments-service
+    restart: always
+    ports:
+      - "8002:8000"
+    env_file:
+      - ./microservicios/payment/.env
+    environment:
+      - TZ=America/Guayaquil
+    networks:
+      - app-net
+    volumes:
+      - ./microservicios/payment:/app
+
 
   # Frontend (Angular)
   frontend:

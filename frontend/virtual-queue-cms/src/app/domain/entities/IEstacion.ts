@@ -4,5 +4,6 @@ export interface IEstacion {
   nombre: string;
   tipo?: string;
   estado: 'activa' | 'inactiva';
+  solo_premium: boolean;
   creadoEn?: Date;
 }

@@ -1,0 +1,11 @@
+/* Estilos mínimos - la mayoría del diseño se maneja con Tailwind CSS */
+/* Solo estilos específicos que no se pueden lograr con Tailwind */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

@@ -5,6 +5,7 @@ export interface IUsuario {
   rol: 'cliente' | 'negocio' | 'admin_sistema';
   telefono?: string;
   nombre_completo: string;
+  es_premium: boolean;
   creadoEn?: Date;
   negocio_id?: string; // ID del negocio si el usuario es de tipo 'negocio'
 }

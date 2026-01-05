@@ -31,4 +31,13 @@ router.put('/:id', authMiddleware, (req: Request, res: Response) => controller.u
 // DELETE /api/usuarios/:id (protegido)
 router.delete('/:id', authMiddleware, (req: Request, res: Response) => controller.deleteUsuario(req, res));
 
+// PATCH /api/usuarios/:id/premium - Actualizar estado premium (llamado desde microservicio de pagos)
+router.patch('/:id/premium', (req: Request, res: Response) => controller.updatePremium(req, res));
+
+// GET /api/usuarios/:id/premium - Verificar si usuario es premium
+router.get('/:id/premium', (req: Request, res: Response) => controller.checkPremium(req, res));
+
+// GET /api/usuarios/premium/list - Lista usuarios premium (protegido)
+router.get('/premium/list', authMiddleware, (req: Request, res: Response) => controller.getPremium(req, res));
+
 export default router;

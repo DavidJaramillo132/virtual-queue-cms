@@ -86,9 +86,11 @@ def info():
             "Procesamiento de lenguaje natural",
             "Gestion de citas",
             "Consulta de negocios y servicios",
+            "Creacion de negocios desde PDFs",
             "Procesamiento de imagenes (OCR)",
             "Extraccion de texto de PDFs",
-            "Transcripcion de audio"
+            "Transcripcion de audio",
+            "Analisis multimodal de documentos"
         ],
         "herramientas_disponibles": [
             "ver_horarios_disponibles",
@@ -97,10 +99,16 @@ def info():
             "consultar_citas",
             "buscar_negocios",
             "obtener_servicios",
-            "obtener_info_negocio"
+            "obtener_info_negocio",
+            "crear_negocio"
+        ],
+        "formatos_archivo_soportados": [
+            "PDF (application/pdf)",
+            "Imagenes (image/jpeg, image/png, image/webp)",
+            "Audio (audio/mp3, audio/wav)"
         ],
         "modelos_soportados": [
-            "Gemini 1.5 Flash" if config.GEMINI_API_KEY else None,
+            "Gemini 2.0 Flash Lite" if config.GEMINI_API_KEY else None,
             "OpenAI GPT" if config.OPENAI_API_KEY else None
         ]
     }

@@ -58,6 +58,7 @@ export class AuthController {
                     nombreCompleto: usuario.nombre_completo, // Mantener compatibilidad
                     telefono: usuario.telefono,
                     negocio_id: negocio_id,
+                    es_premium: usuario.es_premium || false,
                     creadoEn: fechaCreacion instanceof Date ? fechaCreacion.toISOString() : fechaCreacion,
                     creado_en: fechaCreacion instanceof Date ? fechaCreacion.toISOString() : fechaCreacion
                 }

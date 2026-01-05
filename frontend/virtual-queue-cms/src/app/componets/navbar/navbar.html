@@ -27,6 +27,9 @@
 
             <!-- Solo para clientes -->
             <div class="flex items-center space-x-3" *ngIf="usuario?.rol === 'cliente'">
+                <a routerLink="/suscripcion" class="relative px-4 py-2 rounded-md bg-white text-black hover:bg-gray-200">
+                    suscripción
+                </a>
                 <a routerLink="/home" class="px-4 py-2 rounded-md bg-white text-black hover:bg-gray-200">
                     Negocios
                 </a>

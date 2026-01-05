@@ -25,6 +25,67 @@
 
   @if (negocio()) {
     <div class="space-y-6">
+      <!-- Imagen del Negocio -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Imagen del Negocio
+        </label>
+        <div class="flex items-start gap-6">
+          <!-- Preview de imagen -->
+          <div class="flex-shrink-0">
+            @if (imagePreview) {
+              <img 
+                [src]="imagePreview" 
+                alt="Imagen del negocio" 
+                class="w-32 h-32 object-cover rounded-lg border border-gray-300"
+              />
+            } @else {
+              <div class="w-32 h-32 bg-gray-100 rounded-lg border border-gray-300 flex items-center justify-center">
+                <span class="text-gray-400 text-sm">Sin imagen</span>
+              </div>
+            }
+          </div>
+          
+          <!-- Controles de imagen -->
+          <div class="flex-1">
+            @if (isEditing()) {
+              <div class="space-y-3">
+                <input 
+                  #imageInput
+                  type="file" 
+                  (change)="onImageSelected($event)"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  class="hidden"
+                />
+                <div class="flex gap-3">
+                  <button 
+                    type="button"
+                    (click)="triggerImageInput()"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors text-sm"
+                  >
+                    {{ imagePreview ? 'Cambiar Imagen' : 'Seleccionar Imagen' }}
+                  </button>
+                  @if (imagePreview && selectedImageFile) {
+                    <button 
+                      type="button"
+                      (click)="removeImage()"
+                      class="px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium hover:bg-red-200 transition-colors text-sm"
+                    >
+                      Eliminar
+                    </button>
+                  }
+                </div>
+                <p class="text-xs text-gray-500">
+                  Formatos permitidos: JPG, PNG, WEBP. Tamaño máximo: 5MB
+                </p>
+              </div>
+            } @else {
+              <p class="text-sm text-gray-600">Haz clic en "Editar Información" para cambiar la imagen</p>
+            }
+          </div>
+        </div>
+      </div>
+
       <!-- Nombre del Negocio -->
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">

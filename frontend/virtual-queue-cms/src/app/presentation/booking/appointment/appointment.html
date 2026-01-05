@@ -65,8 +65,12 @@
           [class.border-red-500]="nuevaCitaForm.get('estacion_id')?.invalid && nuevaCitaForm.get('estacion_id')?.touched"
         >
           <option value="">-- Seleccione una fila --</option>
-          <option *ngFor="let estacion of estaciones" [value]="estacion.id">
-            {{ estacion.nombre }} {{ estacion.tipo ? '(' + estacion.tipo + ')' : '' }}
+          <option 
+            *ngFor="let estacion of estaciones" 
+            [value]="estacion.id"
+            [disabled]="!puedeSeleccionarEstacion(estacion)"
+          >
+            {{ estacion.nombre }}{{ estacion.tipo ? ' (' + estacion.tipo + ')' : '' }}{{ estacion.solo_premium ? ' - Premium' : '' }}
           </option>
         </select>
         <p *ngIf="!servicio_seleccionado" class="text-sm text-gray-500 mt-1">
@@ -77,6 +81,10 @@
         </p>
         <p *ngIf="servicio_seleccionado && estaciones.length > 0" class="text-sm text-gray-500 mt-1">
           Seleccione una fila para ver las citas disponibles
+        </p>
+        <p *ngIf="servicio_seleccionado && hayEstacionesPremiumNoDisponibles()" 
+           class="text-sm text-amber-600 mt-1 font-medium">
+          Las filas marcadas como "Premium" son exclusivas para usuarios premium
         </p>
       </label>
     </div>

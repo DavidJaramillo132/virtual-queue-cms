@@ -84,6 +84,38 @@ export class EstacionServices {
   }
 
   /**
+   * Obtiene estaciones premium de un negocio
+   */
+  getEstacionesPremiumByNegocio(negocioId: string): Observable<IEstacion[]> {
+    return this.http.get<IEstacion[]>(`${this.apiUrl}/negocio/${negocioId}/premium`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Obtiene estaciones normales (no premium) de un negocio
+   */
+  getEstacionesNormalesByNegocio(negocioId: string): Observable<IEstacion[]> {
+    return this.http.get<IEstacion[]>(`${this.apiUrl}/negocio/${negocioId}/normales`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Actualiza el estado solo_premium de una estación
+   */
+  updateSoloPremium(id: string, soloPremium: boolean): Observable<IEstacion> {
+    const headers = this.getAuthHeaders();
+    return this.http.patch<IEstacion>(
+      `${this.apiUrl}/${id}/premium`, 
+      { solo_premium: soloPremium }, 
+      { headers }
+    ).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Manejo de errores
    */
   private handleError(error: any): Observable<never> {

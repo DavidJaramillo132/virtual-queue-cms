@@ -59,6 +59,12 @@ export const routes: Routes = [
     pathMatch: 'full' 
   },
   {
+    path: 'suscripcion',
+    loadComponent: () =>
+      import('./presentation/suscripcion/suscripcion-premium').then(m => m.SuscripcionPremiumComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: '**',
     redirectTo: '/welcome'
   }

@@ -20,6 +20,7 @@ export class NegocioController {
     try {
       const { search } = req.query;
       const searchQuery = search && typeof search === 'string' ? search : undefined;
+      
       const items = await negocioRepo.getAll(searchQuery);
       res.json(items);
     } catch (error) {

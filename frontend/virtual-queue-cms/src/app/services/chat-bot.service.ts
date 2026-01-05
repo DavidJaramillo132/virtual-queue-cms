@@ -89,4 +89,25 @@ export class ChatBotService {
   reiniciarChat(): Observable<any> {
     return this.http.post(`${this.API_URL}/reiniciar`, {});
   }
+
+  /**
+   * Envía un mensaje con un archivo adjunto (PDF, imagen, etc.)
+   */
+  sendMessageWithFile(mensaje: string, archivo: File, contexto?: any, reiniciarContexto: boolean = false): Observable<ChatResponse> {
+    const usuarioId = this.getUserIdFromLocalStorage();
+    
+    const formData = new FormData();
+    formData.append('mensaje', mensaje);
+    formData.append('archivo', archivo);
+    
+    if (usuarioId) {
+      formData.append('usuario_id', usuarioId);
+    }
+    
+    if (reiniciarContexto) {
+      formData.append('reiniciar_contexto', 'true');
+    }
+
+    return this.http.post<ChatResponse>(`${this.API_URL}/archivo`, formData);
+  }
 }

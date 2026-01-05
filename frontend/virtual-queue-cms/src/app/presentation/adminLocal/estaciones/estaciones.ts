@@ -26,7 +26,8 @@ export class EstacionesComponent implements OnInit {
   formulario = {
     nombre: '',
     tipo: '',
-    estado: 'activa' as 'activa' | 'inactiva'
+    estado: 'activa' as 'activa' | 'inactiva',
+    solo_premium: false
   };
   
   private negocioId: string = '';
@@ -71,7 +72,8 @@ export class EstacionesComponent implements OnInit {
     this.formulario = {
       nombre: '',
       tipo: '',
-      estado: 'activa'
+      estado: 'activa',
+      solo_premium: false
     };
     this.modoEdicion.set(false);
     this.estacionEditando = null;
@@ -84,7 +86,8 @@ export class EstacionesComponent implements OnInit {
     this.formulario = {
       nombre: estacion.nombre,
       tipo: estacion.tipo || '',
-      estado: estacion.estado
+      estado: estacion.estado,
+      solo_premium: estacion.solo_premium || false
     };
     this.modoEdicion.set(true);
     this.estacionEditando = estacion;
@@ -100,7 +103,8 @@ export class EstacionesComponent implements OnInit {
     this.formulario = {
       nombre: '',
       tipo: '',
-      estado: 'activa'
+      estado: 'activa',
+      solo_premium: false
     };
   }
 
@@ -121,7 +125,8 @@ export class EstacionesComponent implements OnInit {
       const datosActualizados: Partial<IEstacion> = {
         nombre: this.formulario.nombre,
         tipo: this.formulario.tipo || undefined,
-        estado: this.formulario.estado
+        estado: this.formulario.estado,
+        solo_premium: this.formulario.solo_premium
       };
 
       this.estacionService.updateEstacion(this.estacionEditando.id, datosActualizados).subscribe({
@@ -145,7 +150,8 @@ export class EstacionesComponent implements OnInit {
         negocio_id: this.negocioId,
         nombre: this.formulario.nombre,
         tipo: this.formulario.tipo || undefined,
-        estado: this.formulario.estado
+        estado: this.formulario.estado,
+        solo_premium: this.formulario.solo_premium
       };
 
       this.estacionService.createEstacion(nuevaEstacion).subscribe({

@@ -26,6 +26,9 @@ export class Estacion {
   })
   estado!: "activa" | "inactiva";
 
+  @Column({ type: 'boolean', nullable: false, default: false, name: 'solo_premium' })
+  solo_premium!: boolean;
+
   @CreateDateColumn({ name: "creado_en" })
   creadoEn!: Date;
 

@@ -29,11 +29,12 @@ export class Home implements OnInit {
     this.isLoading = true;
     this.error = '';
     
-    this.negocioServices.getNegocios().subscribe({
+    // Usar el nuevo método que ordena los negocios premium primero
+    this.negocioServices.getNegociosConPremiumPrimero().subscribe({
       next: (data) => {
         this.negocios = data;
         this.isLoading = false;
-        console.log('Negocios cargados:', this.negocios);
+        console.log('Negocios cargados (premium primero):', this.negocios);
       },
       error: (err) => {
         console.error('Error al cargar negocios:', err);
