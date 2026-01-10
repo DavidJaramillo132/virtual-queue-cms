@@ -40,4 +40,5 @@ class Usuario:
     telefono: Optional[str] = None
     nombre_completo: str
     creadoEn: datetime
+    es_premium: bool = False
     negocios: List[Negocio] = strawberry.field(default_factory=list)

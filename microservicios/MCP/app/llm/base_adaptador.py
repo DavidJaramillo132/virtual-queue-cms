@@ -23,7 +23,8 @@ class LLMAdapter(ABC):
     async def extraer_texto_pdf(self, pdf: bytes) -> str:
         # Extrae texto de un PDF
         pass
-
+    
+    # Nunca se usa 
     @abstractmethod
     async def extraer_texto_audio(self, audio: bytes) -> str:
         # Extrae texto de un archivo de audio

@@ -284,25 +284,34 @@ export class Appointment implements OnInit, OnChanges {
     const [horaInicio, minutoInicio] = horarioHoy.hora_inicio.split(':').map(Number);
     const [horaFin, minutoFin] = horarioHoy.hora_fin.split(':').map(Number);
 
-    let horaActual = horaInicio;
-    let minutoActual = minutoInicio;
+    // Obtener la hora actual para filtrar horas pasadas
+    const horaActualDelDia = hoy.getHours();
+    const minutoActualDelDia = hoy.getMinutes();
 
-    while (horaActual < horaFin || (horaActual === horaFin && minutoActual < minutoFin)) {
-      const horaStr = `${horaActual.toString().padStart(2, '0')}:${minutoActual.toString().padStart(2, '0')}`;
+    let horaIteracion = horaInicio;
+    let minutoIteracion = minutoInicio;
+
+    while (horaIteracion < horaFin || (horaIteracion === horaFin && minutoIteracion < minutoFin)) {
+      const horaStr = `${horaIteracion.toString().padStart(2, '0')}:${minutoIteracion.toString().padStart(2, '0')}`;
+      
+      // Verificar que la hora no haya pasado (solo mostrar horas futuras)
+      const esHoraFutura = horaIteracion > horaActualDelDia || 
+                          (horaIteracion === horaActualDelDia && minutoIteracion > minutoActualDelDia);
       
       // Excluir horas desde las 12:00 PM hasta las 1:30 PM (horario de almuerzo)
       const estaEnHorarioAlmuerzo = this.estaEnHorarioAlmuerzo(horaStr);
       
-      // Verificar que esta hora no se solape con ninguna cita existente y no esté en horario de almuerzo
-      if (!estaEnHorarioAlmuerzo && this.esHoraDisponible(horaStr)) {
+      // Verificar que esta hora no se solape con ninguna cita existente, no esté en horario de almuerzo
+      // y sea una hora futura
+      if (esHoraFutura && !estaEnHorarioAlmuerzo && this.esHoraDisponible(horaStr)) {
         horas.push(horaStr);
       }
 
       // Avanzar en intervalos de 15 minutos
-      minutoActual += 15;
-      if (minutoActual >= 60) {
-        minutoActual = 0;
-        horaActual++;
+      minutoIteracion += 15;
+      if (minutoIteracion >= 60) {
+        minutoIteracion = 0;
+        horaIteracion++;
       }
     }
 

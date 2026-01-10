@@ -22,3 +22,5 @@ class Estacion:
     tipo: Optional[str] = None
     estado: EstadoEstacion
     creado_en: datetime
+    solo_premium: bool = False
+
