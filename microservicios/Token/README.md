@@ -16,5 +16,5 @@ Notas:
 - Configurar en .env: JWT_SECRET, ACCESS_EXPIRES (ej. '24h'), REFRESH_EXPIRES_DAYS (ej. '30').
 
 Ejecutar:
--Prueba: microservicios\Token\ node smoke_test.js
--Token: microservicios\Token\ node index.js o npm start
+- Prueba: microservicios\Token\ node smoke_test.js.
+- Token: microservicios\Token\ node index.js o npm start.

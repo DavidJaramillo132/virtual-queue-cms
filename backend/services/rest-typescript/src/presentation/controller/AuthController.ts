@@ -66,6 +66,7 @@ export class AuthController {
                 successful: true,
                 message: 'Login exitoso',
                 token,
+                refreshToken,
                 user: { 
                     id: usuario.id, 
                     email: usuario.email, 
