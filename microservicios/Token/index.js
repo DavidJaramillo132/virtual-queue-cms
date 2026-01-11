@@ -13,13 +13,19 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 4000;
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
-const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES || '24h';
+// Por seguridad, usar tiempos cortos para access tokens (15-30 minutos recomendado)
+const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES || '30m';
 const REFRESH_EXPIRES_DAYS = parseInt(process.env.REFRESH_EXPIRES_DAYS || '30', 10);
+// Intervalo de limpieza de tokens expirados (por defecto cada hora)
+const CLEANUP_INTERVAL_MS = parseInt(process.env.CLEANUP_INTERVAL_MS || '3600000', 10);
 
 let db;
 
+// Usar carpeta data para persistir en Docker, o directorio actual en desarrollo
+const DB_PATH = process.env.DB_PATH || './token.db';
+
 async function initDb() {
-  db = await open({ filename: './token.db', driver: sqlite3.Database });
+  db = await open({ filename: DB_PATH, driver: sqlite3.Database });
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -74,17 +80,55 @@ async function getUserById(id) {
   return db.get('SELECT * FROM users WHERE id = ?', id);
 }
 
+// Limpieza periodica de tokens expirados
+async function cleanupExpiredTokens() {
+  try {
+    const now = new Date().toISOString();
+    
+    // Eliminar refresh tokens expirados o revocados hace mas de 7 dias
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const deletedRefresh = await db.run(
+      'DELETE FROM refresh_tokens WHERE expires_at < ? OR (revoked = 1 AND created_at < ?)',
+      now, sevenDaysAgo
+    );
+    
+    // Eliminar registros de tokens revocados con mas de 30 dias (ya no son validos de todos modos)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const deletedRevoked = await db.run(
+      'DELETE FROM revoked_tokens WHERE created_at < ?',
+      thirtyDaysAgo
+    );
+    
+    console.log(`[Cleanup] Eliminados: ${deletedRefresh.changes || 0} refresh tokens, ${deletedRevoked.changes || 0} revoked tokens`);
+  } catch (err) {
+    console.error('[Cleanup] Error limpiando tokens expirados:', err);
+  }
+}
+
+// Iniciar job de limpieza periodica
+function startCleanupJob() {
+  console.log(`[Cleanup] Job iniciado, intervalo: ${CLEANUP_INTERVAL_MS}ms`);
+  // Ejecutar limpieza inicial despues de 1 minuto
+  setTimeout(() => {
+    cleanupExpiredTokens();
+    // Luego ejecutar periodicamente
+    setInterval(cleanupExpiredTokens, CLEANUP_INTERVAL_MS);
+  }, 60000);
+}
+
 // Endpoints
 
 app.post('/auth/register', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // Acepta ID opcional para sincronizar con la BD principal
+    const { email, password, id: externalId } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'email y password requeridos' });
     const existing = await getUserByEmail(email);
     if (existing) return res.status(409).json({ message: 'Usuario ya existe' });
 
     const hash = await bcrypt.hash(password, 10);
-    const id = uuidv4();
+    // Usar el ID externo si se proporciona, sino generar uno nuevo
+    const id = externalId || uuidv4();
     await db.run('INSERT INTO users (id, email, password_hash) VALUES (?, ?, ?)', id, email, hash);
     return res.status(201).json({ id, email });
   } catch (err) {
@@ -201,6 +245,9 @@ app.get('/', (req, res) => res.json({ service: 'token-service' }));
 initDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Token service listening on port ${PORT}`);
+    console.log(`ACCESS_EXPIRES: ${ACCESS_EXPIRES}, REFRESH_EXPIRES_DAYS: ${REFRESH_EXPIRES_DAYS}`);
+    // Iniciar job de limpieza de tokens expirados
+    startCleanupJob();
   });
 }).catch(err => {
   console.error('Failed to initialize DB', err);

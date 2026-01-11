@@ -1,5 +1,5 @@
 services:
-  # Servicio REST (TypeScript)
+  # Servicio REST (TypeScript) - API principal que conecta con Token Service
   rest-typescript:
     build: 
       context: ./backend/services/rest-typescript
@@ -15,7 +15,10 @@ services:
       - NODE_ENV=development
       - PORT=3000
       - TOKEN_SERVICE_URL=http://token-service:4000
-      #- GRAPHQL_URL=http://graphql-service:5000/graphql
+      # JWT_SECRET compartido para validacion local de tokens (mismo que token-service)
+      - JWT_SECRET=clave123
+    depends_on:
+      - token-service
     networks:
       - app-net
     volumes:
@@ -43,7 +46,7 @@ services:
     volumes:
       - ./backend/services/GraphQL_Service:/app
 
-  # Servicio WebSocket (Go)
+  # Servicio WebSocket (Go) - Comunicacion en tiempo real
   websocket-server:
     build: 
       context: ./backend/services/websocket-server
@@ -54,6 +57,7 @@ services:
       - "8080:8080"
     environment:
       - DATABASE_URL=postgresql://postgres.ahyeuobiaxqzezqubjox:J5SBRXQBNa2nVAU9@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require
+      # JWT_SECRET compartido para validacion local de tokens (mismo que token-service)
       - JWT_SECRET=clave123
       - PORT=8080
       - REST_API_URL=http://rest-typescript:3000
@@ -64,7 +68,8 @@ services:
     networks:
       - app-net
 
-  # Servicio Token (Node)
+  # Servicio Token (Node) - Microservicio de Autenticacion independiente (Pilar 1)
+  # IMPORTANTE: JWT_SECRET debe ser el mismo en todos los servicios que validan tokens
   token-service:
     build:
       context: ./microservicios/Token
@@ -74,8 +79,18 @@ services:
     ports:
       - "4000:4000"
     environment:
+      # Secreto compartido para firmar/verificar JWT (debe coincidir con rest-typescript y websocket-server)
       - JWT_SECRET=clave123
       - PORT=4000
+      # Duracion del access token (recomendado: 15m a 30m para seguridad)
+      - ACCESS_EXPIRES=30m
+      # Dias de validez del refresh token
+      - REFRESH_EXPIRES_DAYS=30
+      # Intervalo de limpieza de tokens expirados (1 hora = 3600000 ms)
+      - CLEANUP_INTERVAL_MS=3600000
+    volumes:
+      # Volumen para persistir la base de datos SQLite entre reinicios
+      - token-data:/app/data
     networks:
       - app-net
 
@@ -145,4 +160,6 @@ networks:
   app-net:
     driver: bridge
 
-
+volumes:
+  token-data:
+    driver: local

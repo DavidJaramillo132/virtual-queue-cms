@@ -34,8 +34,13 @@ export class AuthController {
             const tokenServiceUrl = process.env.TOKEN_SERVICE_URL || 'http://token-service:4000';
             let tokenResp;
             try {
-                // Intentar registrar en token service (si ya existe responde 409 y lo ignoramos)
-                await axios.post(`${tokenServiceUrl}/auth/register`, { email: usuario.email, password });
+                // Intentar registrar en token service con el mismo ID de PostgreSQL
+                // Si ya existe responde 409 y lo ignoramos
+                await axios.post(`${tokenServiceUrl}/auth/register`, { 
+                    id: usuario.id,  // Sincronizar ID con la BD principal
+                    email: usuario.email, 
+                    password 
+                });
             } catch (err: any) {
                 // 409 -> usuario ya existe en token service
                 if (!(err.response && err.response.status === 409)) {

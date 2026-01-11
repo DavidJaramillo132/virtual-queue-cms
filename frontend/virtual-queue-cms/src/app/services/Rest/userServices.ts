@@ -104,6 +104,10 @@ export class UserService {
           if (response.token) {
             localStorage.setItem('token', response.token);
           }
+          // Guardar refresh token para renovacion automatica
+          if (response.refreshToken) {
+            localStorage.setItem('refreshToken', response.refreshToken);
+          }
         }
       })
     );
@@ -120,10 +124,26 @@ export class UserService {
     return this.http.post(`${this.apiUrl}/usuarios`, usuario);
   }
 
-  // Logout
+  // Logout - revoca tokens en el backend antes de limpiar localStorage
   logout(): void {
+    const token = localStorage.getItem('token');
+    const refreshToken = localStorage.getItem('refreshToken');
+    
+    // Llamar al backend para revocar tokens (fire-and-forget)
+    if (token || refreshToken) {
+      this.http.post(`${this.apiUrl}/usuarios/logout`, {
+        accessToken: token,
+        refreshToken: refreshToken
+      }).subscribe({
+        next: () => console.log('Tokens revocados correctamente'),
+        error: (err) => console.warn('Error al revocar tokens:', err)
+      });
+    }
+    
+    // Limpiar localStorage inmediatamente
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     this.userActualBehavior.next(null);
     this.router.navigate(['/login']);
   }
