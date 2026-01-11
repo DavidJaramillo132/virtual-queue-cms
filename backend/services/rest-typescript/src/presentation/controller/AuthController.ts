@@ -1,5 +1,5 @@
 import { Request , Response } from "express";
-import jwt from "jsonwebtoken";
+import axios from 'axios';
 import bcrypt from "bcrypt";
 import { UsuarioRepo } from "../../repository/UsuarioRepo";
 
@@ -30,12 +30,33 @@ export class AuthController {
                 return;
             }
 
-            // Token con expiración de 24 horas
-            const token = jwt.sign(
-                { id: usuario.id, email: usuario.email },
-                process.env.JWT_SECRET!,
-                { expiresIn: '24h' }, 
-            );
+            // Solicitar al microservicio Token: asegurar usuario y solicitar login para obtener access+refresh
+            const tokenServiceUrl = process.env.TOKEN_SERVICE_URL || 'http://token-service:4000';
+            let tokenResp;
+            try {
+                // Intentar registrar en token service con el mismo ID de PostgreSQL
+                // Si ya existe responde 409 y lo ignoramos
+                await axios.post(`${tokenServiceUrl}/auth/register`, { 
+                    id: usuario.id,  // Sincronizar ID con la BD principal
+                    email: usuario.email, 
+                    password 
+                });
+            } catch (err: any) {
+                // 409 -> usuario ya existe en token service
+                if (!(err.response && err.response.status === 409)) {
+                    console.warn('Warning registering user in token service:', err.message || err);
+                }
+            }
+
+            try {
+                tokenResp = await axios.post(`${tokenServiceUrl}/auth/login`, { email: usuario.email, password });
+            } catch (err: any) {
+                console.error('Error logging in to token service', err.response?.data || err.message || err);
+                return res.status(500).json({ message: 'Error autenticando en token service' });
+            }
+
+            const token = tokenResp.data?.accessToken;
+            const refreshToken = tokenResp.data?.refreshToken;
 
             // Obtener negocio_id si el usuario es de tipo negocio
             let negocio_id = null;
@@ -50,6 +71,7 @@ export class AuthController {
                 successful: true,
                 message: 'Login exitoso',
                 token,
+                refreshToken,
                 user: { 
                     id: usuario.id, 
                     email: usuario.email, 
@@ -66,6 +88,44 @@ export class AuthController {
 
         } catch (error) {
             console.error('Error en login:', error);
+            res.status(500).json({ message: 'Error en el servidor' });
+        }
+    }
+
+    async refresh(req: Request, res: Response){
+        try{
+            const { refreshToken } = req.body;
+            if (!refreshToken) return res.status(400).json({ message: 'refreshToken es requerido' });
+            const tokenServiceUrl = process.env.TOKEN_SERVICE_URL || 'http://token-service:4000';
+            try{
+                const resp = await axios.post(`${tokenServiceUrl}/auth/refresh`, { refreshToken });
+                return res.json(resp.data);
+            } catch(err: any){
+                console.error('Error refreshing token at token service', err.response?.data || err.message || err);
+                const status = err.response?.status || 500;
+                return res.status(status).json(err.response?.data || { message: 'Error refreshing token' });
+            }
+        } catch (error) {
+            console.error('Error en refresh:', error);
+            res.status(500).json({ message: 'Error en el servidor' });
+        }
+    }
+
+    async logout(req: Request, res: Response){
+        try{
+            const { refreshToken, accessToken } = req.body;
+            if (!refreshToken && !accessToken) return res.status(400).json({ message: 'refreshToken o accessToken requerido' });
+            const tokenServiceUrl = process.env.TOKEN_SERVICE_URL || 'http://token-service:4000';
+            try{
+                const resp = await axios.post(`${tokenServiceUrl}/auth/logout`, { refreshToken, accessToken });
+                return res.json(resp.data);
+            } catch(err: any){
+                console.error('Error logging out at token service', err.response?.data || err.message || err);
+                const status = err.response?.status || 500;
+                return res.status(status).json(err.response?.data || { message: 'Error logout' });
+            }
+        } catch (error) {
+            console.error('Error en logout:', error);
             res.status(500).json({ message: 'Error en el servidor' });
         }
     }

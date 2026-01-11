@@ -1,12 +1,13 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { HttpHeaders, provideHttpClient } from '@angular/common/http';
+import { HttpHeaders, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideApollo } from 'apollo-angular';
 import { HttpLink } from 'apollo-angular/http';
 import { ApolloLink, InMemoryCache } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { authInterceptor } from './services/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,18 +15,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideCharts(withDefaultRegisterables()),
-    provideHttpClient(), provideHttpClient(), provideApollo(() => {
-      const httpLink = inject(HttpLink);
-
-      return {
-        link: httpLink.create({
-          uri: '<%= endpoint %>',
-        }),
-        cache: new InMemoryCache(),
-      };
-    }),
-    provideHttpClient(),
-        provideApollo(() => {
+    // Proveedor HTTP con interceptor de autenticacion para refresh automatico de tokens
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideApollo(() => {
       const httpLink = inject(HttpLink);
 
       const authLink = setContext(() => {

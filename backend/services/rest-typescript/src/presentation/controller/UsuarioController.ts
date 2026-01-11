@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import axios from 'axios';
 import { Usuario } from "../../entities/Usuario";
 import { UsuarioRepo } from "../../repository/UsuarioRepo";
 
@@ -18,16 +19,31 @@ export class UsuarioController {
                 return;
             }
 
-            // Verificar si el email ya existe
+            // Verificar si el email ya existe en repositorio local
             const existingUsuario = await usuarioRepo.getByEmail(email);
             if (existingUsuario) {
                 res.status(409).json({ message: 'El email ya está registrado' });
                 return;
             }
 
-            // Encriptar contraseña
+            // Registrar en Auth microservicio primero para mantener consistencia
+            const tokenServiceUrl = process.env.TOKEN_SERVICE_URL || 'http://token-service:4000';
+            try {
+                await axios.post(`${tokenServiceUrl}/auth/register`, { email, password });
+            } catch (err: any) {
+                // si ya existe en token service, permitir continuar; si hay otro error, abortar
+                if (err.response && err.response.status === 409) {
+                    // usuario ya existe en auth service, continuamos
+                } else {
+                    console.error('Error registering user in token service', err.response?.data || err.message || err);
+                    res.status(502).json({ message: 'Error registrando en el servicio de autenticación' });
+                    return;
+                }
+            }
+
+            // Encriptar contraseña localmente para almacenarla en la DB del REST
             const hashedPassword = await bcrypt.hash(password, 10);
-            console.log("Hashed password:", hashedPassword);
+
             // Crear usuario con contraseña encriptada
             const usuarioData: Partial<Usuario> = {
                 nombre_completo,

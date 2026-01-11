@@ -15,6 +15,10 @@ router.post('/', (req: Request, res: Response) => controller.createUsuario(req, 
 
 // POST /api/usuarios/login (público - autenticación)
 router.post('/login', (req: Request, res: Response) => authController.login(req, res));
+// POST /api/usuarios/refresh -> proxy a token-service
+router.post('/refresh', (req: Request, res: Response) => authController.refresh(req, res));
+// POST /api/usuarios/logout -> proxy a token-service
+router.post('/logout', (req: Request, res: Response) => authController.logout(req, res));
 
 // GET /api/usuarios/informe-pdf (protegido - generar PDF)
 router.get('/informe-pdf', authMiddleware, (req: Request, res: Response) => pdfController.generarInformePerfil(req, res));
