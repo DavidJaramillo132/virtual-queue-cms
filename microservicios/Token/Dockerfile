@@ -10,10 +10,17 @@ RUN mkdir -p /app/data
 
 # Copiar dependencias primero (mejor cache de Docker)
 COPY package.json package-lock.json* ./
-RUN npm install --production
+RUN npm install
 
-# Copiar codigo fuente
-COPY . .
+# Copiar codigo fuente y tsconfig
+COPY tsconfig.json ./
+COPY src ./src
+
+# Compilar TypeScript
+RUN npm run build
+
+# Eliminar devDependencies para reducir tamaño de imagen
+RUN npm prune --production
 
 # Variables de entorno por defecto
 ENV PORT=4000

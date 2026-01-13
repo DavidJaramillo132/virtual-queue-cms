@@ -1,12 +1,23 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
-const { v4: uuidv4 } = require('uuid');
-const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+import express, { Request, Response } from 'express';
+import bodyParser from 'body-parser';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import sqlite3 from 'sqlite3';
+import { open, Database } from 'sqlite';
+import { v4 as uuidv4 } from 'uuid';
+import rateLimit from 'express-rate-limit';
+import dotenv from 'dotenv';
+
+// Importar interfaces
+import { 
+  User, 
+  RefreshTokenRecord, 
+  RevokedTokenRecord, 
+  TokenPayload, 
+  DecodedToken 
+} from './interfaces';
+
+dotenv.config();
 
 const app = express();
 app.use(bodyParser.json());
@@ -19,12 +30,12 @@ const REFRESH_EXPIRES_DAYS = parseInt(process.env.REFRESH_EXPIRES_DAYS || '30', 
 // Intervalo de limpieza de tokens expirados (por defecto cada hora)
 const CLEANUP_INTERVAL_MS = parseInt(process.env.CLEANUP_INTERVAL_MS || '3600000', 10);
 
-let db;
+let db: Database;
 
 // Usar carpeta data para persistir en Docker, o directorio actual en desarrollo
 const DB_PATH = process.env.DB_PATH || './token.db';
 
-async function initDb() {
+async function initDb(): Promise<void> {
   db = await open({ filename: DB_PATH, driver: sqlite3.Database });
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -54,14 +65,14 @@ async function initDb() {
   `);
 }
 
-function generateAccessToken(payload) {
+function generateAccessToken(payload: TokenPayload): { token: string; jti: string } {
   // incluir jti para un posible seguimiento de revocación
   const jti = uuidv4();
   const token = jwt.sign({ ...payload, jti }, JWT_SECRET, { expiresIn: ACCESS_EXPIRES });
   return { token, jti };
 }
 
-function generateRefreshToken() {
+function generateRefreshToken(): string {
   return uuidv4() + '.' + uuidv4();
 }
 
@@ -72,16 +83,16 @@ const loginLimiter = rateLimit({
 });
 
 // Helper: get user
-async function getUserByEmail(email) {
-  return db.get('SELECT * FROM users WHERE email = ?', email);
+async function getUserByEmail(email: string): Promise<User | undefined> {
+  return db.get<User>('SELECT * FROM users WHERE email = ?', email);
 }
 
-async function getUserById(id) {
-  return db.get('SELECT * FROM users WHERE id = ?', id);
+async function getUserById(id: string): Promise<User | undefined> {
+  return db.get<User>('SELECT * FROM users WHERE id = ?', id);
 }
 
 // Limpieza periodica de tokens expirados
-async function cleanupExpiredTokens() {
+async function cleanupExpiredTokens(): Promise<void> {
   try {
     const now = new Date().toISOString();
     
@@ -106,7 +117,7 @@ async function cleanupExpiredTokens() {
 }
 
 // Iniciar job de limpieza periodica
-function startCleanupJob() {
+function startCleanupJob(): void {
   console.log(`[Cleanup] Job iniciado, intervalo: ${CLEANUP_INTERVAL_MS}ms`);
   // Ejecutar limpieza inicial despues de 1 minuto
   setTimeout(() => {
@@ -118,7 +129,7 @@ function startCleanupJob() {
 
 // Endpoints
 
-app.post('/auth/register', async (req, res) => {
+app.post('/auth/register', async (req: Request, res: Response) => {
   try {
     // Acepta ID opcional para sincronizar con la BD principal
     const { email, password, id: externalId } = req.body;
@@ -137,7 +148,7 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-app.post('/auth/login', loginLimiter, async (req, res) => {
+app.post('/auth/login', loginLimiter, async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'email y password requeridos' });
@@ -146,7 +157,7 @@ app.post('/auth/login', loginLimiter, async (req, res) => {
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) return res.status(401).json({ message: 'Credenciales inválidas' });
 
-    const { token: accessToken, jti } = generateAccessToken({ id: user.id, email: user.email });
+    const { token: accessToken } = generateAccessToken({ id: user.id, email: user.email });
     const refreshToken = generateRefreshToken();
     const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000).toISOString();
     const rtId = uuidv4();
@@ -159,11 +170,11 @@ app.post('/auth/login', loginLimiter, async (req, res) => {
   }
 });
 
-app.post('/auth/refresh', async (req, res) => {
+app.post('/auth/refresh', async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) return res.status(400).json({ message: 'refreshToken requerido' });
-    const row = await db.get('SELECT * FROM refresh_tokens WHERE token = ? AND revoked = 0', refreshToken);
+    const row = await db.get<RefreshTokenRecord>('SELECT * FROM refresh_tokens WHERE token = ? AND revoked = 0', refreshToken);
     if (!row) return res.status(401).json({ message: 'Refresh token inválido' });
     if (new Date(row.expires_at) < new Date()) return res.status(401).json({ message: 'Refresh token expirado' });
 
@@ -185,7 +196,7 @@ app.post('/auth/refresh', async (req, res) => {
   }
 });
 
-app.post('/auth/logout', async (req, res) => {
+app.post('/auth/logout', async (req: Request, res: Response) => {
   try {
     const { refreshToken, accessToken } = req.body;
     if (refreshToken) {
@@ -193,7 +204,7 @@ app.post('/auth/logout', async (req, res) => {
     }
     if (accessToken) {
       try {
-        const decoded = jwt.verify(accessToken, JWT_SECRET);
+        const decoded = jwt.verify(accessToken, JWT_SECRET) as DecodedToken;
         const jti = decoded.jti;
         if (jti) await db.run('INSERT INTO revoked_tokens (id, jti) VALUES (?, ?)', uuidv4(), jti);
       } catch (e) { /* ignore invalid access token */ }
@@ -205,42 +216,46 @@ app.post('/auth/logout', async (req, res) => {
   }
 });
 
-app.get('/auth/me', async (req, res) => {
+app.get('/auth/me', async (req: Request, res: Response) => {
   try {
     const auth = req.headers.authorization;
     if (!auth) return res.status(401).json({ message: 'sin token' });
     const token = auth.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
     const jti = decoded.jti;
     // check revoked access tokens
-    const revoked = await db.get('SELECT * FROM revoked_tokens WHERE jti = ?', jti);
+    const revoked = await db.get<RevokedTokenRecord>('SELECT * FROM revoked_tokens WHERE jti = ?', jti);
     if (revoked) return res.status(401).json({ message: 'token revocado' });
     const user = await getUserById(decoded.id);
     if (!user) return res.status(404).json({ message: 'usuario no encontrado' });
     return res.json({ id: user.id, email: user.email });
   } catch (err) {
-    if (err.name === 'TokenExpiredError') return res.status(401).json({ message: 'token expirado' });
+    if (err instanceof Error && err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'token expirado' });
+    }
     return res.status(401).json({ message: 'token inválido' });
   }
 });
 
 // Internal validate endpoint: verifica la firma y comprueba la lista de revocación del token de acceso
-app.post('/auth/validate', async (req, res) => {
+app.post('/auth/validate', async (req: Request, res: Response) => {
   try {
     const token = req.body.token || req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(400).json({ message: 'token requerido' });
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
     const jti = decoded.jti;
-    const revoked = await db.get('SELECT * FROM revoked_tokens WHERE jti = ?', jti);
+    const revoked = await db.get<RevokedTokenRecord>('SELECT * FROM revoked_tokens WHERE jti = ?', jti);
     if (revoked) return res.status(401).json({ message: 'token revocado' });
     return res.json({ valid: true, decoded });
   } catch (err) {
-    if (err.name === 'TokenExpiredError') return res.status(401).json({ message: 'token expirado' });
+    if (err instanceof Error && err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'token expirado' });
+    }
     return res.status(401).json({ message: 'token inválido' });
   }
 });
 
-app.get('/', (req, res) => res.json({ service: 'token-service' }));
+app.get('/', (_req: Request, res: Response) => res.json({ service: 'token-service' }));
 
 initDb().then(() => {
   app.listen(PORT, () => {
