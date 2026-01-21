@@ -38,6 +38,14 @@ class TipoEvento(str, Enum):
     ORDER_CREATED = "order.created"
     TOUR_PURCHASED = "tour.purchased"
     EXTERNAL_SERVICE = "external.service"
+    
+    # Eventos de adopción (integración con partners)
+    ANIMAL_ADOPTED = "animal.adopted"
+    ADOPTION_COMPLETED = "adoption.completed"
+    
+    # Eventos de descuentos (notificaciones salientes)
+    DISCOUNT_APPLIED = "discount.applied"
+    PROMOTION_ACTIVATED = "promotion.activated"
 
 
 class RegistrarPartnerRequest(BaseModel):
@@ -85,7 +93,7 @@ class PartnerResponse(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "id": "partner_123",
+                "id": "7351757e-7f56-4133-af42-b8e8522b6316",
                 "nombre": "Tours Ecuador",
                 "webhook_url": "https://api.toursecuador.com/webhooks",
                 "eventos_suscritos": ["booking.confirmed"],

@@ -10,10 +10,10 @@ class RankingServicios:
 @strawberry.type
 class Servicio:
     id: str
-    negocio_id: str
+    negocio_id: Optional[str] = None
     nombre: str
     descripcion: Optional[str] = None
-    duracion_minutos: int
-    precio_centavos: int
-    creado_en: datetime
+    duracion_minutos: int = 0
+    precio_centavos: int = 0
+    creado_en: Optional[str] = None  # Datetime como string ISO
 

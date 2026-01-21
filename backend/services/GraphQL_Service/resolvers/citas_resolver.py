@@ -28,12 +28,14 @@ class CitasResolver:
         citas = await CitasResolver.find_all(token)
         
         now = datetime.now()
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        week_start = today_start - timedelta(days=today_start.weekday())
-        month_start = today_start.replace(day=1)
+        today_str = now.strftime('%Y-%m-%d')
+        week_start = (now - timedelta(days=now.weekday())).strftime('%Y-%m-%d')
+        month_start = now.replace(day=1).strftime('%Y-%m-%d')
+        tomorrow_str = (now + timedelta(days=1)).strftime('%Y-%m-%d')
         
         total_citas = len(citas)
-        citas_hoy = len([c for c in citas if c.fecha >= today_start and c.fecha < today_start + timedelta(days=1)])
+        # Comparar fechas como strings ISO (funciona porque YYYY-MM-DD es ordenable)
+        citas_hoy = len([c for c in citas if c.fecha >= today_str and c.fecha < tomorrow_str])
         citas_semana = len([c for c in citas if c.fecha >= week_start])
         citas_mes = len([c for c in citas if c.fecha >= month_start])
         

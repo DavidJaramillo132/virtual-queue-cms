@@ -49,31 +49,43 @@ async function initDb(): Promise<void> {
     CREATE TABLE IF NOT EXISTS refresh_tokens (
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
-      token TEXT NOT NULL,
+      token TEXT NOT NULL UNIQUE,
       expires_at DATETIME NOT NULL,
       revoked INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(user_id) REFERENCES users(id)
     );
   `);
+  // Crear índice único si no existe
+  await db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_refresh_tokens_token 
+    ON refresh_tokens(token);
+  `);
   await db.exec(`
     CREATE TABLE IF NOT EXISTS revoked_tokens (
       id TEXT PRIMARY KEY,
-      jti TEXT NOT NULL,
+      jti TEXT NOT NULL UNIQUE,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+  `);
+  // Crear índice único para jti si no existe
+  await db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_revoked_tokens_jti 
+    ON revoked_tokens(jti);
   `);
 }
 
 function generateAccessToken(payload: TokenPayload): { token: string; jti: string } {
   // incluir jti para un posible seguimiento de revocación
-  const jti = uuidv4();
-  const token = jwt.sign({ ...payload, jti }, JWT_SECRET, { expiresIn: ACCESS_EXPIRES });
+  // Agregar timestamp para garantizar unicidad absoluta
+  const jti = `${uuidv4()}-${Date.now()}`;
+  const token = jwt.sign({ ...payload, jti }, JWT_SECRET, { expiresIn: ACCESS_EXPIRES } as jwt.SignOptions);
   return { token, jti };
 }
 
 function generateRefreshToken(): string {
-  return uuidv4() + '.' + uuidv4();
+  // Combinar múltiples UUIDs con timestamp para garantizar unicidad
+  return `${uuidv4()}.${uuidv4()}.${Date.now()}`;
 }
 
 const loginLimiter = rateLimit({
@@ -161,6 +173,14 @@ app.post('/auth/login', loginLimiter, async (req: Request, res: Response) => {
     const refreshToken = generateRefreshToken();
     const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000).toISOString();
     const rtId = uuidv4();
+    
+    // Verificar que el refresh token sea único (no debería ocurrir con UUID + timestamp)
+    const existing = await db.get('SELECT id FROM refresh_tokens WHERE token = ?', refreshToken);
+    if (existing) {
+      console.error('[CRITICAL] Token duplicado detectado!', refreshToken);
+      return res.status(500).json({ message: 'Error generando token, intente nuevamente' });
+    }
+    
     await db.run('INSERT INTO refresh_tokens (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)', rtId, user.id, refreshToken, expiresAt);
 
     return res.json({ accessToken, refreshToken, expiresIn: ACCESS_EXPIRES });
@@ -186,6 +206,14 @@ app.post('/auth/refresh', async (req: Request, res: Response) => {
     const newRefresh = generateRefreshToken();
     const newId = uuidv4();
     const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000).toISOString();
+    
+    // Verificar que el nuevo refresh token sea único
+    const existing = await db.get('SELECT id FROM refresh_tokens WHERE token = ?', newRefresh);
+    if (existing) {
+      console.error('[CRITICAL] Token duplicado detectado en refresh!', newRefresh);
+      return res.status(500).json({ message: 'Error generando token, intente nuevamente' });
+    }
+    
     await db.run('INSERT INTO refresh_tokens (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)', newId, user.id, newRefresh, expiresAt);
 
     const { token: accessToken } = generateAccessToken({ id: user.id, email: user.email });

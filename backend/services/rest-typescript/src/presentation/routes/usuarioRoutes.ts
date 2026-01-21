@@ -26,6 +26,9 @@ router.get('/informe-pdf', authMiddleware, (req: Request, res: Response) => pdfC
 // GET /api/usuarios (protegido)
 router.get('/', authMiddleware, (req: Request, res: Response) => controller.getAllUsuarios(req, res));
 
+// GET /api/usuarios/id/:id - Obtener usuario por ID (protegido)
+router.get('/id/:id', authMiddleware, (req: Request, res: Response) => controller.getUsuarioById(req, res));
+
 // GET /api/usuarios/:email (protegido)
 router.get('/:email', authMiddleware, (req: Request, res: Response) => controller.getUsuarioByEmail(req, res));
 

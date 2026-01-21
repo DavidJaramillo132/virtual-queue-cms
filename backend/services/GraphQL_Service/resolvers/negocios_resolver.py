@@ -11,10 +11,17 @@ class NegociosResolver:
     @staticmethod
     def _normalize_negocio_data(negocio_data: dict) -> dict:
         """Normaliza los datos del negocio del formato REST API al formato GraphQL"""
-        normalized = negocio_data.copy()
+        # Campos permitidos en el tipo Negocio de GraphQL
+        allowed_fields = {
+            'id', 'admin_negocio_id', 'nombre', 'categoria', 'descripcion',
+            'telefono', 'correo', 'direccion', 'imagen_url', 'estado',
+            'horario_general', 'creado_en', 'creadoEn'
+        }
+        # Filtrar solo campos permitidos
+        normalized = {k: v for k, v in negocio_data.items() if k in allowed_fields}
         # Normalizar creadoEn a creado_en
-        if 'creadoEn' in normalized and 'creado_en' not in normalized:
-            normalized['creado_en'] = normalized.pop('creadoEn')
+        if 'creadoEn' in normalized:
+            normalized['creado_en'] = str(normalized.pop('creadoEn'))
         return normalized
     
     @staticmethod
@@ -29,7 +36,11 @@ class NegociosResolver:
         """Get a single business by ID. Forward token if provided."""
         headers = _headers_from_token(token)
         data = await http_client.get(f"/api/negocios/{id}", headers=headers)
-        print(data)
+        # Si la API devuelve una lista, tomar el primer elemento
+        if isinstance(data, list):
+            if len(data) == 0:
+                raise Exception(f"Negocio con id {id} no encontrado")
+            data = data[0]
         return Negocio(**NegociosResolver._normalize_negocio_data(data))
     
     @staticmethod

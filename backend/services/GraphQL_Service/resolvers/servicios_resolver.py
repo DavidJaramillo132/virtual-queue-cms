@@ -15,10 +15,16 @@ class ServiciosResolver:
     @staticmethod
     def _normalize_servicio_data(servicio_data: dict) -> dict:
         """Normaliza los datos del servicio del formato REST API al formato GraphQL"""
-        normalized = servicio_data.copy()
+        # Campos permitidos en el tipo Servicio de GraphQL
+        allowed_fields = {
+            'id', 'negocio_id', 'nombre', 'descripcion',
+            'duracion_minutos', 'precio_centavos', 'creado_en', 'creadoEn'
+        }
+        # Filtrar solo campos permitidos
+        normalized = {k: v for k, v in servicio_data.items() if k in allowed_fields}
         # Normalizar creadoEn a creado_en
-        if 'creadoEn' in normalized and 'creado_en' not in normalized:
-            normalized['creado_en'] = normalized.pop('creadoEn')
+        if 'creadoEn' in normalized:
+            normalized['creado_en'] = str(normalized.pop('creadoEn'))
         return normalized
     
     @staticmethod
@@ -33,6 +39,11 @@ class ServiciosResolver:
         """Get a single service by ID. Forward token if provided."""
         headers = _headers_from_token(token)
         data = await http_client.get(f"/api/servicios/{id}", headers=headers)
+        # Si la API devuelve una lista, tomar el primer elemento
+        if isinstance(data, list):
+            if len(data) == 0:
+                raise Exception(f"Servicio con id {id} no encontrado")
+            data = data[0]
         return Servicio(**ServiciosResolver._normalize_servicio_data(data))
 
 

@@ -43,7 +43,7 @@ class ServicioPartners:
             raise ValueError(f"Ya existe un partner con el nombre '{request.nombre}'")
         
         # Generar ID y secreto
-        partner_id = f"partner_{uuid.uuid4().hex[:12]}"
+        partner_id = str(uuid.uuid4())
         hmac_secret = generar_secreto()
         
         # Crear partner
@@ -182,6 +182,43 @@ class ServicioPartners:
             "fallidos": fallidos,
             "timestamp": datetime.utcnow().isoformat()
         }
+    
+    @staticmethod
+    async def notificar_partner(
+        partner_id: str,
+        evento: TipoEvento,
+        datos: Dict[str, Any]
+    ) -> bool:
+        """
+        Notifica a un partner específico.
+        
+        Args:
+            partner_id: ID del partner
+            evento: Tipo de evento
+            datos: Datos del evento
+            
+        Returns:
+            True si se envió exitosamente
+        """
+        partner = AlmacenPartners.obtener(partner_id)
+        if not partner:
+            print(f"⚠️ Partner {partner_id} no encontrado")
+            return False
+        
+        if not partner.activo:
+            print(f"⚠️ Partner {partner_id} está inactivo")
+            return False
+        
+        # Crear notificación
+        notificacion = NotificacionPartner(
+            evento_id=f"evt_{uuid.uuid4().hex[:12]}",
+            tipo_evento=evento,
+            datos=datos,
+            metadatos={}
+        )
+        
+        # Enviar webhook
+        return await ServicioPartners._enviar_webhook(partner, notificacion)
     
     @staticmethod
     async def _enviar_webhook(

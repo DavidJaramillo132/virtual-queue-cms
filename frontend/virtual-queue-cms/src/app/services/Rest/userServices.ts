@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, Optional } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { IUsuario } from '../../domain/entities';
+import { Apollo } from 'apollo-angular';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
@@ -15,7 +16,8 @@ export class UserService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    @Optional() private apollo: Apollo
   ) { }
 
   // Obtener usuario del localStorage al iniciar
@@ -145,6 +147,14 @@ export class UserService {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     this.userActualBehavior.next(null);
+    
+    // Limpiar cache de Apollo para evitar datos del usuario anterior
+    if (this.apollo) {
+      this.apollo.client.resetStore().catch(err => {
+        console.warn('Error al limpiar cache de Apollo:', err);
+      });
+    }
+    
     this.router.navigate(['/login']);
   }
 

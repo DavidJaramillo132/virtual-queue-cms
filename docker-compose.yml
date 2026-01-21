@@ -33,11 +33,13 @@ services:
     container_name: graphql-service
     restart: always
     ports:
-      - "5000:5000"
+      - "3001:3001"
     env_file:
       - ./backend/services/GraphQL_Service/.env
     environment:
-      - REST_API_URL=http://rest-typescript:3000
+      - REST_API_BASE_URL=http://rest-typescript:3000
+      - PORT=3001
+      - HOST=0.0.0.0
     depends_on:
       - rest-typescript
       - token-service
@@ -125,6 +127,8 @@ services:
       - ./microservicios/payment/.env
     environment:
       - TZ=America/Guayaquil
+    depends_on:
+      - rest-typescript
     networks:
       - app-net
     volumes:
@@ -143,7 +147,7 @@ services:
       - "4200:4200"
     environment:
       - REST_API_URL=http://rest-typescript:3000
-      - GRAPHQL_API_URL=http://graphql-service:5000/graphql
+      - GRAPHQL_API_URL=http://graphql-service:3001/graphql
       - WEBSOCKET_URL=ws://websocket-server:8080
 
     depends_on:
@@ -156,10 +160,67 @@ services:
       - ./frontend/virtual-queue-cms:/app
       - /app/node_modules
 
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    environment:
+      # Configuración básica de n8n
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin@virtualqueue.local
+      - N8N_BASIC_AUTH_PASSWORD=VirtualQueue2026!
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      # Zona horaria
+      - GENERIC_TIMEZONE=America/Guayaquil
+      - TZ=America/Guayaquil
+      # URLs de servicios internos (para workflows)
+      - REST_API_URL=http://rest-typescript:3000
+      - GRAPHQL_API_URL=http://graphql-service:3001/graphql
+      - GRAPHQL_SERVICE_URL=http://graphql-service:3001
+      - REST_SERVICE_URL=http://rest-typescript:3000
+      - WEBSOCKET_URL=ws://websocket-server:8080
+      - WEBSOCKET_SERVICE_URL=http://websocket-server:8080
+      - MCP_SERVICE_URL=http://mcp-service:8000
+      - PAYMENT_SERVICE_URL=http://payments-service:8000
+      # Telegram para notificaciones
+      - TELEGRAM_CHAT_ID=5084256553
+      - TELEGRAM_TOKEN=8393668649:AAG3mM7Kbp1f-7dkcUhKvmLhfMXcQiodrig
+      # Email configuration (SMTP) - Appointment Reminders
+      - SMTP_FROM_EMAIL=noreply@virtualqueue.com
+      - ADMIN_EMAIL=admin@virtualqueue.com
+      # SMS (Twilio - opcional para usuarios premium)
+      # - TWILIO_ACCOUNT_SID=ACxxxxx
+      # - TWILIO_AUTH_TOKEN=xxxxx
+      # - TWILIO_PHONE_NUMBER=+1234567890
+      # Admin Token para operaciones privilegiadas
+      # - ADMIN_TOKEN=Bearer_your_jwt_token
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n-workflows:/home/node/workflows:ro
+    depends_on:
+      - rest-typescript
+      - graphql-service
+      - payments-service
+      - mcp-service
+    networks:
+      - app-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 networks:
   app-net:
     driver: bridge
 
 volumes:
+  n8n_data:
   token-data:
     driver: local

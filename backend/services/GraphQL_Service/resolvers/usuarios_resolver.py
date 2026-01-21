@@ -14,17 +14,17 @@ def _headers_from_token(token: Optional[str]) -> Optional[Dict[str, str]]:
 
 class UsuariosResolver:
     @staticmethod
-    async def find_all() -> List[Usuario]:
+    async def find_all(token: Optional[str] = None) -> List[Usuario]:
         """Get all usuarios from REST API"""
-        data = await http_client.get("/api/usuarios/")
+        headers = _headers_from_token(token)
+        data = await http_client.get("/api/usuarios/", headers=headers)
         return [Usuario(**user) for user in data]
 
     @staticmethod
     async def find_one(id: str, token: Optional[str] = None) -> Usuario:
         """Get a single user by ID, sending Authorization header if token provided"""
         headers = _headers_from_token(token)
-        data = await http_client.get(f"/api/usuarios/{id}", headers=headers)
-        print(data)
+        data = await http_client.get(f"/api/usuarios/id/{id}", headers=headers)
         return Usuario(**data)      
     
     @staticmethod
@@ -102,8 +102,13 @@ class UsuariosResolver:
         """Obtiene el perfil completo de un usuario con sus citas agregadas."""
         from resolvers.citas_resolver import CitasResolver
 
-        #Obtener el token del header HTTP
-        token = info.context["request"].headers.get("authorization")
+        # Obtener el token del header HTTP (case-insensitive)
+        token = (
+            info.context.get("auth_header") or
+            info.context.get("request", {}).headers.get("authorization") or
+            info.context.get("request", {}).headers.get("Authorization")
+        )
+        
         if not token:
             raise Exception("Token no proporcionado en la cabecera Authorization")
 

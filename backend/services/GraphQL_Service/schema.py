@@ -20,27 +20,46 @@ from gql_types.horario_atencion_types import HorarioAtencion
 from gql_types.admin_sistema_types import AdminSistema
 from gql_types.pdf_types import InformePDF
 
+
+def get_auth_token(info: Info) -> Optional[str]:
+    """Helper para obtener el token de Authorization de manera consistente"""
+    # Primero intentar desde el contexto directo
+    token = info.context.get("auth_header")
+    if token:
+        return token
+    
+    # Fallback: obtener del request (case-insensitive)
+    request = info.context.get("request")
+    if request:
+        return (
+            request.headers.get("authorization") or 
+            request.headers.get("Authorization") or
+            request.headers.get("AUTHORIZATION")
+        )
+    return None
+
+
 @strawberry.type
 class Query:
     # Usuarios queries
     @strawberry.field(description="Obtener todos los usuarios")
     async def usuarios(self, info: Info) -> List[Usuario]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await UsuariosResolver.find_all(token)
     
     @strawberry.field(description="Obtener un usuario por ID")
     async def usuario(self, info: Info, id: str) -> Usuario:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await UsuariosResolver.find_one(id, token)
     
     @strawberry.field(description="Lista los usuarios con sus citas pendientes")
     async def usuarios_con_citas_pendientes(self, info: Info) -> List[UsuarioCitasDTO]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await UsuariosResolver.usuarios_con_citas_pendientes(token)
     
     @strawberry.field(description="Lista los usuarios con sus citas atendidas")
     async def usuarios_con_citas_atendidas(self, info: Info) -> List[UsuarioCitasDTO]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await UsuariosResolver.usuarios_con_citas_atendidas(token)
     
     @strawberry.field(description="Perfil completo del usuario")
@@ -51,83 +70,83 @@ class Query:
     # Citas queries
     @strawberry.field(description="Obtener todas las citas")
     async def citas(self, info: Info) -> List[Cita]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await CitasResolver.find_all(token)
     
     @strawberry.field(description="Obtener una cita por ID")
     async def cita(self, info: Info, id: str) -> Cita:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await CitasResolver.find_one(id, token)
     
     @strawberry.field(description="Métricas temporales de citas")
     async def metricas_temporales(self, info: Info) -> MetricasTemporales:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await CitasResolver.metricas_temporales(token)
     
     # Servicios queries
     @strawberry.field(description="Obtener todos los servicios")
     async def servicios(self, info: Info) -> List[Servicio]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await ServiciosResolver.find_all(token)
     
     @strawberry.field(description="Obtener un servicio por ID")
     async def servicio(self, info: Info, id: str) -> Servicio:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await ServiciosResolver.find_one(id, token)
     
     @strawberry.field(description="Ranking de servicios más solicitados")
     async def ranking_servicios(self, info: Info) -> List[RankingServicios]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await ServiciosResolver.ranking_servicios(token)
     
     # Negocios queries
     @strawberry.field(description="Obtener todos los negocios")
     async def negocios(self, info: Info) -> List[Negocio]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await NegociosResolver.find_all(token)
     
     @strawberry.field(description="Obtener un negocio por ID")
     async def negocio(self, info: Info, id: str) -> Negocio:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await NegociosResolver.find_one(id, token)
     
     @strawberry.field(description="Dashboard del negocio")
     async def dashboard_negocio(self, info: Info, negocio_id: str) -> DashboardNegocio:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await NegociosResolver.dashboard_negocio(negocio_id, token)
     
     @strawberry.field(description="Resumen del negocio")
     async def resumen_negocio(self, info: Info, negocio_id: str) -> ResumenNegocio:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await NegociosResolver.resumen_negocio(negocio_id, token)
     
     # Estaciones queries
     @strawberry.field(description="Obtener todas las estaciones")
     async def estaciones(self, info: Info) -> List[Estacion]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await EstacionesResolver.find_all(token)
     
     @strawberry.field(description="Obtener una estación por ID")
     async def estacion(self, info: Info, id: str) -> Estacion:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await EstacionesResolver.find_one(id, token)
     
 
     # Horarios queries
     @strawberry.field(description="Obtener todos los horarios de atención")
     async def horarios_atencion(self, info: Info) -> List[HorarioAtencion]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await HorariosAtencionResolver.find_all(token)
     
     @strawberry.field(description="Obtener un horario por ID")
     async def horario_atencion(self, info: Info, id: str) -> HorarioAtencion:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await HorariosAtencionResolver.find_one(id, token)
     
     # Admin Sistema queries
     @strawberry.field(description="Obtener todos los administradores del sistema")
     async def admin_sistema(self, info: Info) -> List[AdminSistema]:
-        token = info.context["request"].headers.get("authorization")
+        token = get_auth_token(info)
         return await AdminSistemaResolver.find_all(token)
     
     # PDF queries

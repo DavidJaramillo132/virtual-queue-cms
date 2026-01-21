@@ -34,16 +34,16 @@ El microservicio de Pagos es un sistema integral que gestiona:
 │          FastAPI Application (main.py)                  │
 │  ┌──────────────────────────────────────────────────┐   │
 │  │              Routers/Controladores               │   │
-│  │  - Pagos      - Partners    - Webhooks          │   │
-│  │  - Suscripciones    - Cola Premium              │   │
+│  │  - Pagos      - Partners    - Webhooks           │   │
+│  │  - Suscripciones    - Cola Premium               │   │
 │  └─────────┬────────────────────────────────────────┘   │
 └───────────┼──────────────────────────────────────────────┘
             │
 ┌───────────┴──────────────────────────────────────────────┐
 │               Capa de Adaptadores (Factory)              │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
-│  │ MockAdapter │  │   Stripe    │  │ MercadoPago │     │
-│  └─────────────┘  └─────────────┘  └─────────────┘     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐       │
+│  │ MockAdapter │  │   Stripe    │  │ MercadoPago │       │
+│  └─────────────┘  └─────────────┘  └─────────────┘       │
 └───────────┬──────────────────────────────────────────────┘
             │
             ▼
@@ -54,11 +54,11 @@ El microservicio de Pagos es un sistema integral que gestiona:
 
 ┌─────────────────────────────────────────────────────────┐
 │                    Webhooks Flow                        │
-│                                                          │
-│  Pasarelas  ──→  Normalizador  ──→  Procesador         │
-│     │                                     │              │
-│     ▼                                     ▼              │
-│  Partners  ◄──  Servicio Partners  ◄──  Sistema        │
+│                                                         │
+│  Pasarelas  ──→  Normalizador  ──→  Procesador          │
+│     │                                     │             │
+│     ▼                                     ▼             │
+│  Partners  ◄──  Servicio Partners  ◄──  Sistema         │
 │  Externos       (Notificaciones)                        │
 └─────────────────────────────────────────────────────────┘
 ```

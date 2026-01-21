@@ -28,6 +28,6 @@ class Negocio:
     correo: Optional[str] = None
     direccion: Optional[str] = None
     imagen_url: Optional[str] = None
-    estado: bool
+    estado: bool = True
     horario_general: Optional[str] = None
-    creado_en: datetime
+    creado_en: Optional[str] = None  # Datetime como string ISO

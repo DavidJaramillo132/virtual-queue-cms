@@ -21,10 +21,10 @@ class Cita:
     id: str
     cliente_id: str
     negocio_id: str
-    estacion_id: str
-    servicio_id: str
-    fecha: date
-    hora_inicio: time
-    hora_fin: time
-    estado: EstadoCita
-    creadoEn: datetime
+    estacion_id: Optional[str] = None
+    servicio_id: Optional[str] = None
+    fecha: str  # Fecha como string ISO (YYYY-MM-DD)
+    hora_inicio: str  # Hora como string (HH:MM:SS)
+    hora_fin: str  # Hora como string (HH:MM:SS)
+    estado: str  # Estado como string
+    creadoEn: Optional[str] = None  # Datetime como string ISO

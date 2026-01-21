@@ -2,7 +2,7 @@
 Almacen en memoria para partners (reemplazar por DB en produccion).
 """
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 from app.modelos.partner import TipoEvento
 
 
@@ -30,8 +30,11 @@ class PartnerData:
         self.contacto_email = contacto_email
         self.metadatos = metadatos or {}
         self.ultimo_webhook_enviado: Optional[datetime] = None
+        self.ultimo_webhook_recibido: Optional[Dict[str, Any]] = None
         self.webhooks_exitosos = 0
         self.webhooks_fallidos = 0
+        self.webhooks_recibidos_exitosos = 0
+        self.webhooks_recibidos_fallidos = 0
         self.creado_en = datetime.utcnow()
         self.actualizado_en = datetime.utcnow()
     
@@ -98,6 +101,23 @@ class AlmacenPartners:
             del cls._partners[partner_id]
             return True
         return False
+    
+    @classmethod
+    def obtener_por_metadatos(cls, clave: str, valor: Any) -> Optional[PartnerData]:
+        """
+        Obtiene un partner por un campo en sus metadatos.
+        
+        Args:
+            clave: Clave en metadatos
+            valor: Valor a buscar
+            
+        Returns:
+            Partner si se encuentra, None en caso contrario
+        """
+        for partner in cls._partners.values():
+            if partner.metadatos.get(clave) == valor:
+                return partner
+        return None
     
     @classmethod
     def obtener_por_evento(cls, evento: TipoEvento) -> List[PartnerData]:

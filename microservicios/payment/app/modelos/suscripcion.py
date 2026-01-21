@@ -41,15 +41,18 @@ class CrearSuscripcionRequest(BaseModel):
     tipo: TipoSuscripcion = Field(default=TipoSuscripcion.PREMIUM)
     con_prueba_gratis: bool = Field(True, description="Iniciar con periodo de prueba")
     metodo_pago_id: Optional[str] = Field(None, description="ID del metodo de pago")
+    email: Optional[str] = Field(None, description="Email del usuario para notificaciones y descuentos")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "usuario_id": "uuid-usuario",
                 "tipo": "premium",
-                "con_prueba_gratis": True
+                "con_prueba_gratis": True,
+                "email": "usuario@ejemplo.com"
             }
         }
+
 
 
 class SuscripcionResponse(BaseModel):

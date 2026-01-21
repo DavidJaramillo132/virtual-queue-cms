@@ -101,7 +101,6 @@ export class UsuarioController {
     async getUsuarioByEmail(req: Request, res: Response): Promise<void> {
         const { email } = req.params;
         try {
-            console.log("DSADASASASADADDASD");
             const usuario = await usuarioRepo.getByEmail(email);
             if (!usuario) {
                 res.status(404).json({ error: "Usuario not found" });
@@ -110,6 +109,21 @@ export class UsuarioController {
             res.json(usuario);
         } catch (error) {
             console.error(`Error fetching usuario ${email}:`, error);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    }
+
+    async getUsuarioById(req: Request, res: Response): Promise<void> {
+        const { id } = req.params;
+        try {
+            const usuario = await usuarioRepo.getById(id);
+            if (!usuario) {
+                res.status(404).json({ error: "Usuario not found" });
+                return;
+            }
+            res.json(usuario);
+        } catch (error) {
+            console.error(`Error fetching usuario by id ${id}:`, error);
             res.status(500).json({ error: "Internal server error" });
         }
     }

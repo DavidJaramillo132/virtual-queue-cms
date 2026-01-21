@@ -44,6 +44,79 @@ Este microservicio es responsable exclusivamente de la gestion de autenticacion,
 2. **Validacion local**: Los servicios (REST, WebSocket, GraphQL) validan JWT localmente usando el `JWT_SECRET` compartido
 3. **Sin dependencia constante**: No se consulta al Auth Service en cada peticion
 4. **Tokens rotativos**: Los refresh tokens se rotan en cada uso para mayor seguridad
+5. **Tokens únicos garantizados**: Múltiples capas de validación previenen duplicación de tokens
+
+---
+
+## Garantía de Unicidad de Tokens
+
+El servicio implementa **múltiples capas de seguridad** para garantizar que cada token generado sea único y nunca se reutilice:
+
+### 🔐 Access Token (JWT)
+
+**Formato del JTI:** `UUID-v4 + timestamp`
+```typescript
+// Ejemplo: 550e8400-e29b-41d4-a716-446655440000-1737331200000
+const jti = `${uuidv4()}-${Date.now()}`;
+```
+
+**Protecciones:**
+- Cada JWT tiene un `jti` (JWT ID) único
+- Combinación de UUID v4 (aleatorio criptográfico) + timestamp en milisegundos
+- Los tokens revocados se almacenan en tabla `revoked_tokens` con constraint UNIQUE
+- Índice único en columna `jti` previene duplicados a nivel de BD
+
+### 🔄 Refresh Token
+
+**Formato:** `UUID.UUID.timestamp`
+```typescript
+// Ejemplo: 550e8400-e29b-41d4-a716-446655440000.7c9e6679-7425-40de-944b-e07fc1f90ae7.1737331200000
+const refreshToken = `${uuidv4()}.${uuidv4()}.${Date.now()}`;
+```
+
+**Protecciones:**
+1. **Nivel de Código:**
+   ```typescript
+   // Verificación pre-inserción
+   const existing = await db.get('SELECT id FROM refresh_tokens WHERE token = ?', refreshToken);
+   if (existing) {
+     console.error('[CRITICAL] Token duplicado detectado!');
+     return res.status(500).json({ message: 'Error generando token' });
+   }
+   ```
+
+2. **Nivel de Base de Datos:**
+   ```sql
+   CREATE TABLE refresh_tokens (
+     token TEXT NOT NULL UNIQUE,  -- Constraint de unicidad
+     ...
+   );
+   CREATE UNIQUE INDEX idx_refresh_tokens_token ON refresh_tokens(token);
+   ```
+
+### 🔁 Rotación de Tokens en /auth/refresh
+
+Cuando un usuario renueva sus tokens:
+
+1. ✅ Se valida el refresh token actual
+2. 🚫 Se **revoca** el token antiguo (`revoked = 1`)
+3. 🆕 Se genera un **nuevo refresh token único**
+4. 🔍 Se verifica que no exista en la BD
+5. 🆕 Se genera un **nuevo access token con nuevo jti**
+6. 📤 Se retornan ambos tokens nuevos
+
+**Esto previene:**
+- ❌ Reutilización de tokens antiguos
+- ❌ Ataques de replay
+- ❌ Tokens obsoletos en circulación
+- ❌ Sesiones duplicadas
+
+### 📊 Probabilidad de Colisión
+
+Con UUID v4 + timestamp:
+- **UUID v4:** 2^122 combinaciones posibles (5.3 × 10^36)
+- **Timestamp:** Resolución de 1ms (único en el tiempo)
+- **Probabilidad de colisión:** Prácticamente 0% (menor que ganar la lotería 8 veces seguidas)
 
 ---
 

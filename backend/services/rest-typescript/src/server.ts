@@ -30,6 +30,15 @@ AppDataSource.initialize()
   .then(() => {
     console.log('Conexión a Supabase (PostgreSQL) establecida');
 
+    // Health check endpoint
+    app.get('/health', (req, res) => {
+      res.status(200).json({ 
+        status: 'ok', 
+        service: 'rest-typescript',
+        timestamp: new Date().toISOString() 
+      });
+    });
+
     // Rutas
     app.use('/api/usuarios', usuarioRoutes);
     app.use('/api/negocios', negocioRoutes);

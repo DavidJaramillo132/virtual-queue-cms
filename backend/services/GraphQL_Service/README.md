@@ -2,6 +2,26 @@
 
 API GraphQL construida con FastAPI y Strawberry GraphQL para gestionar citas, servicios y negocios.
 
+## 🔐 Autenticación
+
+Este servicio **recibe y reenvía headers de autenticación** a la API REST. 
+
+- **n8n:** Incluye el header `Authorization: Bearer <token>` en tus peticiones GraphQL
+- **Documentación completa:** Ver [N8N_INTEGRATION.md](./N8N_INTEGRATION.md)
+
+```graphql
+# Ejemplo de query autenticada
+query {
+  perfil_completo_usuario {
+    id
+    nombreCompleto
+    totalCitas
+  }
+}
+```
+
+**Header requerido:** `Authorization: Bearer <tu-jwt-token>`
+
 ## Requisitos
 
 - Python 3.9 o superior

@@ -36,7 +36,9 @@ class SuscripcionData:
         fecha_fin: Optional[datetime] = None,
         fecha_proximo_cobro: Optional[datetime] = None,
         dias_prueba_restantes: int = 0,
-        id_suscripcion_externa: Optional[str] = None
+        id_suscripcion_externa: Optional[str] = None,
+        email: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
     ):
         self.id = id
         self.usuario_id = usuario_id
@@ -50,9 +52,12 @@ class SuscripcionData:
         self.dias_prueba_restantes = dias_prueba_restantes
         self.beneficios = BeneficiosPremium()
         self.id_suscripcion_externa = id_suscripcion_externa
+        self.email = email
+        self.metadata = metadata or {}
         self.historial_pagos: List[str] = []
         self.creado_en = datetime.utcnow()
         self.actualizado_en = datetime.utcnow()
+
 
 
 class AlmacenSuscripciones:
@@ -60,6 +65,7 @@ class AlmacenSuscripciones:
     
     _suscripciones: Dict[str, SuscripcionData] = {}
     _por_usuario: Dict[str, str] = {}  # usuario_id -> suscripcion_id
+    _por_email: Dict[str, str] = {}  # email -> suscripcion_id
     
     @classmethod
     def guardar(cls, suscripcion: SuscripcionData) -> SuscripcionData:
@@ -67,6 +73,9 @@ class AlmacenSuscripciones:
         suscripcion.actualizado_en = datetime.utcnow()
         cls._suscripciones[suscripcion.id] = suscripcion
         cls._por_usuario[suscripcion.usuario_id] = suscripcion.id
+        # Indexar por email si existe
+        if suscripcion.email:
+            cls._por_email[suscripcion.email.lower()] = suscripcion.id
         return suscripcion
     
     @classmethod
@@ -80,6 +89,20 @@ class AlmacenSuscripciones:
         suscripcion_id = cls._por_usuario.get(usuario_id)
         if suscripcion_id:
             return cls._suscripciones.get(suscripcion_id)
+        return None
+    
+    @classmethod
+    def obtener_por_email(cls, email: str) -> Optional[SuscripcionData]:
+        """Obtiene la suscripcion de un usuario por su email."""
+        suscripcion_id = cls._por_email.get(email.lower())
+        if suscripcion_id:
+            return cls._suscripciones.get(suscripcion_id)
+        # Búsqueda alternativa en metadata si no está indexado
+        for suscripcion in cls._suscripciones.values():
+            if suscripcion.email and suscripcion.email.lower() == email.lower():
+                return suscripcion
+            if suscripcion.metadata.get('email', '').lower() == email.lower():
+                return suscripcion
         return None
     
     @classmethod
@@ -98,6 +121,8 @@ class AlmacenSuscripciones:
             del cls._suscripciones[suscripcion_id]
             if suscripcion.usuario_id in cls._por_usuario:
                 del cls._por_usuario[suscripcion.usuario_id]
+            if suscripcion.email and suscripcion.email.lower() in cls._por_email:
+                del cls._por_email[suscripcion.email.lower()]
             return True
         return False
     
@@ -106,6 +131,8 @@ class AlmacenSuscripciones:
         """Limpia todo el almacen."""
         cls._suscripciones.clear()
         cls._por_usuario.clear()
+        cls._por_email.clear()
+
 
 
 class ServicioSuscripciones:
@@ -168,7 +195,9 @@ class ServicioSuscripciones:
             fecha_inicio=ahora,
             fecha_proximo_cobro=fecha_proximo_cobro,
             dias_prueba_restantes=dias_prueba,
-            id_suscripcion_externa=id_externo
+            id_suscripcion_externa=id_externo,
+            email=request.email,  # Guardar email para descuentos
+            metadata={"email": request.email} if request.email else {}
         )
         
         AlmacenSuscripciones.guardar(suscripcion)
@@ -335,17 +364,41 @@ class ServicioSuscripciones:
         Returns:
             True si se actualizo correctamente
         """
+        url = f"{configuracion.REST_API_URL}/api/usuarios/{usuario_id}/premium"
+        print(f"[PREMIUM] Iniciando actualizacion de usuario premium")
+        print(f"[PREMIUM] URL destino: {url}")
+        print(f"[PREMIUM] Usuario ID: {usuario_id}")
+        print(f"[PREMIUM] Nuevo estado premium: {es_premium}")
+        
         try:
-            async with httpx.AsyncClient(timeout=10) as cliente:
-                # Llamar al endpoint del REST API para actualizar el usuario
+            async with httpx.AsyncClient(timeout=30) as cliente:
                 respuesta = await cliente.patch(
-                    f"{configuracion.REST_API_URL}/api/usuarios/{usuario_id}/premium",
+                    url,
                     json={"es_premium": es_premium}
                 )
-                print(f"[DEBUG] Actualizando usuario {usuario_id} premium={es_premium}, status={respuesta.status_code}")
-                return respuesta.status_code in [200, 204]
+                
+                print(f"[PREMIUM] Respuesta recibida - Status: {respuesta.status_code}")
+                print(f"[PREMIUM] Respuesta body: {respuesta.text}")
+                
+                if respuesta.status_code in [200, 204]:
+                    print(f"[PREMIUM] Usuario {usuario_id} actualizado exitosamente a premium={es_premium}")
+                    return True
+                else:
+                    print(f"[PREMIUM] ERROR: Status code inesperado: {respuesta.status_code}")
+                    print(f"[PREMIUM] ERROR: Response: {respuesta.text}")
+                    return False
+                    
+        except httpx.ConnectError as e:
+            print(f"[PREMIUM] ERROR DE CONEXION: No se pudo conectar al servicio REST")
+            print(f"[PREMIUM] URL intentada: {url}")
+            print(f"[PREMIUM] Detalles: {e}")
+            return False
+        except httpx.TimeoutException as e:
+            print(f"[PREMIUM] ERROR DE TIMEOUT: La solicitud excedio el tiempo limite")
+            print(f"[PREMIUM] Detalles: {e}")
+            return False
         except Exception as e:
-            print(f"Error actualizando usuario premium: {e}")
+            print(f"[PREMIUM] ERROR INESPERADO: {type(e).__name__}: {e}")
             return False
     
     @staticmethod

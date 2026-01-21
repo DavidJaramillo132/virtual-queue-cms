@@ -38,8 +38,15 @@ class Configuracion:
     WEBHOOK_TIMEOUT: int = int(os.getenv("WEBHOOK_TIMEOUT", "30"))
     WEBHOOK_REINTENTOS: int = int(os.getenv("WEBHOOK_REINTENTOS", "3"))
     
+    # URL de pagina externa (para recibir/enviar informacion)
+    EXTERNAL_PAGE_URL: Optional[str] = os.getenv("EXTERNAL_PAGE_URL")
+    
     # Secreto para HMAC (DEBE configurarse en produccion)
     HMAC_SECRET_GLOBAL: str = os.getenv("HMAC_SECRET_GLOBAL", "secreto_desarrollo_cambiar_en_produccion")
+    
+    # Love4Pets Partner (configuración B2B)
+    LOVE4PETS_PARTNER_ID: Optional[str] = os.getenv("LOVE4PETS_PARTNER_ID")
+    LOVE4PETS_HMAC_SECRET: Optional[str] = os.getenv("LOVE4PETS_HMAC_SECRET")
     
     @classmethod
     def validar_secreto_hmac(cls) -> None:

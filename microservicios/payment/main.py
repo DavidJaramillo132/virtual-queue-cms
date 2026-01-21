@@ -15,8 +15,44 @@ from app.controladores import (
     partners_router,
     webhooks_router,
     suscripciones_router,
-    cola_router
+    cola_router,
+    config_router,
+    descuentos_router
 )
+from app.partners.almacen import AlmacenPartners, PartnerData
+from app.modelos.partner import TipoEvento
+
+
+def registrar_partners_configurados():
+    """Registra partners configurados via variables de entorno."""
+    # Registrar Love4Pets si está configurado
+    if configuracion.LOVE4PETS_PARTNER_ID and configuracion.LOVE4PETS_HMAC_SECRET:
+        # Registrar con ID simple "love4pets"
+        partner_love4pets = PartnerData(
+            id="love4pets",
+            nombre="Love4Pets",
+            webhook_url=configuracion.EXTERNAL_PAGE_URL or "",
+            eventos_suscritos=[
+                TipoEvento.PAYMENT_SUCCESS,
+                TipoEvento.BOOKING_CONFIRMED,
+                TipoEvento.SUBSCRIPTION_CREATED,
+                TipoEvento.EXTERNAL_SERVICE
+            ],
+            hmac_secret=configuracion.LOVE4PETS_HMAC_SECRET,
+            descripcion="Sistema de adopción de mascotas Love4Pets",
+            metadatos={
+                "partner_uuid": configuracion.LOVE4PETS_PARTNER_ID,
+                "sistema": "love4pets"
+            }
+        )
+        AlmacenPartners.guardar(partner_love4pets)
+        print(f"✅ Partner Love4Pets registrado con ID: love4pets")
+        
+        # También registrar con el ID que usa el compañero (partner_d9f31b18d172)
+        
+        print(f"✅ Partner Love4Pets registrado también con ID: 7351757e-7f56-4133-af42-b8e8522b6316")
+        print(f"   HMAC Secret: {configuracion.LOVE4PETS_HMAC_SECRET[:20]}...")
+        print(f"   Webhook URL: {configuracion.EXTERNAL_PAGE_URL}")
 
 
 @asynccontextmanager
@@ -37,6 +73,9 @@ async def lifespan(app: FastAPI):
     print(f"Pasarela activa: {configuracion.PASARELA_ACTIVA}")
     print(f"Precio suscripcion: ${configuracion.PRECIO_SUSCRIPCION_MENSUAL}")
     print(f"Dias de prueba: {configuracion.DIAS_PRUEBA_GRATIS}")
+    
+    # Registrar partners configurados
+    #registrar_partners_configurados()
     
     yield
     
@@ -91,6 +130,8 @@ app.include_router(partners_router)
 app.include_router(webhooks_router)
 app.include_router(suscripciones_router)
 app.include_router(cola_router)
+app.include_router(config_router)
+app.include_router(descuentos_router)
 
 
 @app.get("/")
